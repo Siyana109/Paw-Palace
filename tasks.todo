@@ -1,0 +1,21 @@
+User side:
+    ☐ Home page setup
+    ☐ User signs up & logs in with validation
+    ☐ Sign up with OTP (with timer and resend OTP)
+    ☐ Login/signup with single sign-on (Google, Facebook)
+    ☐ Implement forgot password
+    ☐ User profile
+    ☐ Show details, including profile image and address
+    ☐ Edit profile (separate edit and display pages)
+    ☐ Email edit verification with OTP/token
+    ☐ Change password functionality
+    ☐ Address management (Add, Edit, Delete)
+
+Admin side:
+    ☐ Admin sign in
+    ☐ User management
+    ☐ Implement block and unblock user (with confirmation)
+    ☐ Implement search with cancel/clear button (backend)
+    ☐ Implement pagination (backend)
+    ☐ Sort the user table in descending order (latest first)
+
