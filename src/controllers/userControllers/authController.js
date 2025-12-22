@@ -4,6 +4,26 @@ import OTP from "../../model/otpModel.js"
 
 
 
+const landingPage = (req, res) => {
+    try {
+        // Change '/' to the name of your EJS file (e.g., 'index')
+        res.render('landing', { 
+            title: 'PawPalace', // Your EJS template uses 'title', not 'pageTitle'
+            announcement: '🎁 FREE TOY with every order over $50!',
+            products: [] 
+        });
+    } catch (error) {
+        console.error('Error rendering landing page', error);
+        res.status(500).render('error', {
+            message: 'Error loading landing page',
+            error: error.message
+        });
+    }
+};
+
+
+
+
 const getSignup = (req, res) => {
     try {
         res.render('user/signup')
@@ -76,7 +96,7 @@ const postSignup = async (req, res) => {
 
         await newUser.save();
 
-        return res.redirect('/login');
+        return res.redirect('/');
 
     } catch (error) {
         console.error('Signup Error:', error);
@@ -98,6 +118,7 @@ const getLogin = (req,res) => {
         })
     }
 }
+
 
 
 const forgotPassword = (req, res) => {
@@ -125,6 +146,29 @@ const verifyEmail = async (req, res) => {
 }
 
 
+// const profile = async (req, res) => {
+//     try {
+//         // 1. Fetch the user data (usually from req.user if using Passport/JWT 
+//         // or by querying the DB using the ID in the session)
+//         const userData = await User.findById(req.session.userId); 
+
+//         // 2. Determine if the user is in "edit mode" based on the URL query (?edit=true)
+//         const isEditing = req.query.edit === 'true';
+
+//         // 3. PASS THE DATA TO THE VIEW
+//         res.render('user/profile', { 
+//             user: userData,     // This must match the name used in EJS
+//             isEditing: isEditing 
+//         });
+
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
 
 
-export default { getSignup, getLogin, postSignup, forgotPassword, verifyEmail}
+
+export default { getSignup, getLogin, postSignup, forgotPassword, verifyEmail, landingPage}
+
+
