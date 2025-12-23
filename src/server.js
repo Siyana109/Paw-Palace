@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js"
 // import adminRoutes from "./routes/adminRoutes.js"
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
 dotenv.config()
 connectDB();
@@ -31,6 +33,27 @@ app.set("views", path.join(__dirname, "views"));
 
 // Serve static files (like CSS, images, and client-side JavaScript) from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
+
+
+
+app.use(
+  session({
+    name: "pawpalace.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions"
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: false, // true only in HTTPS
+      maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }
+  })
+);
+console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
 
 
 app.use('/',userRoutes)

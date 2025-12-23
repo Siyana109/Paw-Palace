@@ -9,7 +9,7 @@ const landingPage = (req, res) => {
         // Change '/' to the name of your EJS file (e.g., 'index')
         res.render('landing', { 
             title: 'PawPalace', // Your EJS template uses 'title', not 'pageTitle'
-            announcement: '🎁 FREE TOY with every order over $50!',
+            // announcement: '🎁 FREE TOY with every order over $50!',
             products: [] 
         });
     } catch (error) {
@@ -120,6 +120,36 @@ const getLogin = (req,res) => {
 }
 
 
+const homePage = (req, res) => {
+    // Check if user is logged in (middleware recommended)
+    // For this example, we assume user data is stored in the session
+    if (req.session.user) {
+        res.render('user/home', { 
+            user: req.session.user // Passing the user object to EJS
+        });
+    } else {
+        res.redirect('/login');
+    }
+};
+
+
+
+export const postLogin = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return res.render("user/login", { error: "Invalid credentials" });
+  }
+
+  req.session.user = {
+    id: user._id
+  };
+  
+  res.redirect("/home");
+};
+
+
+
 
 const forgotPassword = (req, res) => {
     try{
@@ -169,6 +199,18 @@ const verifyEmail = async (req, res) => {
 
 
 
-export default { getSignup, getLogin, postSignup, forgotPassword, verifyEmail, landingPage}
+export const logout = (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.redirect("/home");
+    }
+    res.clearCookie("pawpalace.sid");
+    res.redirect("/login");
+  });
+};
+
+
+
+export default { getSignup, getLogin, postLogin, postSignup, forgotPassword, verifyEmail, landingPage, homePage}
 
 
