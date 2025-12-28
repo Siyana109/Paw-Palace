@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js"
-// import adminRoutes from "./routes/adminRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js"
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
@@ -61,7 +61,7 @@ app.use(passport.session());
 
 
 app.use('/',userRoutes)
-// app.use('/admin',adminRoutes)
+app.use('/admin',adminRoutes)
 
 
 app.listen(port, () => {
