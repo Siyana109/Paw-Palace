@@ -10,6 +10,15 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
     password:{
         type: String,
         required: true
@@ -22,7 +31,7 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     phone: {
-        type: String,
+        type: String
     },
     createdAt: {
         type: Date,

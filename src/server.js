@@ -1,15 +1,17 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 // Import the fileURLToPath function to convert file URLs to paths
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js"
 // import adminRoutes from "./routes/adminRoutes.js"
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
-dotenv.config()
+import passport from "passport";
+import "./config/passport.js";
+
 connectDB();
 
 // Get the current filename and directory
@@ -53,7 +55,9 @@ app.use(
     }
   })
 );
-console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 app.use('/',userRoutes)

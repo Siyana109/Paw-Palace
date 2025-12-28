@@ -28,6 +28,8 @@ const checkSession = async (req, res, next) => {
   }
 };
 
+
+
 const isLogin = (req, res, next) => {
   if (req.session.user) {
     return res.redirect("/home");

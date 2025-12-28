@@ -32,3 +32,56 @@ TODO :
     ☐ google auth
     ☐ forgot password, resend otp
     ☐ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+User
+ OTP resend timer 
+ button to remove item from cart 
+--- show discounts in order details 
+
+Admin
+--- variant type is irrelevant as variants can have both colors and sizes 
+--- variant images input conflicts with database
+--- remove price and stock from products as they’re properties of variants 
+--- allow multiple selection for product offers
+--- return requests
+
+DB
+ no field to store phone number in profile 
+ category description is missing
+ brand image is missing
+ replace coupon.maxOrderAmount with coupon.maxDiscountAmount
+--- support account (soft) deletion as shown in UI
+
+API
+ password verification for account deletion
+--- request to submit OTP has no connection with signup POST (HTTP is stateless)
+- rework endpoints for adding offers 
+ return/cancel individual item in order
+ accept/approve return request
+ endpoint to submit review
+
+Communication is good enough. 

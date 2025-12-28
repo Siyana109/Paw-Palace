@@ -74,7 +74,7 @@
             <span class="text-accent-navy font-bold"><%= typeof email !== 'undefined' ? email : 'your email' %></span>
         </p>
 
-        <form id="otp-form" action="/verify" method="POST">
+        <form id="otp-form" action="/verify-otp" method="POST">
             <input type="hidden" name="otp" id="full-otp">
             
             <div class="flex justify-center gap-3 mb-8">
@@ -102,7 +102,8 @@
 
     <p class="mt-8 text-gray-400 font-bold text-sm relative z-10">
         Wrong email? <a href="/signup" class="text-accent-tealDark hover:underline">Change details</a>
-    </p>
+    </p>  
+
 
     <script>
         const inputs = document.querySelectorAll('.otp-input');

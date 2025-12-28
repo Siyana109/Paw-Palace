@@ -220,7 +220,7 @@
                                         value="<%= typeof formData !== 'undefined' ? formData.fullName : '' %>"
                                         class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
                                         placeholder="Your Name" required>
-                                        <p id="fullNameError" class="text-sm text-red-500 mt-1 hidden"></p>
+                                    <p id="fullNameError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                 </div>
                             </div>
@@ -237,7 +237,7 @@
                                         value="<%= typeof formData !== 'undefined' ? formData.email : '' %>"
                                         class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
                                         placeholder="doggo@example.com" required>
-                                        <p id="emailError" class="text-sm text-red-500 mt-1 hidden"></p>
+                                    <p id="emailError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                 </div>
                             </div>
@@ -253,7 +253,7 @@
                                     <input type="password" name="password" id="password"
                                         class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
                                         placeholder="At least 8 characters" required>
-                                        <p id="passwordError" class="text-sm text-red-500 mt-1 hidden"></p>
+                                    <p id="passwordError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                     <button type="button" onclick="togglePassword('password', 'eye-icon')"
                                         class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-accent-navy transition cursor-pointer">
@@ -273,7 +273,7 @@
                                     <input type="password" name="confirmPassword" id="confirmPassword"
                                         class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
                                         placeholder="Repeat password" required>
-                                        <p id="confirmPasswordError" class="text-sm text-red-500 mt-1 hidden"></p>
+                                    <p id="confirmPasswordError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                 </div>
                             </div>
@@ -283,7 +283,7 @@
                                     <input id="terms" type="checkbox" name="terms"
                                         class="h-5 w-5 text-brand-500 focus:ring-brand-500 border-gray-300 rounded cursor-pointer accent-brand-500"
                                         required>
-                                        <p id="termsError" class="text-sm text-red-500 mt-1 hidden"></p>
+                                    <p id="termsError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                 </div>
                                 <div class="ml-2 text-sm">
@@ -310,12 +310,22 @@
                             <div class="flex-grow border-t border-gray-100"></div>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
+                        <!-- <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
                             <button
                                 class="flex items-center justify-center gap-2 py-3 px-4 border-2 border-gray-100 rounded-xl font-bold text-gray-600 hover:border-brand-200 hover:bg-brand-50 transition duration-300">
-                                <i class="fa-brands fa-google text-brand-500"></i> Sign in with Google
+                                <i class="fa-brands fa-google text-brand-500"></i> Continue with Google
                             </button>
+                        </div> -->
+
+
+                        <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
+                            <a href="/google"
+                                class="flex items-center justify-center gap-2 py-3 px-4 border-2 border-gray-100 rounded-xl font-bold text-gray-600 hover:border-brand-200 hover:bg-brand-50 transition duration-300">
+                                <i class="fa-brands fa-google text-brand-500"></i>
+                                Continue with Google
+                            </a>
                         </div>
+
 
                         <div class="mt-8 text-center pb-8">
                             <p class="text-gray-500 font-medium">

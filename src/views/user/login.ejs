@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Login | PawPalace' %></title>
-    
+    <title>
+        <%= typeof title !=='undefined' ? title : 'Login | PawPalace' %>
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -50,56 +54,56 @@
     </script>
 
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('loginBtn');
+        document.addEventListener('DOMContentLoaded', () => {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
 
-    const emailError = document.getElementById('emailError');
-    const passwordError = document.getElementById('passwordError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
 
-    function showError(el, msg) {
-        el.textContent = msg;
-        el.classList.remove('hidden');
-    }
+            function showError(el, msg) {
+                el.textContent = msg;
+                el.classList.remove('hidden');
+            }
 
-    function hideError(el) {
-        el.textContent = '';
-        el.classList.add('hidden');
-    }
+            function hideError(el) {
+                el.textContent = '';
+                el.classList.add('hidden');
+            }
 
-    function validateEmail() {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regex.test(emailInput.value.trim())) {
-            showError(emailError, 'Enter a valid email address');
-            return false;
-        }
-        hideError(emailError);
-        return true;
-    }
+            function validateEmail() {
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!regex.test(emailInput.value.trim())) {
+                    showError(emailError, 'Enter a valid email address');
+                    return false;
+                }
+                hideError(emailError);
+                return true;
+            }
 
-    // function validatePassword() {
-    //     if (passwordInput.value.trim().length < 6) {
-    //         showError(passwordError, 'Password must be at least 6 characters');
-    //         return false;
-    //     }
-    //     hideError(passwordError);
-    //     return true;
-    // }
+            // function validatePassword() {
+            //     if (passwordInput.value.trim().length < 6) {
+            //         showError(passwordError, 'Password must be at least 6 characters');
+            //         return false;
+            //     }
+            //     hideError(passwordError);
+            //     return true;
+            // }
 
-    function validateForm() {
-        const valid = validateEmail();
+            function validateForm() {
+                const valid = validateEmail();
 
-        loginBtn.disabled = !valid;
-        loginBtn.classList.toggle('cursor-not-allowed', !valid);
-        loginBtn.classList.toggle('bg-brand-500/70', !valid);
-        loginBtn.classList.toggle('bg-brand-500', valid);
-    }
+                loginBtn.disabled = !valid;
+                loginBtn.classList.toggle('cursor-not-allowed', !valid);
+                loginBtn.classList.toggle('bg-brand-500/70', !valid);
+                loginBtn.classList.toggle('bg-brand-500', valid);
+            }
 
-    emailInput.addEventListener('input', validateForm);
-    passwordInput.addEventListener('input', validateForm);
-});
-</script>
+            emailInput.addEventListener('input', validateForm);
+            passwordInput.addEventListener('input', validateForm);
+        });
+    </script>
 
 
     <style>
@@ -111,15 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     </style>
 </head>
-<body class="font-sans text-accent-navy antialiased bg-accent-cream selection:bg-accent-teal selection:text-white h-screen overflow-hidden">
+
+<body
+    class="font-sans text-accent-navy antialiased bg-accent-cream selection:bg-accent-teal selection:text-white h-screen overflow-hidden">
 
     <div class="flex min-h-screen">
-        
-        <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 xl:px-24 bg-white relative z-10 overflow-y-auto">
-            
+
+        <div
+            class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 xl:px-24 bg-white relative z-10 overflow-y-auto">
+
             <div class="absolute top-8 left-8">
                 <a href="/" class="flex items-center gap-2 cursor-pointer group">
-                    <div class="bg-brand-500 text-white p-1.5 rounded-xl shadow-[3px_3px_0px_0px_rgba(13,148,136,1)] transform group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none transition-all duration-200">
+                    <div
+                        class="bg-brand-500 text-white p-1.5 rounded-xl shadow-[3px_3px_0px_0px_rgba(13,148,136,1)] transform group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none transition-all duration-200">
                         <i class="fa-solid fa-arrow-left text-sm"></i>
                     </div>
                     <span class="font-bold text-accent-navy group-hover:text-brand-500 transition">Back to Shop</span>
@@ -135,107 +143,151 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-gray-500 font-medium">Please enter your details to sign in.</p>
                 </div>
 
-                <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="mb-6 p-4 bg-red-50 border-2 border-red-100 rounded-xl flex items-center gap-3 text-red-600 font-bold">
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div
+                        class="mb-6 p-4 bg-red-50 border-2 border-red-100 rounded-xl flex items-center gap-3 text-red-600 font-bold">
                         <i class="fa-solid fa-circle-exclamation"></i>
-                        <span><%= error %></span>
+                        <span>
+                            <%= error %>
+                        </span>
                     </div>
-                <% } %>
+                    <% } %>
 
-                <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
+                        <!-- <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
                     <button type="button" class="flex items-center justify-center gap-2 py-3 px-4 border-2 border-gray-100 rounded-xl font-bold text-gray-600 hover:border-brand-200 hover:bg-brand-50 transition duration-300">
-                        <i class="fa-brands fa-google text-brand-500"></i> Sign in with Google
+                        <i class="fa-brands fa-google text-brand-500"></i> Login with Google
                     </button>
-                </div>
+                </div> -->
 
-                <div class="relative flex items-center mb-8">
-                    <div class="flex-grow border-t border-gray-100"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-bold uppercase tracking-wider">Or with email</span>
-                    <div class="flex-grow border-t border-gray-100"></div>
-                </div>
-
-                <form action="/login" method="POST" class="space-y-6">
-                    
-                    <div>
-                        <label for="email" class="block text-sm font-bold text-accent-navy mb-2">Email Address</label>
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="fa-regular fa-envelope text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
-                            </div>
-                            <input type="email" name="email" id="email" value="<%= typeof email !== 'undefined' ? email : '' %>" class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400" placeholder="doggo@example.com" required>
-                            <p id="emailError" class="text-sm text-red-500 mt-1 hidden"></p>
-
+                        <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
+                            <a href="/google"
+                                class="flex items-center justify-center gap-2 py-3 px-4 border-2 border-gray-100 rounded-xl font-bold text-gray-600 hover:border-brand-200 hover:bg-brand-50 transition duration-300">
+                                <i class="fa-brands fa-google text-brand-500"></i>
+                                Login with Google
+                            </a>
                         </div>
-                    </div>
 
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label for="password" class="block text-sm font-bold text-accent-navy">Password</label>
-                            <a href="/forgot-password" class="text-sm font-bold text-brand-500 hover:text-brand-600 transition">Forgot Password?</a>
+
+                        <div class="relative flex items-center mb-8">
+                            <div class="flex-grow border-t border-gray-100"></div>
+                            <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-bold uppercase tracking-wider">Or
+                                with email</span>
+                            <div class="flex-grow border-t border-gray-100"></div>
                         </div>
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="fa-solid fa-lock text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
-                            </div>
-                            <input type="password" name="password" id="password" class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400" placeholder="••••••••" required>
-                            <p id="passwordError" class="text-sm text-red-500 mt-1 hidden"></p>
 
-                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-accent-navy transition cursor-pointer">
-                                <i class="fa-regular fa-eye" id="eye-icon"></i>
+                        <form action="/login" method="POST" class="space-y-6">
+
+                            <div>
+                                <label for="email" class="block text-sm font-bold text-accent-navy mb-2">Email
+                                    Address</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i
+                                            class="fa-regular fa-envelope text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
+                                    </div>
+                                    <input type="email" name="email" id="email"
+                                        value="<%= typeof email !== 'undefined' ? email : '' %>"
+                                        class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
+                                        placeholder="doggo@example.com" required>
+                                    <p id="emailError" class="text-sm text-red-500 mt-1 hidden"></p>
+
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label for="password"
+                                        class="block text-sm font-bold text-accent-navy">Password</label>
+                                    <a href="/forgot-password"
+                                        class="text-sm font-bold text-brand-500 hover:text-brand-600 transition">Forgot
+                                        Password?</a>
+                                </div>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i
+                                            class="fa-solid fa-lock text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
+                                    </div>
+                                    <input type="password" name="password" id="password"
+                                        class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
+                                        placeholder="••••••••" required>
+                                    <p id="passwordError" class="text-sm text-red-500 mt-1 hidden"></p>
+
+                                    <button type="button" onclick="togglePassword()"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-accent-navy transition cursor-pointer">
+                                        <i class="fa-regular fa-eye" id="eye-icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input id="remember-me" name="rememberMe" type="checkbox"
+                                    class="h-5 w-5 text-brand-500 focus:ring-brand-500 border-gray-300 rounded cursor-pointer accent-brand-500">
+                                <label for="remember-me"
+                                    class="ml-2 block text-sm font-bold text-gray-500 cursor-pointer select-none">
+                                    Keep me logged in
+                                </label>
+                            </div>
+
+                            <button id="loginBtn" type="submit"
+                                class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 group">
+                                Sign In <i
+                                    class="fa-solid fa-arrow-right-to-bracket group-hover:translate-x-1 transition"></i>
                             </button>
+
+                        </form>
+
+                        <div class="mt-8 text-center">
+                            <p class="text-gray-500 font-medium">
+                                Don't have an account?
+                                <a href="/signup"
+                                    class="text-brand-500 font-bold hover:text-brand-600 hover:underline transition">Create
+                                    free account</a>
+                            </p>
                         </div>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input id="remember-me" name="rememberMe" type="checkbox" class="h-5 w-5 text-brand-500 focus:ring-brand-500 border-gray-300 rounded cursor-pointer accent-brand-500">
-                        <label for="remember-me" class="ml-2 block text-sm font-bold text-gray-500 cursor-pointer select-none">
-                            Keep me logged in
-                        </label>
-                    </div>
-
-                    <button id="loginBtn" type="submit" class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 group">
-                        Sign In <i class="fa-solid fa-arrow-right-to-bracket group-hover:translate-x-1 transition"></i>
-                    </button>
-
-                </form>
-
-                <div class="mt-8 text-center">
-                    <p class="text-gray-500 font-medium">
-                        Don't have an account? 
-                        <a href="/signup" class="text-brand-500 font-bold hover:text-brand-600 hover:underline transition">Create free account</a>
-                    </p>
-                </div>
             </div>
         </div>
 
         <div class="hidden lg:block lg:w-1/2 relative bg-brand-50 overflow-hidden">
             <div class="absolute inset-0 hero-pattern z-0"></div>
-            <div class="absolute top-[-10%] right-[-5%] w-[30rem] h-[30rem] bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob"></div>
-            <div class="absolute bottom-[-10%] left-[-10%] w-[30rem] h-[30rem] bg-accent-teal/30 rounded-full mix-blend-multiply filter blur-3xl opacity-80 animate-blob animation-delay-2000"></div>
+            <div
+                class="absolute top-[-10%] right-[-5%] w-[30rem] h-[30rem] bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob">
+            </div>
+            <div
+                class="absolute bottom-[-10%] left-[-10%] w-[30rem] h-[30rem] bg-accent-teal/30 rounded-full mix-blend-multiply filter blur-3xl opacity-80 animate-blob animation-delay-2000">
+            </div>
 
             <div class="relative h-full w-full flex flex-col items-center justify-center p-12 z-10">
-                
-                <div class="absolute top-24 right-24 bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl animate-float max-w-xs border-l-4 border-brand-500">
+
+                <div
+                    class="absolute top-24 right-24 bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl animate-float max-w-xs border-l-4 border-brand-500">
                     <div class="flex gap-1 text-brand-400 text-xs mb-2">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                            class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                            class="fa-solid fa-star"></i>
                     </div>
-                    <p class="text-accent-navy font-bold text-sm italic">"My golden retriever goes crazy for the squeaky toys! Best shop ever."</p>
+                    <p class="text-accent-navy font-bold text-sm italic">"My golden retriever goes crazy for the squeaky
+                        toys! Best shop ever."</p>
                     <p class="text-gray-400 text-xs font-bold mt-2">- Sarah & Buster 🐕</p>
                 </div>
 
-                <div class="relative w-[450px] h-[550px] rounded-[3rem] overflow-hidden border-[8px] border-white shadow-2xl rotate-2 hover:rotate-0 transition duration-500 ease-out">
-                    <img src="https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Happy Dog" class="w-full h-full object-cover">
-                    
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-8 text-white">
+                <div
+                    class="relative w-[450px] h-[550px] rounded-[3rem] overflow-hidden border-[8px] border-white shadow-2xl rotate-2 hover:rotate-0 transition duration-500 ease-out">
+                    <img src="https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="Happy Dog" class="w-full h-full object-cover">
+
+                    <div
+                        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-8 text-white">
                         <h3 class="text-2xl font-bold">Join the PawPalace Family</h3>
-                        <p class="text-brand-100 font-medium text-sm mt-1">Earn points on every purchase & get exclusive treats.</p>
+                        <p class="text-brand-100 font-medium text-sm mt-1">Earn points on every purchase & get exclusive
+                            treats.</p>
                     </div>
                 </div>
 
                 <div class="absolute bottom-20 left-20">
-                     <div class="w-16 h-16 bg-accent-teal rounded-full flex items-center justify-center text-white text-2xl shadow-lg animate-bounce" style="animation-delay: 1s;">
+                    <div class="w-16 h-16 bg-accent-teal rounded-full flex items-center justify-center text-white text-2xl shadow-lg animate-bounce"
+                        style="animation-delay: 1s;">
                         <i class="fa-solid fa-bone"></i>
-                     </div>
+                    </div>
                 </div>
 
             </div>
@@ -246,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 eyeIcon.classList.remove('fa-eye');
@@ -259,4 +311,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     </script>
 </body>
+
 </html>
