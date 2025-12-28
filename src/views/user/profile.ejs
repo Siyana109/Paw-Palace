@@ -23,7 +23,7 @@
 </head>
 <body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen">
 
-    <nav class="bg-white px-8 py-4 flex justify-between items-center shadow-sm">
+    <!-- <nav class="bg-white px-8 py-4 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2">
             <div class="bg-brand-500 p-2 rounded-lg text-white"><i class="fa-solid fa-paw"></i></div>
             <span class="text-xl font-bold">Paw<span class="text-brand-500">Palace</span></span>
@@ -37,7 +37,9 @@
             <i class="fa-solid fa-cart-shopping text-xl text-gray-400"></i>
             <span class="absolute -top-2 -right-2 bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">2</span>
         </div>
-    </nav>
+    </nav> -->
+
+    <%- include('../partials/header') %>
 
     <main class="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -49,7 +51,7 @@
                         <i class="fa-solid fa-camera"></i>
                     </button>
                 </div>
-                <h2 class="text-xl font-bold"><%= user.name %></h2>
+                <h2 class="text-xl font-bold"><%= user.fullName %></h2>
                 <p class="text-gray-400 text-sm font-medium">PawParent since 2023</p>
                 <div class="mt-4 p-2 bg-brand-50 rounded-xl">
                     <p class="text-[10px] font-bold text-brand-500 uppercase">Referral Code</p>
@@ -93,7 +95,7 @@
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Full Name</label>
                         <div class="relative">
                             <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                            <input type="text" name="name" value="<%= user.name %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
+                            <input type="text" name="name" value="<%= user.fullName%>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
                         </div>
                     </div>
                     <div>

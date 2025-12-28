@@ -349,26 +349,6 @@ const verifyEmail = async (req, res) => {
 }
 
 
-// const profile = async (req, res) => {
-//     try {
-//         // 1. Fetch the user data (usually from req.user if using Passport/JWT 
-//         // or by querying the DB using the ID in the session)
-//         const userData = await User.findById(req.session.userId); 
-
-//         // 2. Determine if the user is in "edit mode" based on the URL query (?edit=true)
-//         const isEditing = req.query.edit === 'true';
-
-//         // 3. PASS THE DATA TO THE VIEW
-//         res.render('user/profile', { 
-//             user: userData,     // This must match the name used in EJS
-//             isEditing: isEditing 
-//         });
-
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
 
 
 

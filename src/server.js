@@ -8,7 +8,7 @@ import userRoutes from "./routes/userRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import session from "express-session";
 import MongoStore from "connect-mongo";
-
+import viewDataMiddleware from './middlewares/viewDataMiddleware.js';
 import passport from "passport";
 import "./config/passport.js";
 
@@ -60,8 +60,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+app.use(viewDataMiddleware);
+
 app.use('/',userRoutes)
 app.use('/admin',adminRoutes)
+
 
 
 app.listen(port, () => {
