@@ -38,8 +38,7 @@ const postAdmin = async (req, res) => {
             password === process.env.ADMIN_PASSWORD
         ) {
             req.session.isAdmin = true;
-            // return res.redirect('/dashboard');
-            return res.send('successfully logged in')
+            return res.redirect('/admin/users');
         }
 
         /* ---------- Invalid credentials ---------- */

@@ -21,6 +21,3 @@ export const sendOTPEmail = async (email, otp) => {
         `
     });
 };
-
-console.log("EMAIL:", process.env.EMAIL);
-console.log("PASS:", process.env.EMAIL_PASSWORD);

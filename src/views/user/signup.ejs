@@ -59,7 +59,7 @@
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
-            const termsCheckbox = document.getElementById('terms');
+            // const termsCheckbox = document.getElementById('terms');
             const submitBtn = document.getElementById('submitBtn');
 
             const errors = {
@@ -67,7 +67,7 @@
                 email: document.getElementById('emailError'),
                 password: document.getElementById('passwordError'),
                 confirmPassword: document.getElementById('confirmPasswordError'),
-                terms: document.getElementById('termsError')
+                // terms: document.getElementById('termsError')
             };
 
             function showError(el, msg) {
@@ -123,22 +123,22 @@
                 return true;
             }
 
-            function validateTerms() {
-                if (!termsCheckbox.checked) {
-                    showError(errors.terms, 'You must accept the terms');
-                    return false;
-                }
-                hideError(errors.terms);
-                return true;
-            }
+            // function validateTerms() {
+            //     if (!termsCheckbox.checked) {
+            //         showError(errors.terms, 'You must accept the terms');
+            //         return false;
+            //     }
+            //     hideError(errors.terms);
+            //     return true;
+            // }
 
             function validateForm() {
                 const valid =
                     validatefullName() &&
                     validateEmail() &&
                     validatePassword() &&
-                    validateConfirmPassword() &&
-                    validateTerms();
+                    validateConfirmPassword() 
+                    // validateTerms();
 
                 submitBtn.disabled = !valid;
                 submitBtn.classList.toggle('cursor-not-allowed', !valid);
@@ -151,7 +151,7 @@
             emailInput.addEventListener('input', validateForm);
             passwordInput.addEventListener('input', validateForm);
             confirmPasswordInput.addEventListener('input', validateForm);
-            termsCheckbox.addEventListener('change', validateForm);
+            // termsCheckbox.addEventListener('change', validateForm);
         });
     </script>
 
@@ -278,7 +278,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-start">
+                            <!-- <div class="flex items-start">
                                 <div class="flex items-center h-5">
                                     <input id="terms" type="checkbox" name="terms"
                                         class="h-5 w-5 text-brand-500 focus:ring-brand-500 border-gray-300 rounded cursor-pointer accent-brand-500"
@@ -294,7 +294,7 @@
                                             Policy</a>
                                     </label>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <button id="submitBtn" type="submit" disabled
                                 class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 group">

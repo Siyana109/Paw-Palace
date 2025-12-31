@@ -38,80 +38,24 @@ const getSignup = (req, res) => {
     }
 }
 
-// const postSignup = async (req, res) => {
-//     try {
-//         const {
-//             fullName,
-//             email,
-//             password,
-//             confirmPassword,
-//             terms
-//         } = req.body;
-
-//         const errors = [];
-
-//         if (!fullName || fullName.trim().length < 3) {
-//             errors.push({ msg: 'Name must be at least 3 characters' });
-//         }
-
-//         if (!email) {
-//             errors.push({ msg: 'Email is required' });
-//         }
-
-//         if (!password || password.length < 8) {
-//             errors.push({ msg: 'Password must be at least 8 characters' });
-//         }
-
-//         if (password !== confirmPassword) {
-//             errors.push({ msg: 'Passwords do not match' });
-//         }
-
-//         if (!terms) {
-//             errors.push({ msg: 'You must accept the terms and conditions' });
-//         }
-
-//         if (errors.length > 0) {
-//             return res.status(400).render('user/signup');
-//         }
-
-//         const existingUser = await User.findOne({ email });
-
-//         if (existingUser) {
-//             return res.status(400).render('user/signup', {
-//                 title: 'Create Account | PawPalace',
-//                 errors: [{ msg: 'Email is already registered' }],
-//                 formData: {
-//                     fullName,
-//                     email
-//                 }
-//             });
-//         }
-// 
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         const newUser = new User({
-//             fullName,
-//             email,
-//             password: hashedPassword
-//         });
-
-//         await newUser.save();
-
-//         return res.redirect('/');
-
-//     } catch (error) {
-//         console.error('Signup Error:', error);
-
-//         return res.status(500).render('user/signup');
-//     }
-// };
-
 
 
 
 const postSignup = async (req, res) => {
   try {
     const { fullName, email, password, confirmPassword, terms } = req.body;
+
+     if (!fullName || fullName.trim().length < 3) {
+            return res.render("user/signup", {
+        errors: [{ msg: 'Name must be at least 3 characters' }]
+      });
+        }
+ if (!email) {
+            return res.render("user/signup", {
+        errors: [{ msg: 'Email is required' }]
+      });
+        }
+
 
     if (password !== confirmPassword) {
       return res.render("user/signup", {
@@ -139,11 +83,12 @@ const postSignup = async (req, res) => {
     }
 
     const otp = generateOTP();
+    console.log("Generated OTP: ",otp)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await OTP.findOneAndUpdate(
       { email },
-      { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+      { otp, expiresAt: new Date(Date.now() + 30 * 1000) },
       { upsert: true }
     );
 
@@ -177,8 +122,6 @@ const getVerifyOtp = (req, res) => {
 };
 
 
-
-
 const verifyOtp = async (req, res) => {
   try {
     if (!req.session.signupData) {
@@ -190,13 +133,23 @@ const verifyOtp = async (req, res) => {
 
     const otpData = await OTP.findOne({ email: signupData.email });
 
-    if (
-      !otpData ||
-      otpData.otp !== String(otp).trim() ||
-      otpData.expiresAt < Date.now()
-    ) {
+    if (!otpData) {
       return res.render("user/otp", {
-        error: "Invalid or expired OTP",
+        error: "OTP not found. Please resend OTP.",
+        email: signupData.email
+      });
+    }
+
+    if (otpData.expiresAt < new Date()) {
+      return res.render("user/otp", {
+        error: "OTP expired. Please resend OTP.",
+        email: signupData.email
+      });
+    }
+
+    if (otpData.otp !== String(otp).trim()) {
+      return res.render("user/otp", {
+        error: "Invalid OTP",
         email: signupData.email
       });
     }
@@ -207,9 +160,7 @@ const verifyOtp = async (req, res) => {
       password: signupData.password
     });
 
-    req.session.user = {
-      id: user._id
-    };
+    req.session.user = { id: user._id };
 
     await OTP.deleteOne({ email: signupData.email });
     req.session.signupData = null;
@@ -219,12 +170,11 @@ const verifyOtp = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.render("user/otp", {
+      error: "Something went wrong",
       email: req.session.signupData?.email
     });
   }
 };
-
-
 
 
 const resendOtp = async (req, res) => {
@@ -313,12 +263,21 @@ export const postLogin = async (req, res) => {
     return res.render("user/login", { error: "Invalid credentials" });
   }
 
+  if (user.isBlocked) {
+    return res.render("user/login", {
+        error: "Your account has been blocked by admin",
+        success: null
+    });
+}
+
   req.session.user = {
     id: user._id
   };
   
   res.redirect("/home");
 };
+
+
 
 
 
@@ -334,19 +293,183 @@ const forgotPassword = (req, res) => {
 
 
 
-const verifyEmail = async (req, res) => {
+
+
+const verifyEmailSendOtp = async (req, res) => {
     try{
         const {email} = req.body
-        const user = OTP.findOne({email})
+        const user = await User.findOne({email})
         if(!user){
-            return res.status(400)
+            return res.render("user/forgotPassword", {
+        error: "No account found with this email"
+      });
         }
-        res.redirect('/login')
-    }
-    catch(error){
+         const otp = generateOTP();
 
+    await OTP.findOneAndUpdate(
+      { email },
+      { otp,
+        expiresAt: new Date(Date.now() + 30 * 1000)
+      },
+      { upsert: true }
+    );
+
+    await sendOTPEmail(email, otp);
+
+     req.session.resetPassword = { email };
+
+    res.redirect("/reset-password/verify-otp");
     }
-}
+    catch (error) {
+    console.error("Verify email error:", error);
+    res.render("user/forgotPassword", {
+      error: "Something went wrong"
+    });
+  }
+};
+
+
+
+
+// const verifyResetOtp = async (req, res) => {
+//   try {
+//     if (!req.session.resetPassword) {
+//       return res.redirect("/forgot-password");
+//     }
+
+//     const { otp } = req.body;
+//     const { email } = req.session.resetPassword;
+
+//     const otpData = await OTP.findOne({ email });
+
+//     if (
+//       !otpData ||
+//       otpData.otp !== String(otp).trim() ||
+//       otpData.expiresAt < Date.now()
+//     ) {
+//       return res.render("user/otp", {
+//         error: "Invalid or expired OTP",
+//         email
+//       });
+//     }
+
+//     // OTP verified → allow password reset
+//     req.session.resetPassword.verified = true;
+
+//     res.redirect("/reset-password");
+
+//   } catch (error) {
+//     console.error("Verify reset OTP error:", error);
+//     res.redirect("/forgot-password");
+//   }
+// };
+
+
+const getResetOtp = (req, res) => {
+  if (!req.session.resetPassword) {
+    return res.redirect("/forgot-password");
+  }
+
+  res.render("user/otp", {
+    email: req.session.resetPassword.email
+  });
+};
+
+
+
+const getResetPassword = (req, res) => {
+  if (!req.session.resetPassword?.verified) {
+    return res.redirect("/forgot-password");
+  }
+
+  res.render("user/resetPassword");
+};
+
+
+const verifyResetOtp = async (req, res) => {
+  try {
+    if (!req.session.resetPassword) {
+      return res.redirect("/forgot-password");
+    }
+
+    const { otp } = req.body;
+    const { email } = req.session.resetPassword;
+
+    // 🔐 Fetch ONLY reset-password OTP
+    const otpData = await OTP.findOne({
+      email,
+      purpose: "reset-password"
+    });
+
+    if (!otpData) {
+      return res.render("user/otp", {
+        error: "OTP not found or expired",
+        email
+      });
+    }
+
+    // Compare OTP
+    if (otpData.otp !== String(otp).trim()) {
+      return res.render("user/otp", {
+        error: "Invalid OTP",
+        email
+      });
+    }
+
+    // Compare expiry correctly
+    if (otpData.expiresAt < new Date()) {
+      return res.render("user/otp", {
+        error: "OTP expired",
+        email
+      });
+    }
+
+    // ✅ OTP VERIFIED
+    req.session.resetPassword.verified = true;
+
+    res.redirect("/reset-password");
+
+  } catch (error) {
+    console.error("Verify reset OTP error:", error);
+    res.redirect("/forgot-password");
+  }
+};
+
+
+
+
+const resetPassword = async (req, res) => {
+  try {
+    if (!req.session.resetPassword?.verified) {
+      return res.redirect("/forgot-password");
+    }
+
+    const { password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword || password.length < 8) {
+      return res.render("user/resetPassword", {
+        error: "Password validation failed"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.findOneAndUpdate(
+      { email: req.session.resetPassword.email },
+      { password: hashedPassword }
+    );
+
+    // Cleanup
+    await OTP.deleteOne({ email: req.session.resetPassword.email });
+    req.session.resetPassword = null;
+
+    res.redirect("/login?message=Password+updated+successfully");
+
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.redirect("/forgot-password");
+  }
+};
 
 
 
@@ -364,6 +487,8 @@ export const logout = (req, res) => {
 
 
 
-export default { getSignup, getLogin, postLogin, postSignup, forgotPassword, verifyEmail, landingPage, homePage, verifyOtp, resendOtp, getVerifyOtp, googleSignup, googleCallback}
+export default { getSignup, postSignup, verifyEmailSendOtp, getVerifyOtp, verifyOtp, resendOtp, googleSignup, googleCallback,
+                 getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword,
+                 landingPage, homePage }
 
 
