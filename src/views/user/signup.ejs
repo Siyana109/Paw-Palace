@@ -53,107 +53,129 @@
         }
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const fullNameInput = document.getElementById('fullName');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            // const termsCheckbox = document.getElementById('terms');
-            const submitBtn = document.getElementById('submitBtn');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
 
-            const errors = {
-                fullName: document.getElementById('fullNameError'),
-                email: document.getElementById('emailError'),
-                password: document.getElementById('passwordError'),
-                confirmPassword: document.getElementById('confirmPasswordError'),
-                // terms: document.getElementById('termsError')
-            };
+    const errors = {
+        fullName: document.getElementById('fullNameError'),
+        email: document.getElementById('emailError'),
+        password: document.getElementById('passwordError'),
+        confirmPassword: document.getElementById('confirmPasswordError'),
+    };
 
-            function showError(el, msg) {
-                el.textContent = msg;
-                el.classList.remove('hidden');
-            }
+    // 🔹 Track user interaction
+    const touched = {
+        fullName: false,
+        email: false,
+        password: false,
+        confirmPassword: false,
+    };
 
-            function hideError(el) {
-                el.textContent = '';
-                el.classList.add('hidden');
-            }
+    function showError(el, msg) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
 
-            function validatefullName() {
-                if (fullNameInput.value.trim().length < 3) {
-                    showError(errors.fullName, 'Name must be at least 3 characters');
-                    return false;
-                }
-                hideError(errors.fullName);
-                return true;
-            }
+    function hideError(el) {
+        el.textContent = '';
+        el.classList.add('hidden');
+    }
 
-            function validateEmail() {
-                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!regex.test(emailInput.value.trim())) {
-                    showError(errors.email, 'Enter a valid email address');
-                    return false;
-                }
-                hideError(errors.email);
-                return true;
-            }
+    function validateFullName(show = true) {
+        if (fullNameInput.value.trim().length < 3) {
+            if (show) showError(errors.fullName, 'Name must be at least 3 characters');
+            return false;
+        }
+        hideError(errors.fullName);
+        return true;
+    }
 
-            function validatePassword() {
-                const value = passwordInput.value;
-                const strong = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+    function validateEmail(show = true) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(emailInput.value.trim())) {
+            if (show) showError(errors.email, 'Enter a valid email address');
+            return false;
+        }
+        hideError(errors.email);
+        return true;
+    }
 
-                if (!strong.test(value)) {
-                    showError(
-                        errors.password,
-                        'Password must be 8+ chars, include uppercase, lowercase & number'
-                    );
-                    return false;
-                }
-                hideError(errors.password);
-                return true;
-            }
+    function validatePassword(show = true) {
+        const strong = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+        if (!strong.test(passwordInput.value)) {
+            if (show) showError(
+                errors.password,
+                'Password must be 8+ chars, include uppercase, lowercase & number'
+            );
+            return false;
+        }
+        hideError(errors.password);
+        return true;
+    }
 
-            function validateConfirmPassword() {
-                if (confirmPasswordInput.value !== passwordInput.value) {
-                    showError(errors.confirmPassword, 'Passwords do not match');
-                    return false;
-                }
-                hideError(errors.confirmPassword);
-                return true;
-            }
+    function validateConfirmPassword(show = true) {
+        if (confirmPasswordInput.value !== passwordInput.value) {
+            if (show) showError(errors.confirmPassword, 'Passwords do not match');
+            return false;
+        }
+        hideError(errors.confirmPassword);
+        return true;
+    }
 
-            // function validateTerms() {
-            //     if (!termsCheckbox.checked) {
-            //         showError(errors.terms, 'You must accept the terms');
-            //         return false;
-            //     }
-            //     hideError(errors.terms);
-            //     return true;
-            // }
+    function validateForm() {
+        const valid =
+            validateFullName(false) &&
+            validateEmail(false) &&
+            validatePassword(false) &&
+            validateConfirmPassword(false);
 
-            function validateForm() {
-                const valid =
-                    validatefullName() &&
-                    validateEmail() &&
-                    validatePassword() &&
-                    validateConfirmPassword() 
-                    // validateTerms();
+        submitBtn.disabled = !valid;
+        submitBtn.classList.toggle('cursor-not-allowed', !valid);
+        submitBtn.classList.toggle('bg-brand-500/70', !valid);
+        submitBtn.classList.toggle('bg-brand-500', valid);
 
-                submitBtn.disabled = !valid;
-                submitBtn.classList.toggle('cursor-not-allowed', !valid);
-                submitBtn.classList.toggle('bg-brand-500/70', !valid);
-                submitBtn.classList.toggle('bg-brand-500', valid);
-            }
+        return valid;
+    }
 
-            // Real-time listeners
-            fullNameInput.addEventListener('input', validateForm);
-            emailInput.addEventListener('input', validateForm);
-            passwordInput.addEventListener('input', validateForm);
-            confirmPasswordInput.addEventListener('input', validateForm);
-            // termsCheckbox.addEventListener('change', validateForm);
-        });
-    </script>
+    // 🔹 Field-level validation (only after touch)
+    fullNameInput.addEventListener('input', () => {
+        touched.fullName = true;
+        validateFullName(true);
+        validateForm();
+    });
+
+    emailInput.addEventListener('input', () => {
+        touched.email = true;
+        validateEmail(true);
+        validateForm();
+    });
+
+    passwordInput.addEventListener('input', () => {
+        touched.password = true;
+        validatePassword(true);
+        validateForm();
+    });
+
+    confirmPasswordInput.addEventListener('input', () => {
+        touched.confirmPassword = true;
+        validateConfirmPassword(true);
+        validateForm();
+    });
+
+    // 🔹 Final guard on submit
+    document.querySelector('form').addEventListener('submit', (e) => {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
 
 
     <style>
@@ -206,7 +228,7 @@
                     </div>
                     <% } %>
 
-                        <form action="/signup" method="POST" class="space-y-5">
+                        <form action="/signup" method="POST" class="space-y-5" novalidate>
 
                             <div>
                                 <label for="name" class="block text-sm font-bold text-accent-navy mb-2">Full

@@ -82,26 +82,39 @@
                 return true;
             }
 
-            // function validatePassword() {
-            //     if (passwordInput.value.trim().length < 6) {
-            //         showError(passwordError, 'Password must be at least 6 characters');
-            //         return false;
-            //     }
-            //     hideError(passwordError);
-            //     return true;
-            // }
-
-            function validateForm() {
-                const valid = validateEmail();
-
-                loginBtn.disabled = !valid;
-                loginBtn.classList.toggle('cursor-not-allowed', !valid);
-                loginBtn.classList.toggle('bg-brand-500/70', !valid);
-                loginBtn.classList.toggle('bg-brand-500', valid);
+            function validatePassword() {
+                if (passwordInput.value.trim().length < 6) {
+                    showError(passwordError, 'Password must be at least 6 characters');
+                    return false;
+                }
+                hideError(passwordError);
+                return true;
             }
 
-            emailInput.addEventListener('input', validateForm);
-            passwordInput.addEventListener('input', validateForm);
+            emailInput.addEventListener('input', validateEmail);
+            passwordInput.addEventListener('input', validatePassword);
+
+            //     function validateForm() {
+            //         const valid = validateEmail() && validatePassword();
+
+            //         loginBtn.disabled = !valid;
+            //         loginBtn.classList.toggle('cursor-not-allowed', !valid);
+            //         loginBtn.classList.toggle('bg-brand-500/70', !valid);
+            //         loginBtn.classList.toggle('bg-brand-500', valid);
+            //     }
+
+            //     emailInput.addEventListener('input', validateForm);
+            //     passwordInput.addEventListener('input', validateForm);
+
+            document.querySelector('form').addEventListener('submit', (e) => {
+                const isEmailValid = validateEmail();
+                const isPasswordValid = validatePassword();
+
+                if (!isEmailValid || !isPasswordValid) {
+                    e.preventDefault(); // stop submit
+                }
+            });
+
         });
     </script>
 
@@ -153,11 +166,6 @@
                     </div>
                     <% } %>
 
-                        <!-- <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
-                    <button type="button" class="flex items-center justify-center gap-2 py-3 px-4 border-2 border-gray-100 rounded-xl font-bold text-gray-600 hover:border-brand-200 hover:bg-brand-50 transition duration-300">
-                        <i class="fa-brands fa-google text-brand-500"></i> Login with Google
-                    </button>
-                </div> -->
 
                         <div class="grid grid-cols-1 gap-4 mb-8 place-items-center">
                             <a href="/google"
@@ -175,7 +183,7 @@
                             <div class="flex-grow border-t border-gray-100"></div>
                         </div>
 
-                        <form action="/login" method="POST" class="space-y-6">
+                        <form action="/login" method="POST" class="space-y-6" novalidate>
 
                             <div>
                                 <label for="email" class="block text-sm font-bold text-accent-navy mb-2">Email
@@ -188,7 +196,7 @@
                                     <input type="email" name="email" id="email"
                                         value="<%= typeof email !== 'undefined' ? email : '' %>"
                                         class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
-                                        placeholder="doggo@example.com" required>
+                                        placeholder="doggo@example.com">
                                     <p id="emailError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                 </div>
@@ -209,7 +217,7 @@
                                     </div>
                                     <input type="password" name="password" id="password"
                                         class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:bg-white focus:border-brand-500 text-accent-navy font-medium transition duration-200 placeholder-gray-400"
-                                        placeholder="••••••••" required>
+                                        placeholder="••••••••">
                                     <p id="passwordError" class="text-sm text-red-500 mt-1 hidden"></p>
 
                                     <button type="button" onclick="togglePassword()"
@@ -219,14 +227,14 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center">
+                            <!-- <div class="flex items-center">
                                 <input id="remember-me" name="rememberMe" type="checkbox"
                                     class="h-5 w-5 text-brand-500 focus:ring-brand-500 border-gray-300 rounded cursor-pointer accent-brand-500">
                                 <label for="remember-me"
                                     class="ml-2 block text-sm font-bold text-gray-500 cursor-pointer select-none">
                                     Keep me logged in
                                 </label>
-                            </div>
+                            </div> -->
 
                             <button id="loginBtn" type="submit"
                                 class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 group">
@@ -283,12 +291,12 @@
                     </div>
                 </div>
 
-                <div class="absolute bottom-20 left-20">
+                <!-- <div class="absolute bottom-20 left-20">
                     <div class="w-16 h-16 bg-accent-teal rounded-full flex items-center justify-center text-white text-2xl shadow-lg animate-bounce"
                         style="animation-delay: 1s;">
                         <i class="fa-solid fa-bone"></i>
                     </div>
-                </div>
+                </div> -->
 
             </div>
         </div>

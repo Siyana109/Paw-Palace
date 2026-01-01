@@ -38,6 +38,18 @@
             <p class="text-gray-500 font-medium">We're currently building something amazing for your furry friends. Stay tuned!</p>
         </div>
     </main>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<% if (query?.login === 'success') { %>
+<script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Welcome back! 🐾',
+    text: 'You have logged in successfully',
+    timer: 2000,
+    showConfirmButton: false
+  });
+</script>
+<% } %>
 
 </body>
 </html>

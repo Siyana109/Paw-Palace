@@ -43,7 +43,9 @@ const getSignup = (req, res) => {
 
 const postSignup = async (req, res) => {
   try {
+    console.log("POST /signup HIT");
     const { fullName, email, password, confirmPassword, terms } = req.body;
+    const formData = { fullName, email };
 
      if (!fullName || fullName.trim().length < 3) {
             return res.render("user/signup", {
@@ -56,16 +58,15 @@ const postSignup = async (req, res) => {
       });
         }
 
+    if (!password || password.length < 6) {
+      return res.render("user/signup", {
+        errors: [{ msg: "Password must be at least 6 characters" }]
+      });
+    }
 
     if (password !== confirmPassword) {
       return res.render("user/signup", {
         errors: [{ msg: "Passwords do not match" }]
-      });
-    }
-
-    if (!password || password.length < 8) {
-      return res.render("user/signup", {
-        errors: [{ msg: "Password must be at least 8 characters" }]
       });
     }
 
@@ -78,12 +79,14 @@ const postSignup = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.render("user/signup", {
-        errors: [{ msg: "Email already registered" }]
+        errors: [{ msg: "Email already registered" }],
+        formData
       });
     }
 
     const otp = generateOTP();
     console.log("Generated OTP: ",otp)
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await OTP.findOneAndUpdate(
@@ -241,41 +244,61 @@ const getLogin = (req,res) => {
 
 
 const homePage = (req, res) => {
-    // Check if user is logged in (middleware recommended)
-    // For this example, we assume user data is stored in the session
-    // if (req.session.user) {
         res.render('user/home', { 
-            user: req.session.user // Passing the user object to EJS
+            user: req.session.user, // Passing the user object to EJS
+            query: req.query
         });
-    // } else {
-    //     res.redirect('/login');
-    // }
 };
 
 
 
 export const postLogin = async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+  try {
+    const { email, password } = req.body;
 
-  const isMatch = await bcrypt.compare(req.body.password, user.password);
+    // Basic validation
+    if (!email || !password) {
+      return res.render("user/login", {
+        error: "Email and password are required",
+      });
+    }
 
-  if (!isMatch || !user) {
-    return res.render("user/login", { error: "Invalid credentials" });
-  }
+    const user = await User.findOne({ email });
 
-  if (user.isBlocked) {
-    return res.render("user/login", {
+    // ❗ Check user first
+    if (!user) {
+      return res.render("user/login", {
+        error: "Invalid credentials",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.render("user/login", {
+        error: "Invalid credentials",
+      });
+    }
+
+    if (user.isBlocked) {
+      return res.render("user/login", {
         error: "Your account has been blocked by admin",
-        success: null
-    });
-}
+      });
+    }
 
-  req.session.user = {
-    id: user._id
-  };
-  
-  res.redirect("/home");
+    req.session.user = { id: user._id, };
+
+    return res.redirect("/home?login=success");
+  } catch (error) {
+    console.error("Login error:", error);
+    res.render("user/login", {
+      error: "Something went wrong. Please try again.",
+    });
+  }
 };
+
+
+
 
 
 
@@ -397,8 +420,7 @@ const verifyResetOtp = async (req, res) => {
 
     // 🔐 Fetch ONLY reset-password OTP
     const otpData = await OTP.findOne({
-      email,
-      purpose: "reset-password"
+      email
     });
 
     if (!otpData) {

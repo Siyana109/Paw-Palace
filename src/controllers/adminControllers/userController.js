@@ -4,7 +4,7 @@ import User from "../../model/userModel.js";
 export const getUsers = async (req, res) => {
     try {
         const users = await User.find({})
-            .select("fullName email isBlocked createdAt")
+            // .select("fullName email isBlocked createdAt")
             .sort({ createdAt: -1 });
 console.log(users)
         const formattedUsers = users.map(user => ({
@@ -62,7 +62,40 @@ export const unblockUser = async (req, res) => {
 
 
 
+export const searchUsers = async (req, res) => {
+    try {
+        const search = req.query.q?.trim() || "";
+
+        const filter = {
+            isAdmin: false,
+            ...(search && {
+                $or: [
+                    { fullName: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } }
+                ]
+            })
+        };
+
+        const users = await User.find(filter).sort({ createdAt: -1 });
+
+        const formattedUsers = users.map(user => ({
+            id: user._id.toString(),
+            name: user.fullName,
+            email: user.email,
+            status: user.isBlocked ? "Blocked" : "Active",
+            joinDate: user.createdAt.toDateString(),
+            orderCount: 0
+        }));
+
+        res.json({ users: formattedUsers });
+
+    } catch (error) {
+        console.error("Live search error:", error);
+        res.status(500).json({ users: [] });
+    }
+};
 
 
 
-export default {getUsers, blockUser, unblockUser}
+
+export default {getUsers, blockUser, unblockUser, searchUsers}

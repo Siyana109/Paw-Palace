@@ -1,15 +1,15 @@
 
-export const adminSession = (req, res, next) => {
-    if (req.session.isAdmin) {
-        return res.redirect('/admin/users');
+const adminSession = (req, res, next) => {
+    if (!req.session.isAdmin) {
+        return res.redirect('/admin/login');
     }
     next();
 };
 
 
-export const isAdminLoggedIn = (req, res, next) => {
-    if (!req.session.isAdmin) {
-        return res.redirect('/admin/login');
+const isAdminLoggedIn = (req, res, next) => {
+    if (req.session.isAdmin) {
+        return res.redirect('/admin/users');
     }
     next();
 };

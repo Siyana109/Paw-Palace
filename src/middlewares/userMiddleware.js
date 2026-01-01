@@ -30,14 +30,16 @@ const checkSession = async (req, res, next) => {
 
 
 
-const isLogin = (req, res, next) => {
+const isLoggedIn = (req, res, next) => {
   if (req.session.user) {
     return res.redirect("/home");
   }
   next();
 };
 
-export default {
-  checkSession,
-  isLogin
-};
+export default { checkSession, isLoggedIn };
+
+
+
+
+

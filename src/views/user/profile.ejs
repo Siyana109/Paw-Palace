@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | PawPalace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -21,150 +23,215 @@
         }
     </script>
 </head>
-<body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen">
 
-    <!-- <nav class="bg-white px-8 py-4 flex justify-between items-center shadow-sm">
-        <div class="flex items-center gap-2">
-            <div class="bg-brand-500 p-2 rounded-lg text-white"><i class="fa-solid fa-paw"></i></div>
-            <span class="text-xl font-bold">Paw<span class="text-brand-500">Palace</span></span>
-        </div>
-        <div class="flex gap-8 font-bold text-gray-500">
-            <a href="/" class="hover:text-brand-500">Home</a>
-            <a href="/shop" class="hover:text-brand-500">Shop</a>
-            <a href="/profile" class="text-brand-500 border-b-2 border-brand-500">Profile</a>
-        </div>
-        <div class="relative">
-            <i class="fa-solid fa-cart-shopping text-xl text-gray-400"></i>
-            <span class="absolute -top-2 -right-2 bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">2</span>
-        </div>
-    </nav> -->
+<body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen">
 
     <%- include('../partials/header') %>
 
-    <main class="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-3 space-y-6">
-            <div class="bg-white rounded-[2rem] p-8 text-center shadow-sm">
-                <div class="relative inline-block mb-4">
-                    <img src="<%= user.profilePic || 'https://via.placeholder.com/150' %>" alt="Profile" class="w-24 h-24 rounded-full object-cover border-4 border-brand-50">
-                    <button class="absolute bottom-0 right-0 bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center text-xs text-brand-500 border border-gray-100">
-                        <i class="fa-solid fa-camera"></i>
-                    </button>
-                </div>
-                <h2 class="text-xl font-bold"><%= user.fullName %></h2>
-                <p class="text-gray-400 text-sm font-medium">PawParent since 2023</p>
-                <div class="mt-4 p-2 bg-brand-50 rounded-xl">
-                    <p class="text-[10px] font-bold text-brand-500 uppercase">Referral Code</p>
-                    <p class="font-bold text-xs"><%= user.referralCode %></p>
-                </div>
-            </div>
+        <main class="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            <div class="bg-white rounded-[2rem] p-4 shadow-sm space-y-2">
-                <a href="/profile" class="flex items-center gap-4 p-4 rounded-2xl bg-brand-50 text-brand-500 font-bold transition">
-                    <i class="fa-regular fa-user"></i> Profile Details
-                </a>
-                <a href="/wallet" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
-                    <i class="fa-solid fa-wallet"></i> Wallet
-                </a>
-                <a href="/orders" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
-                    <i class="fa-solid fa-box"></i> Orders
-                </a>
-                <a href="/logout" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
-                </a>
-            </div>
-        </div>
-
-        <div class="lg:col-span-9 space-y-6">
-            <form action="/profile/update" method="POST" class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
-                
-                <div class="flex justify-between items-center mb-8">
-                    <h3 class="text-2xl font-bold">Personal Information</h3>
-                    <% if (!isEditing) { %>
-                        <a href="/profile?edit=true" class="text-brand-500 font-bold text-sm hover:underline">Edit Details</a>
-                    <% } else { %>
-                        <div class="flex gap-4">
-                            <a href="/profile" class="text-gray-400 font-bold text-sm flex items-center">Cancel</a>
-                            <button type="submit" class="bg-brand-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/20">Save Changes</button>
-                        </div>
-                    <% } %>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Full Name</label>
-                        <div class="relative">
-                            <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                            <input type="text" name="name" value="<%= user.fullName%>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
-                        </div>
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-white rounded-[2rem] p-8 text-center shadow-sm">
+                    <div class="relative inline-block mb-4">
+                        <img src="<%= user.profilePic || 'https://via.placeholder.com/150' %>" alt="Profile"
+                            class="w-24 h-24 rounded-full object-cover border-4 border-brand-50">
+                        <button
+                            class="absolute bottom-0 right-0 bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center text-xs text-brand-500 border border-gray-100">
+                            <i class="fa-solid fa-camera"></i>
+                        </button>
                     </div>
-                    <div>
+                    <h2 class="text-xl font-bold">
+                        <%= user.fullName %>
+                    </h2>
+                    <p class="text-gray-400 text-sm font-medium">PawParent since 2023</p>
+                    <div class="mt-4 p-2 bg-brand-50 rounded-xl">
+                        <p class="text-[10px] font-bold text-brand-500 uppercase">Referral Code</p>
+                        <p class="font-bold text-xs">
+                            <%= user.referralCode %>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-4 shadow-sm space-y-2">
+                    <a href="/profile"
+                        class="flex items-center gap-4 p-4 rounded-2xl bg-brand-50 text-brand-500 font-bold transition">
+                        <i class="fa-regular fa-user"></i> Profile Details
+                    </a>
+                    <a href="/wallet"
+                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
+                        <i class="fa-solid fa-wallet"></i> Wallet
+                    </a>
+                    <a href="/orders"
+                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
+                        <i class="fa-solid fa-box"></i> Orders
+                    </a>
+                    <a href="/logout"
+                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9 space-y-6">
+                <form action="/profile/update" method="POST" class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
+
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-2xl font-bold">Personal Information</h3>
+                        <% if (!isEditing) { %>
+                            <a href="/profile?edit=true" class="text-brand-500 font-bold text-sm hover:underline">Edit
+                                Details</a>
+                            <% } else { %>
+                                <div class="flex gap-4">
+                                    <a href="/profile"
+                                        class="text-gray-400 font-bold text-sm flex items-center">Cancel</a>
+                                    <button type="submit"
+                                        class="bg-brand-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/20">Save
+                                        Changes</button>
+                                </div>
+                                <% } %>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Full
+                                Name</label>
+                            <div class="relative">
+                                <i
+                                    class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                                <input type="text" name="name" value="<%= user.fullName %>" <%=!isEditing ? 'disabled'
+                                    : '' %> required minlength="3" class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2
+                                border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none
+                                font-medium disabled:opacity-60">
+                                <!-- <input type="text" name="name" value="<%= user.fullName%>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60"> -->
+                            </div>
+                        </div>
+                        <!-- <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Email Address</label>
                         <div class="relative">
                             <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
                             <input type="email" name="email" value="<%= user.email %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Phone Number</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                            <input type="text" name="phone" value="<%= user.phone %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
+                    </div> -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Phone
+                                Number</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                                <input type="text" name="phone" value="<%= user.phone || '' %>" <%=!isEditing
+                                    ? 'disabled' : '' %>
+                                pattern="[0-9]{10}"
+                                placeholder="Optional"
+                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
+                                focus:border-brand-500 focus:bg-white transition outline-none font-medium
+                                disabled:opacity-60">
+
+                                <!-- <input type="text" name="phone" value="<%= user.phone %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60"> -->
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="border-t border-gray-50 pt-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="font-bold text-gray-400 uppercase text-[10px]">Shipping Address</h4>
-                        <button type="button" onclick="openAddressModal()" class="text-brand-500 font-bold text-xs">+ Add New Address</button>
-                    </div>
+                    <div class="border-t border-gray-50 pt-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="font-bold text-gray-400 uppercase text-[10px]">Shipping Address</h4>
+                            <a href="/profile/address/add" class="text-brand-500 font-bold text-xs">+ Add New
+                                Address</a>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <% user.addresses.forEach((addr, index) => { %>
-                            <label class="relative cursor-pointer group">
-                                <input type="radio" name="defaultAddress" value="<%= addr.id %>" <%= addr.isDefault ? 'checked' : '' %> class="peer hidden">
-                                <div class="p-6 border-2 border-gray-100 rounded-2xl peer-checked:border-brand-500 peer-checked:bg-brand-50/30 transition-all">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="font-bold"><%= addr.label %> <span class="ml-2 text-[10px] text-gray-400 px-2 py-0.5 bg-gray-100 rounded uppercase"><%= addr.type %></span></span>
-                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                                            <button type="button" class="text-xs text-gray-400 hover:text-brand-500">Edit</button>
-                                            <button type="button" class="text-xs text-gray-400 hover:text-red-500">Delete</button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% (user.addresses || []).forEach((addr, index)=> { %>
+                                <label class="relative cursor-pointer group">
+                                    <input type="radio" name="defaultAddress" value="<%= addr.id %>" <%=addr.isDefault
+                                        ? 'checked' : '' %> class="peer hidden">
+                                    <div
+                                        class="p-6 border-2 border-gray-100 rounded-2xl peer-checked:border-brand-500 peer-checked:bg-brand-50/30 transition-all">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="font-bold">
+                                                <%= addr.label %> <span
+                                                        class="ml-2 text-[10px] text-gray-400 px-2 py-0.5 bg-gray-100 rounded uppercase">
+                                                        <%= addr.type %>
+                                                    </span>
+                                            </span>
+                                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                                <a href="/profile/address/<%= addr.id %>/edit" class="text-xs text-gray-400 hover:text-brand-500">Edit</a>
+                                                <form action="/profile/address/<%= addr.id %>/delete" method="POST"
+                                                    onsubmit="return confirm('Delete this address?')">
+                                                    <button type="submit"
+                                                        class="text-xs text-gray-400 hover:text-red-500"> Delete
+                                                    </button>
+                                                </form>
+
+                                            </div>
                                         </div>
+                                        <p class="text-xs text-gray-500 leading-relaxed">
+                                            <%= addr.street %><br>
+                                                <%= addr.city %>, <%= addr.state %>
+                                                        <%= addr.zip %><br>
+                                                            <%= addr.phone %>
+                                        </p>
                                     </div>
-                                    <p class="text-xs text-gray-500 leading-relaxed">
-                                        <%= addr.street %><br><%= addr.city %>, <%= addr.state %> <%= addr.zip %><br><%= addr.phone %>
-                                    </p>
-                                </div>
-                                <div class="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-gray-200 peer-checked:border-brand-500 peer-checked:bg-brand-500 flex items-center justify-center transition">
-                                    <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                </div>
-                            </label>
-                        <% }) %>
+                                    <div
+                                        class="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-gray-200 peer-checked:border-brand-500 peer-checked:bg-brand-500 flex items-center justify-center transition">
+                                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                    </div>
+                                </label>
+                                <% }) %>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-[2rem] p-8 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-lock"></i></div>
-                        <h3 class="font-bold text-lg">Security</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-6">Update your password to keep your account safe.</p>
-                    <a href="/change-password" class="block text-center w-full border-2 border-gray-100 py-3 rounded-xl font-bold hover:bg-gray-50 transition">Change Password</a>
-                </div>
+                <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div
+                                class="text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <h3 class="font-bold text-lg">Email Address</h3>
+                        </div>
 
-                <div class="bg-white rounded-[2rem] p-8 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="text-red-500 bg-red-50 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <h3 class="font-bold text-lg">Danger Zone</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Current email: <span class="font-medium text-accent-navy">
+                                <%= user.email %>
+                            </span>
+                        </p>
+
+                        <a href="/change-email"
+                            class="block text-center w-full border-2 border-gray-100 py-3 rounded-xl font-bold hover:bg-gray-50 transition">
+                            Change Email
+                        </a>
                     </div>
-                    <p class="text-gray-400 text-sm mb-6">Once you delete your account, there is no going back.</p>
-                    <button class="block w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Delete Account</button>
+
+
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div
+                                class="text-brand-500 bg-brand-50 w-10 h-10 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <h3 class="font-bold text-lg">Security</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-6">Update your password to keep your account safe.</p>
+                        <a href="/change-password"
+                            class="block text-center w-full border-2 border-gray-100 py-3 rounded-xl font-bold hover:bg-gray-50 transition">Change
+                            Password</a>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="text-red-500 bg-red-50 w-10 h-10 rounded-xl flex items-center justify-center"><i
+                                    class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h3 class="font-bold text-lg">Danger Zone</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-6">Once you delete your account, there is no going back.</p>
+                        <button
+                            class="block w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Delete
+                            Account</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
 </body>
+
 </html>
