@@ -38,6 +38,17 @@ router.get('/profile/address/:id/edit', profileController.getEditAddress);
 router.post('/profile/address/:id/edit', profileController.updateAddress);
 router.post('/profile/address/:id/delete', profileController.deleteAddress);
 
+router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);
+router.post('/change-password', userMiddleware.checkSession, profileController.postChangePassword);
+
+router.get('/change-email', profileController.getChangeEmail);
+router.post('/change-email', profileController.postChangeEmail);
+router.get('/verify-email-otp', profileController.getVerifyEmailOtp);
+router.post('/reset-email/verify-otp', profileController.verifyEmailOtp);
+router.post('/reset-email/resend-otp', profileController.resendEmailOtp);
+
+
+router.post('/logout', authController.logout)
 // router.get('/address/add', profileController.getAddAddress)
 
 export default router

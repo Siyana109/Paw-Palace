@@ -65,10 +65,13 @@
                         class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
                         <i class="fa-solid fa-box"></i> Orders
                     </a>
-                    <a href="/logout"
-                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
-                    </a>
+                    <form action="/logout" method="POST" class="w-full">
+                        <button type="submit"
+                            class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                        </button>
+                    </form>
+
                 </div>
             </div>
 
@@ -153,7 +156,8 @@
                                                     </span>
                                             </span>
                                             <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                                                <a href="/profile/address/<%= addr.id %>/edit" class="text-xs text-gray-400 hover:text-brand-500">Edit</a>
+                                                <a href="/profile/address/<%= addr.id %>/edit"
+                                                    class="text-xs text-gray-400 hover:text-brand-500">Edit</a>
                                                 <form action="/profile/address/<%= addr.id %>/delete" method="POST"
                                                     onsubmit="return confirm('Delete this address?')">
                                                     <button type="submit"

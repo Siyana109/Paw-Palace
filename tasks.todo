@@ -8,7 +8,7 @@ User side:
     ✔ Show details, including profile image and address @done (1/2/2026, 12:12:54 AM)
     ☐ Edit profile (separate edit and display pages)
     ☐ Email edit verification with OTP/token
-    ☐ Change password functionality
+    ✔ Change password functionality @done (1/2/2026, 3:46:38 AM)
     ☐ Address management (Add, Edit, Delete)
 
 Admin side:
@@ -27,6 +27,7 @@ TODO :
     ☐ session handling
     ☐ otp resent and submitting attempt limit
     ☐ images
+    ☐ otpEmail, otpReset - back & cancel buttons
 
 
 

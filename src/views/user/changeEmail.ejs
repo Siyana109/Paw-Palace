@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'Change Email | PawPalace' %>
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#f43f5e', 50: '#fff1f2' },
+                        accent: { teal: '#2dd4bf', tealDark: '#0d9488', navy: '#0f172a', cream: '#fffdf5' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-sans text-accent-navy antialiased bg-accent-cream min-h-screen flex flex-col">
+
+    <%- include('../partials/header') %>
+
+        <main class="flex-grow pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-2xl mx-auto">
+
+                <div class="mb-6">
+                    <a href="/profile"
+                        class="text-gray-400 font-bold text-sm hover:text-accent-teal transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Profile
+                    </a>
+                </div>
+
+                <div class="mb-8">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-accent-navy">Update Email Address</h1>
+                    <p class="text-gray-500 mt-2 font-medium">Please enter your new email address. You may need to
+                        verify this change.</p>
+                </div>
+
+                <% if (typeof error !=='undefined' && error.length> 0) { %>
+                    <div
+                        class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl flex items-center gap-3">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <p class="text-sm font-bold">
+                            <%= error %>
+                        </p>
+                    </div>
+                    <% } %>
+
+                        <div
+                            class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-gray-100 relative overflow-hidden">
+
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-bl-full -mr-10 -mt-10 pointer-events-none opacity-50">
+                            </div>
+
+                            <form action="/change-email" method="POST" class="space-y-6 relative z-10">
+
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Current Email</label>
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fa-solid fa-envelope text-gray-300"></i>
+                                        </div>
+                                        <input type="email" value="<%= user.email %>" disabled
+                                            class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3.5 px-4 pl-12 text-gray-400 font-medium cursor-not-allowed">
+                                    </div>
+                                </div>
+
+                                <hr class="border-gray-100">
+
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">New Email Address</label>
+                                    <div class="relative group">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i
+                                                class="fa-solid fa-at text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
+                                        </div>
+                                        <input type="email" name="newEmail" placeholder="example@pawpalace.com"
+                                            class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 px-4 pl-12 focus:outline-none focus:border-brand-500 transition font-medium">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
+                                    <div class="relative group">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i
+                                                class="fa-solid fa-lock text-gray-400 group-focus-within:text-accent-tealDark transition"></i>
+                                        </div>
+                                        <input type="password" name="password" placeholder="Verify your password"
+                                            class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 px-4 pl-12 focus:outline-none focus:border-brand-500 transition font-medium">
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-wider">
+                                        Required to verify your identity</p>
+                                </div>
+
+                                <div class="pt-4 flex flex-col sm:flex-row gap-4">
+                                    <button type="submit"
+                                        class="flex-1 bg-brand-500 text-white py-4 rounded-xl font-bold shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+                                        Save Changes
+                                    </button>
+                                    <a href="/profile"
+                                        class="sm:px-8 text-center py-4 bg-white border-2 border-gray-200 text-gray-500 rounded-xl font-bold hover:border-gray-300 hover:bg-gray-50 transition">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+            </div>
+        </main>
+
+        <script>
+            const emailInput = document.querySelector('input[name="newEmail"]');
+            const passwordInput = document.querySelector('input[name="password"]');
+            const submitBtn = document.querySelector('button[type="submit"]');
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            function showError(input, message) {
+                let error = input.parentNode.querySelector('.field-error');
+                if (!error) {
+                    error = document.createElement('p');
+                    error.className = 'field-error text-xs text-red-500 mt-1 font-bold';
+                    input.parentNode.appendChild(error);
+                }
+                error.textContent = message;
+                input.classList.add('border-red-500', 'bg-red-50');
+            }
+
+            function clearError(input) {
+                const error = input.parentNode.querySelector('.field-error');
+                if (error) error.remove();
+                input.classList.remove('border-red-500', 'bg-red-50');
+            }
+
+            function validateEmail() {
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    showError(emailInput, 'Enter a valid email address');
+                    return false;
+                }
+                clearError(emailInput);
+                return true;
+            }
+
+            function validatePassword() {
+                if (passwordInput.value.length < 6) {
+                    showError(passwordInput, 'Password must be at least 6 characters');
+                    return false;
+                }
+                clearError(passwordInput);
+                return true;
+            }
+
+            function toggleSubmit() {
+                const isValid = validateEmail() && validatePassword();
+                submitBtn.disabled = !isValid;
+                submitBtn.classList.toggle('opacity-50', !isValid);
+                submitBtn.classList.toggle('cursor-not-allowed', !isValid);
+            }
+
+            // 🔹 Field-level validation (KEY FIX)
+            emailInput.addEventListener('input', () => {
+                validateEmail();
+                toggleSubmit();
+            });
+
+            passwordInput.addEventListener('input', () => {
+                validatePassword();
+                toggleSubmit();
+            });
+
+            // 🔹 Initial state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        </script>
+
+
+
+</body>
+
+</html>

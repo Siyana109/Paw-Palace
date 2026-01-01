@@ -542,6 +542,6 @@ export const logout = (req, res) => {
 
 export default { getSignup, postSignup, verifyEmailSendOtp, getVerifyOtp, verifyOtp, resendOtp, googleSignup, googleCallback,
                  getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword, resendResetOtp,
-                 landingPage, homePage }
+                 landingPage, homePage, logout }
 
 
