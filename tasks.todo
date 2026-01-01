@@ -1,9 +1,9 @@
 User side:
     ✔ Home page setup @done (1/2/2026, 12:12:24 AM)
     ✔ User signs up & logs in with validation @done (1/2/2026, 12:12:28 AM)
-    ☐ Sign up with OTP (with timer and resend OTP)
+    ✔ Sign up with OTP (with timer and resend OTP) @done (1/2/2026, 2:53:04 AM)
     ✔ Login/signup with single sign-on (Google, Facebook) @done (1/2/2026, 12:12:37 AM)
-    ☐ Implement forgot password
+    ✔ Implement forgot password @done (1/2/2026, 2:52:53 AM)
     ☐ User profile
     ✔ Show details, including profile image and address @done (1/2/2026, 12:12:54 AM)
     ☐ Edit profile (separate edit and display pages)
@@ -25,7 +25,8 @@ Admin side:
 
 TODO :
     ☐ session handling
-    ☐ 
+    ☐ otp resent and submitting attempt limit
+    ☐ images
 
 
 

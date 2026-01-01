@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'Verify Account | PawPalace' %>
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af',
+                            400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c',
+                            800: '#9f1239', 900: '#881337',
+                        },
+                        accent: {
+                            teal: '#2dd4bf', tealDark: '#0d9488', navy: '#0f172a', cream: '#fffdf5'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'bounce-slight': 'bounce-slight 2s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'bounce-slight': {
+                            '0%, 100%': { transform: 'translateY(-5%)' },
+                            '50%': { transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .otp-input:focus {
+            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.2);
+        }
+        /* Style for invalid state */
+        .otp-input.error {
+            border-color: #f43f5e;
+            background-color: #fff1f2;
+        }
+    </style>
+</head>
+
+<body
+    class="font-sans text-accent-navy antialiased bg-accent-cream selection:bg-accent-teal selection:text-white min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+
+    <div
+        class="absolute top-[-10%] right-[-5%] w-[30rem] h-[30rem] bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-float pointer-events-none">
+    </div>
+    <div class="absolute bottom-[-10%] left-[-10%] w-[30rem] h-[30rem] bg-accent-teal/30 rounded-full mix-blend-multiply filter blur-3xl opacity-80 animate-float pointer-events-none"
+        style="animation-delay: 2s;"></div>
+
+    <div
+        class="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-12 w-full max-w-lg relative z-10 text-center border-4 border-white/50 backdrop-blur-sm">
+
+        <a href="/login" class="absolute top-8 left-8 text-gray-400 hover:text-accent-navy transition">
+            <i class="fa-solid fa-arrow-left text-xl"></i>
+        </a>
+
+        <div
+            class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-500 text-3xl shadow-sm animate-bounce-slight">
+            <i class="fa-solid fa-shield-cat"></i>
+        </div>
+
+        <h1 class="text-3xl font-extrabold text-accent-navy mb-2">Check your Inbox</h1>
+        <p class="text-gray-500 font-medium mb-6">
+            We sent a verification code to <br>
+            <span class="text-accent-navy font-bold">
+                <%= typeof email !=='undefined' ? email : 'your email' %>
+            </span>
+        </p>
+
+        <% if (typeof error !== 'undefined' && error.length > 0) { %>
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl flex items-center gap-3 text-sm font-bold">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <% if (typeof success !== 'undefined' && success.length > 0) { %>
+            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-xl flex items-center gap-3 text-sm font-bold">
+                <i class="fa-solid fa-circle-check"></i>
+                <p><%= success %></p>
+            </div>
+        <% } %>
+
+        <form id="otp-form" action="/reset-password/verify-otp" method="POST">
+            <input type="hidden" name="otp" id="full-otp">
+
+            <div class="flex justify-center gap-3 mb-8">
+                <input type="text" maxlength="1"
+                    class="otp-input w-14 h-16 rounded-xl border-2 border-gray-200 text-center text-2xl font-bold text-accent-navy focus:border-accent-teal focus:outline-none transition-all bg-gray-50 focus:bg-white"
+                    autofocus>
+                <input type="text" maxlength="1"
+                    class="otp-input w-14 h-16 rounded-xl border-2 border-gray-200 text-center text-2xl font-bold text-accent-navy focus:border-accent-teal focus:outline-none transition-all bg-gray-50 focus:bg-white">
+                <input type="text" maxlength="1"
+                    class="otp-input w-14 h-16 rounded-xl border-2 border-gray-200 text-center text-2xl font-bold text-accent-navy focus:border-accent-teal focus:outline-none transition-all bg-gray-50 focus:bg-white">
+                <input type="text" maxlength="1"
+                    class="otp-input w-14 h-16 rounded-xl border-2 border-gray-200 text-center text-2xl font-bold text-accent-navy focus:border-accent-teal focus:outline-none transition-all bg-gray-50 focus:bg-white">
+            </div>
+
+            <button type="submit" id="verify-btn"
+                class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg shadow-[4px_4px_0px_0px_rgba(13,148,136,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 group mb-6">
+                Verify Account <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+            </button>
+        </form>
+
+        <div class="text-sm font-medium text-gray-500">
+            Didn't receive the code?
+            <form action="/reset-password/resend-otp" method="POST" class="inline">
+                <button type="submit" id="resend-btn" class="text-gray-300 font-bold cursor-not-allowed ml-1" disabled>
+                    Resend in <span id="timer">00:30</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <p class="mt-8 text-gray-400 font-bold text-sm relative z-10">
+        Wrong email? <a href="/signup" class="text-accent-tealDark hover:underline">Change details</a>
+    </p>
+
+
+    <script>
+        const inputs = document.querySelectorAll('.otp-input');
+        const form = document.getElementById('otp-form');
+        const hiddenInput = document.getElementById('full-otp');
+
+        // Auto-focus and handling logic
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                // Remove error style when user starts typing
+                input.classList.remove('error');
+
+                if (e.key >= 0 && e.key <= 9) {
+                    input.value = '';
+                } else if (e.key === 'Backspace') {
+                    if (input.value === '' && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener('input', (e) => {
+                // Only allow numbers
+                input.value = input.value.replace(/[^0-9]/g, '');
+                
+                if (input.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text').slice(0, 4);
+                if (/^\d+$/.test(text)) {
+                    text.split('').forEach((char, i) => {
+                        if (inputs[i]) {
+                            inputs[i].value = char;
+                            inputs[i].classList.remove('error');
+                        }
+                    });
+                    inputs[Math.min(text.length, inputs.length - 1)].focus();
+                }
+            });
+        });
+
+        // Concatenate OTP before submitting
+        form.addEventListener('submit', (e) => {
+            let otpValue = "";
+            let hasEmpty = false;
+
+            inputs.forEach(input => {
+                const val = input.value.trim();
+                if (!val) {
+                    hasEmpty = true;
+                    input.classList.add('error');
+                }
+                otpValue += val;
+            });
+
+            if (hasEmpty || otpValue.length !== inputs.length) {
+                e.preventDefault();
+                return;
+            }
+
+            hiddenInput.value = otpValue;
+        });
+
+
+        // Timer Logic
+        let timeLeft = 30;
+        const timerEl = document.getElementById('timer');
+        const resendBtn = document.getElementById('resend-btn');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
+                resendBtn.classList.add('text-brand-500', 'hover:underline');
+                resendBtn.innerHTML = 'Resend Code';
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>

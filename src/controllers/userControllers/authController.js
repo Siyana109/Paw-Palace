@@ -119,7 +119,7 @@ const getVerifyOtp = (req, res) => {
         return res.redirect("/signup");
     }
 
-    res.render("user/otp", {
+    res.render("user/otpSignup", {
         email: req.session.signupData.email
     });
 };
@@ -137,21 +137,21 @@ const verifyOtp = async (req, res) => {
     const otpData = await OTP.findOne({ email: signupData.email });
 
     if (!otpData) {
-      return res.render("user/otp", {
+      return res.render("user/otpSignup", {
         error: "OTP not found. Please resend OTP.",
         email: signupData.email
       });
     }
 
     if (otpData.expiresAt < new Date()) {
-      return res.render("user/otp", {
+      return res.render("user/otpSignup", {
         error: "OTP expired. Please resend OTP.",
         email: signupData.email
       });
     }
 
     if (otpData.otp !== String(otp).trim()) {
-      return res.render("user/otp", {
+      return res.render("user/otpSignup", {
         error: "Invalid OTP",
         email: signupData.email
       });
@@ -172,7 +172,7 @@ const verifyOtp = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.render("user/otp", {
+    res.render("user/otpSignup", {
       error: "Something went wrong",
       email: req.session.signupData?.email
     });
@@ -393,9 +393,40 @@ const getResetOtp = (req, res) => {
     return res.redirect("/forgot-password");
   }
 
-  res.render("user/otp", {
+  res.render("user/otpReset", {
     email: req.session.resetPassword.email
   });
+};
+
+
+const resendResetOtp = async (req, res) => {
+  try {
+    if (!req.session.resetPassword) {
+      return res.redirect("/forgot-password");
+    }
+
+    const { email } = req.session.resetPassword;
+    const otp = generateOTP();
+
+    await OTP.findOneAndUpdate(
+      { email },
+      { otp, expiresAt: new Date(Date.now() + 30 * 1000) },
+      { upsert: true }
+    );
+
+    await sendOTPEmail(email, otp);
+
+    res.render("user/otpReset", {
+      email,
+      success: "OTP resent successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    res.render("user/otpReset", {
+      email: req.session.resetPassword?.email,
+      error: "Failed to resend OTP"
+    });
+  }
 };
 
 
@@ -424,7 +455,7 @@ const verifyResetOtp = async (req, res) => {
     });
 
     if (!otpData) {
-      return res.render("user/otp", {
+      return res.render("user/otpReset", {
         error: "OTP not found or expired",
         email
       });
@@ -432,7 +463,7 @@ const verifyResetOtp = async (req, res) => {
 
     // Compare OTP
     if (otpData.otp !== String(otp).trim()) {
-      return res.render("user/otp", {
+      return res.render("user/otpReset", {
         error: "Invalid OTP",
         email
       });
@@ -440,7 +471,7 @@ const verifyResetOtp = async (req, res) => {
 
     // Compare expiry correctly
     if (otpData.expiresAt < new Date()) {
-      return res.render("user/otp", {
+      return res.render("user/otpReset", {
         error: "OTP expired",
         email
       });
@@ -468,7 +499,7 @@ const resetPassword = async (req, res) => {
 
     const { password, confirmPassword } = req.body;
 
-    if (password !== confirmPassword || password.length < 8) {
+    if (password !== confirmPassword || password.length < 6) {
       return res.render("user/resetPassword", {
         error: "Password validation failed"
       });
@@ -510,7 +541,7 @@ export const logout = (req, res) => {
 
 
 export default { getSignup, postSignup, verifyEmailSendOtp, getVerifyOtp, verifyOtp, resendOtp, googleSignup, googleCallback,
-                 getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword,
+                 getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword, resendResetOtp,
                  landingPage, homePage }
 
 

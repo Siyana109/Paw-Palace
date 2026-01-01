@@ -25,6 +25,7 @@ router.post('/login', userMiddleware.isLoggedIn,authController.postLogin)
 router.get('/forgot-password', authController.forgotPassword)
 router.post('/forgot-password', authController.verifyEmailSendOtp)
 router.get("/reset-password/verify-otp", authController.getResetOtp)
+router.post('/reset-password/resend-otp', authController.resendResetOtp);
 router.post("/reset-password/verify-otp", authController.verifyResetOtp)
 router.get("/reset-password", authController.getResetPassword)
 router.post("/reset-password", authController.resetPassword)
