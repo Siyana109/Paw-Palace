@@ -215,7 +215,7 @@
             </div>
         </div>
     </div>
-
+<!-- 
     <script>
         const searchInput = document.getElementById("searchInput");
         const tableBody = document.getElementById("usersTableBody");
@@ -273,7 +273,83 @@
                 </tr>`;
             });
         }
-    </script>
+    </script> -->
+
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const tableBody = document.getElementById("usersTableBody");
+    const clearBtn = document.getElementById("clearBtn");
+
+    let debounceTimer;
+
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim();
+        clearBtn.classList.toggle("hidden", query.length === 0);
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fetchUsers(query);
+        }, 300);
+    });
+
+    function clearSearch() {
+        searchInput.value = "";
+        clearBtn.classList.add("hidden");
+        fetchUsers("");
+    }
+
+    async function fetchUsers(query) {
+        const res = await fetch(`/admin/users/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        tableBody.innerHTML = "";
+
+        if (data.users.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-10 text-center text-gray-400 font-bold">
+                        No users found
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        data.users.forEach(user => {
+            const actionButton =
+                user.status === "Active"
+                    ? `
+                    <form action="/admin/users/${user.id}/block" method="POST">
+                        <button class="flex items-center gap-2 bg-brand-50 text-brand-500 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-500 hover:text-white transition">
+                            <i class="fa-solid fa-lock"></i> Block
+                        </button>
+                    </form>`
+                    : `
+                    <form action="/admin/users/${user.id}/unblock" method="POST">
+                        <button class="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-accent-teal hover:text-white transition">
+                            <i class="fa-solid fa-lock-open"></i> Unblock
+                        </button>
+                    </form>`;
+
+            tableBody.innerHTML += `
+                <tr class="hover:bg-gray-50/50 transition">
+                    <td class="px-6 py-4 text-sm text-gray-400">${user.id}</td>
+                    <td class="px-6 py-4 font-bold">${user.name}</td>
+                    <td class="px-6 py-4 text-gray-500">${user.email}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold ${
+                            user.status === "Active"
+                                ? "bg-green-50 text-green-600"
+                                : "bg-red-50 text-red-600"
+                        }">${user.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">${user.joinDate}</td>
+                    <td class="px-6 py-4 font-bold">${user.orderCount}</td>
+                    <td class="px-6 py-4">${actionButton}</td>
+                </tr>`;
+        });
+    }
+</script>
+
 
    
 </body>
