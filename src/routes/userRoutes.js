@@ -31,7 +31,7 @@ router.get("/reset-password", authController.getResetPassword)
 router.post("/reset-password", authController.resetPassword)
 
 router.get('/profile', profileController.getProfile)
-router.get('/profile/update', profileController.updateProfile)
+router.post('/profile/update', profileController.updateProfile)
 router.get('/profile/address/add', profileController.getAddAddress);
 router.post('/address/add', profileController.addAddress);
 router.get('/profile/address/:id/edit', profileController.getEditAddress);

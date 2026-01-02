@@ -4,12 +4,12 @@ User side:
     ✔ Sign up with OTP (with timer and resend OTP) @done (1/2/2026, 2:53:04 AM)
     ✔ Login/signup with single sign-on (Google, Facebook) @done (1/2/2026, 12:12:37 AM)
     ✔ Implement forgot password @done (1/2/2026, 2:52:53 AM)
-    ☐ User profile
+    ✔ User profile @done (1/2/2026, 5:49:04 AM)
     ✔ Show details, including profile image and address @done (1/2/2026, 12:12:54 AM)
     ☐ Edit profile (separate edit and display pages)
-    ☐ Email edit verification with OTP/token
+    ✔ Email edit verification with OTP/token @done (1/2/2026, 5:08:42 AM)
     ✔ Change password functionality @done (1/2/2026, 3:46:38 AM)
-    ☐ Address management (Add, Edit, Delete)
+    ✔ Address management (Add, Edit, Delete) @done (1/2/2026, 5:35:39 AM)
 
 Admin side:
     ✔ Admin sign in @done (1/2/2026, 12:13:12 AM)
@@ -28,6 +28,7 @@ TODO :
     ☐ otp resent and submitting attempt limit
     ☐ images
     ☐ otpEmail, otpReset - back & cancel buttons
+    ☐ user listing
 
 
 

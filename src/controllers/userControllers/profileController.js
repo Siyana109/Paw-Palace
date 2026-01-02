@@ -4,36 +4,98 @@ import bcrypt from "bcrypt"
 import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
 
+// const getProfile = async (req, res) => {
+//     try {
+//         // assuming user id is stored in session after login
+//         const userId = req.session.user?.id;
+
+//         if (!userId) {
+//             return res.redirect('/login');
+//         }
+
+//         const user = await User.findById(userId).lean();
+
+//         if (!user) {
+//             return res.redirect('/login');
+//         }
+
+//         const addresses = await Address.find({ userId }).lean();
+//         console.log(await Address.find({ userId }));
+
+
+//         const isEditing = req.query.edit === 'true';
+
+//         res.render('user/profile', {
+//             title: 'My Profile | PawPalace',
+//             user,
+//             addresses,
+//             isEditing
+//         });
+
+//     } catch (error) {
+//         console.error('Profile page error:', error);
+//         res.status(500).render('error', {
+//             title: 'My Profile | PawPalace',
+//             user: null,
+//             addresses: [],
+//             isEditing: false,
+//             error: 'Failed to load profile'
+//         });
+//     }
+// };
+
+
 const getProfile = async (req, res) => {
-    try {
-        // assuming user id is stored in session after login
-        const userId = req.session.user?.id;
+  try {
+    const userId = req.session.user?.id;
 
-        if (!userId) {
-            return res.redirect('/login');
-        }
-
-        const user = await User.findById(userId).lean();
-
-        if (!user) {
-            return res.redirect('/login');
-        }
-
-        const isEditing = req.query.edit === 'true';
-
-        res.render('user/profile', {
-            title: 'My Profile | PawPalace',
-            user,
-            isEditing
-        });
-
-    } catch (error) {
-        console.error('Profile page error:', error);
-        res.status(500).render('error', {
-            message: 'Failed to load profile'
-        });
+    // 🔐 Safety check
+    if (!userId) {
+      return res.redirect('/login');
     }
+
+    // 👤 Fetch user
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      req.session.destroy();
+      return res.redirect('/login');
+    }
+
+    // 📍 Fetch addresses
+    const addresses = await Address.find({ userId }).lean();
+
+    // ✏️ Edit mode
+    const isEditing = req.query.edit === 'true';
+
+    // 🧩 Render
+    res.render('user/profile', {
+      title: 'My Profile | PawPalace',
+      user,
+      addresses,
+      isEditing,
+
+      // 🔽 IMPORTANT: defaults for shared partials
+      wishlistCount: 0,
+      cartCount: 0,
+      currentPath: req.path
+    });
+
+  } catch (error) {
+    console.error('Profile page error:', error);
+
+    res.status(500).render('user/profile', {
+      title: 'My Profile | PawPalace',
+      user: null,
+      addresses: [],
+      isEditing: false,
+      wishlistCount: 0,
+      cartCount: 0,
+      currentPath: req.path,
+      error: 'Failed to load profile'
+    });
+  }
 };
+
 
 
 // export const getProfile = async (req, res) => {
@@ -100,12 +162,14 @@ const updateProfile = async (req, res) => {
         const { name, phone } = req.body;
 
         const user = await User.findById(userId).lean();
+        const addresses = await Address.find({ userId }).lean();
 
         /* ---------- Validation ---------- */
         if (!name || name.trim().length < 3) {
             return res.status(400).render('user/profile', {
                 title: 'My Profile | PawPalace',
                 user: await User.findById(userId).lean(),
+                addresses,
                 isEditing: true,
                 error: 'Name must be at least 3 characters'
             });
@@ -114,6 +178,7 @@ const updateProfile = async (req, res) => {
         if (phone && !/^[0-9]{10}$/.test(phone)) {
             return res.status(400).render('user/profile', {
                 error: 'Phone number must be 10 digits',
+                addresses,
                 user,
                 isEditing: true
             });

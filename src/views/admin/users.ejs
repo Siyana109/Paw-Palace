@@ -149,23 +149,25 @@
                     </div>
 
                     <div class="p-6 bg-white flex justify-between items-center text-sm font-bold">
-                        <span class="text-gray-400">Showing 1-8 of 156 users</span>
-                        <div class="flex items-center gap-2">
-                            <button
-                                class="px-4 py-2 rounded-xl border border-gray-100 text-gray-400 hover:bg-gray-50 transition"><i
-                                    class="fa-solid fa-chevron-left"></i></button>
-                            <button class="w-10 h-10 rounded-xl bg-brand-500 text-white">1</button>
-                            <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">2</button>
-                            <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">3</button>
-                            <span class="text-gray-300">...</span>
-                            <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">20</button>
-                            <button
-                                class="px-4 py-2 rounded-xl border border-gray-100 text-gray-400 hover:bg-gray-50 transition"><i
-                                    class="fa-solid fa-chevron-right"></i></button>
-                        </div>
+                        <span class="text-gray-400" id="paginationInfo"></span>
+
+                        <!-- 👇 THIS IS WHERE YOU ADD IT -->
+                        <div id="pagination" class="flex items-center gap-2"></div>
+                        <button
+                            class="px-4 py-2 rounded-xl border border-gray-100 text-gray-400 hover:bg-gray-50 transition"><i
+                                class="fa-solid fa-chevron-left"></i></button>
+                        <button class="w-10 h-10 rounded-xl bg-brand-500 text-white">1</button>
+                        <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">2</button>
+                        <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">3</button>
+                        <span class="text-gray-300">...</span>
+                        <button class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50">20</button>
+                        <button
+                            class="px-4 py-2 rounded-xl border border-gray-100 text-gray-400 hover:bg-gray-50 transition"><i
+                                class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
-            </main>
+    </div>
+    </main>
     </div>
 
     <div x-show="showModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -215,7 +217,7 @@
             </div>
         </div>
     </div>
-<!-- 
+    <!-- 
     <script>
         const searchInput = document.getElementById("searchInput");
         const tableBody = document.getElementById("usersTableBody");
@@ -275,83 +277,127 @@
         }
     </script> -->
 
-<script>
-    const searchInput = document.getElementById("searchInput");
-    const tableBody = document.getElementById("usersTableBody");
-    const clearBtn = document.getElementById("clearBtn");
+    <script>
+        let currentPage = 1;
+        const limit = 8;
 
-    let debounceTimer;
+        const searchInput = document.getElementById("searchInput");
+        const tableBody = document.getElementById("usersTableBody");
+        const clearBtn = document.getElementById("clearBtn");
+        const pagination = document.getElementById("pagination");
 
-    searchInput.addEventListener("input", () => {
-        const query = searchInput.value.trim();
-        clearBtn.classList.toggle("hidden", query.length === 0);
+        let debounceTimer;
 
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            fetchUsers(query);
-        }, 300);
-    });
+        // 🔍 Search with debounce
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.trim();
+            clearBtn.classList.toggle("hidden", query.length === 0);
 
-    function clearSearch() {
-        searchInput.value = "";
-        clearBtn.classList.add("hidden");
-        fetchUsers("");
-    }
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                currentPage = 1;
+                fetchUsers(query, currentPage);
+            }, 300);
+        });
 
-    async function fetchUsers(query) {
-        const res = await fetch(`/admin/users/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+        function clearSearch() {
+            searchInput.value = "";
+            clearBtn.classList.add("hidden");
+            currentPage = 1;
+            fetchUsers("", currentPage);
+        }
 
-        tableBody.innerHTML = "";
+        // 📡 Fetch users (search + pagination)
+        async function fetchUsers(query = "", page = 1) {
+            const res = await fetch(
+                `/admin/users/list?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`
+            );
 
-        if (data.users.length === 0) {
-            tableBody.innerHTML = `
+            const data = await res.json();
+
+            renderUsers(data.users);
+            renderPagination(data.currentPage, data.totalPages);
+
+            currentPage = data.currentPage;
+        }
+
+        // 🧱 Render table rows
+        function renderUsers(users) {
+            tableBody.innerHTML = "";
+
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" class="px-6 py-10 text-center text-gray-400 font-bold">
                         No users found
                     </td>
                 </tr>`;
-            return;
-        }
+                return;
+            }
 
-        data.users.forEach(user => {
-            const actionButton =
-                user.status === "Active"
-                    ? `
+            users.forEach(user => {
+                const actionButton =
+                    user.status === "Active"
+                        ? `
                     <form action="/admin/users/${user.id}/block" method="POST">
                         <button class="flex items-center gap-2 bg-brand-50 text-brand-500 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-500 hover:text-white transition">
                             <i class="fa-solid fa-lock"></i> Block
                         </button>
                     </form>`
-                    : `
+                        : `
                     <form action="/admin/users/${user.id}/unblock" method="POST">
                         <button class="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-accent-teal hover:text-white transition">
                             <i class="fa-solid fa-lock-open"></i> Unblock
                         </button>
                     </form>`;
 
-            tableBody.innerHTML += `
+                tableBody.innerHTML += `
                 <tr class="hover:bg-gray-50/50 transition">
                     <td class="px-6 py-4 text-sm text-gray-400">${user.id}</td>
                     <td class="px-6 py-4 font-bold">${user.name}</td>
                     <td class="px-6 py-4 text-gray-500">${user.email}</td>
                     <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold ${
-                            user.status === "Active"
-                                ? "bg-green-50 text-green-600"
-                                : "bg-red-50 text-red-600"
-                        }">${user.status}</span>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold ${user.status === "Active"
+                        ? "bg-green-50 text-green-600"
+                        : "bg-red-50 text-red-600"
+                    }">${user.status}</span>
                     </td>
                     <td class="px-6 py-4 text-gray-500">${user.joinDate}</td>
                     <td class="px-6 py-4 font-bold">${user.orderCount}</td>
                     <td class="px-6 py-4">${actionButton}</td>
                 </tr>`;
-        });
-    }
-</script>
+            });
+        }
+
+        // 🔢 Pagination buttons
+        function renderPagination(current, total) {
+            pagination.innerHTML = "";
+
+            if (total <= 1) return;
+
+            for (let i = 1; i <= total; i++) {
+                pagination.innerHTML += `
+                <button
+                    onclick="changePage(${i})"
+                    class="w-10 h-10 rounded-xl ${i === current
+                        ? "bg-brand-500 text-white"
+                        : "text-gray-400 hover:bg-gray-50"
+                    }">
+                    ${i}
+                </button>`;
+            }
+        }
+
+        function changePage(page) {
+            fetchUsers(searchInput.value.trim(), page);
+        }
+
+        // 🚀 Initial load
+        fetchUsers("", 1);
+    </script>
 
 
-   
+
 </body>
 
 </html>

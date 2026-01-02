@@ -94,44 +94,53 @@
                                 <% } %>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Full
-                                Name</label>
-                            <div class="relative">
-                                <i
-                                    class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                                <input type="text" name="name" value="<%= user.fullName %>" <%=!isEditing ? 'disabled'
-                                    : '' %> required minlength="3" class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2
-                                border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none
-                                font-medium disabled:opacity-60">
-                                <!-- <input type="text" name="name" value="<%= user.fullName%>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60"> -->
-                            </div>
-                        </div>
-                        <!-- <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Email Address</label>
-                        <div class="relative">
-                            <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                            <input type="email" name="email" value="<%= user.email %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60">
-                        </div>
-                    </div> -->
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Phone
-                                Number</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                                <input type="text" name="phone" value="<%= user.phone || '' %>" <%=!isEditing
-                                    ? 'disabled' : '' %>
-                                pattern="[0-9]{10}"
-                                placeholder="Optional"
-                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
-                                focus:border-brand-500 focus:bg-white transition outline-none font-medium
-                                disabled:opacity-60">
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
-                                <!-- <input type="text" name="phone" value="<%= user.phone %>" <%= !isEditing ? 'disabled' : '' %> class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium disabled:opacity-60"> -->
-                            </div>
-                        </div>
-                    </div>
+    <!-- FULL NAME -->
+    <div>
+        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+            Full Name
+        </label>
+
+        <div class="relative">
+            <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+
+            <input
+                type="text"
+                name="name"
+                value="<%= user.fullName %>"
+                <%= !isEditing ? 'disabled' : '' %>
+                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
+                       focus:border-brand-500 focus:bg-white transition outline-none font-medium
+                       disabled:opacity-60"
+            >
+        </div>
+    </div>
+
+    <!-- PHONE NUMBER -->
+    <div>
+        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+            Phone Number
+        </label>
+
+        <div class="relative">
+            <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+
+            <input
+                type="text"
+                name="phone"
+                value="<%= user.phone || '' %>"
+                <%= !isEditing ? 'disabled' : '' %>
+                placeholder="Optional"
+                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
+                       focus:border-brand-500 focus:bg-white transition outline-none font-medium
+                       disabled:opacity-60"
+            >
+        </div>
+    </div>
+
+</div>
+
 
                     <div class="border-t border-gray-50 pt-8">
                         <div class="flex justify-between items-center mb-6">
@@ -142,7 +151,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <% (user.addresses || []).forEach((addr, index)=> { %>
+                            <!-- <% (addresses || []).forEach((addr, index)=> { %>
                                 <label class="relative cursor-pointer group">
                                     <input type="radio" name="defaultAddress" value="<%= addr.id %>" <%=addr.isDefault
                                         ? 'checked' : '' %> class="peer hidden">
@@ -179,7 +188,44 @@
                                         <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                                     </div>
                                 </label>
+                                <% }) %> -->
+                            <% (addresses || []).forEach(addr=> { %>
+                                <label class="relative cursor-pointer group">
+                                    <div
+                                        class="p-6 border-2 border-gray-100 rounded-2xl hover:border-brand-500 transition-all">
+
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold truncate max-w-[70%]">
+                                                <%= addr.fullName %>
+                                            </span>
+
+                                            <div class="flex gap-3 items-center whitespace-nowrap">
+                                                <a href="/profile/address/<%= addr._id %>/edit"
+                                                    class="text-xs text-gray-400 hover:text-brand-500">
+                                                    Edit
+                                                </a>
+
+                                                <button type="button"
+                                                    onclick="openDeleteModal('<%= addr._id %>', '<%= addr.fullName %>', '<%= addr.address %>')"
+                                                    class="text-xs text-red-400 hover:text-red-500">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+
+                                        <p class="text-xs text-gray-500 leading-relaxed">
+                                            <%= addr.address %><br>
+                                                <%= addr.city %>, <%= addr.state %>
+                                                        <%= addr.zipCode %><br>
+                                                            <%= addr.phone %>
+                                        </p>
+
+                                    </div>
+                                </label>
                                 <% }) %>
+
                         </div>
                     </div>
                 </form>
@@ -236,6 +282,138 @@
                 </div>
             </div>
         </main>
+        <!-- Delete Address Modal -->
+        <div id="deleteModal"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-accent-navy/40 backdrop-blur-sm px-4">
+
+            <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl relative">
+
+                <!-- Icon -->
+                <div
+                    class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-2xl font-extrabold text-center mb-2">
+                    Delete Address?
+                </h3>
+
+                <p class="text-gray-400 text-sm text-center mb-6">
+                    This address will be permanently removed. This action cannot be undone.
+                </p>
+
+                <!-- Address Preview -->
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6">
+                    <p id="modalAddrName" class="font-bold text-sm text-accent-navy"></p>
+                    <p id="modalAddrText" class="text-xs text-gray-400 mt-1"></p>
+                </div>
+
+                <!-- Actions -->
+                <form id="deleteForm" method="POST" class="space-y-3">
+                    <button type="submit"
+                        class="w-full bg-red-500 text-white py-4 rounded-xl font-bold hover:bg-red-600 transition">
+                        Yes, Delete Address
+                    </button>
+
+                    <button type="button" onclick="closeDeleteModal()"
+                        class="w-full bg-gray-100 text-gray-500 py-4 rounded-xl font-bold hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
 </body>
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const modalAddrName = document.getElementById('modalAddrName');
+    const modalAddrText = document.getElementById('modalAddrText');
+
+    function openDeleteModal(id, name, address) {
+        deleteForm.action = `/profile/address/${id}/delete`;
+        modalAddrName.textContent = name;
+        modalAddrText.textContent = address;
+
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+        deleteModal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on backdrop click
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+</script>
+
+<script>
+    const nameInput = document.querySelector('input[name="name"]');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const saveBtn = document.querySelector('button[type="submit"]');
+
+    function showError(input, message) {
+        clearError(input);
+        const p = document.createElement('p');
+        p.className = 'text-xs text-red-500 mt-1 font-bold';
+        p.textContent = message;
+        input.parentElement.appendChild(p);
+        input.classList.add('border-red-500', 'bg-red-50');
+    }
+
+    function clearError(input) {
+        const err = input.parentElement.querySelector('p.text-red-500');
+        if (err) err.remove();
+        input.classList.remove('border-red-500', 'bg-red-50');
+    }
+
+    function validateName() {
+        const value = nameInput.value.trim();
+        if (value.length < 3) {
+            showError(nameInput, 'Name must be at least 3 characters');
+            return false;
+        }
+        clearError(nameInput);
+        return true;
+    }
+
+    function validatePhone() {
+        const value = phoneInput.value.trim();
+        if (value === '') {
+            clearError(phoneInput); // optional phone
+            return true;
+        }
+        if (!/^\d{10}$/.test(value)) {
+            showError(phoneInput, 'Phone number must be 10 digits');
+            return false;
+        }
+        clearError(phoneInput);
+        return true;
+    }
+
+    function updateSaveState() {
+        const valid = validateName() && validatePhone();
+        saveBtn.disabled = !valid;
+        saveBtn.classList.toggle('opacity-50', !valid);
+        saveBtn.classList.toggle('cursor-not-allowed', !valid);
+    }
+
+    if (nameInput && phoneInput) {
+        nameInput.addEventListener('input', updateSaveState);
+        phoneInput.addEventListener('input', updateSaveState);
+
+        // initial check
+        updateSaveState();
+    }
+</script>
+
+
 
 </html>

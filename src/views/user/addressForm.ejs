@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Add Address | PawPalace' %></title>
+    <title>
+        <%= typeof title !=='undefined' ? title : 'Add Address | PawPalace' %>
+    </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -21,6 +25,7 @@
         }
     </script>
 </head>
+
 <body class="bg-accent-cream font-sans text-accent-navy min-h-screen">
 
     <!-- <header class="bg-white border-b border-gray-100 py-4 shadow-sm">
@@ -38,69 +43,181 @@
         </div>
     </header> -->
 
-        <%- include('../partials/header') %>
+    <%- include('../partials/header') %>
 
-    <main class="max-w-4xl mx-auto py-12 px-6">
-        <div class="mb-8">
-            <a href="/profile" class="text-gray-400 font-bold text-sm hover:text-brand-500 transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Back to Profile
-            </a>
-        </div>
-
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 md:p-12">
-            
-            <div class="flex items-center gap-4 mb-10">
-                <div class="bg-accent-navy text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
-                <h2 class="text-2xl font-extrabold">Shipping Address</h2>
+        <main class="max-w-4xl mx-auto py-12 px-6">
+            <div class="mb-8">
+                <a href="/profile"
+                    class="text-gray-400 font-bold text-sm hover:text-brand-500 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Profile
+                </a>
             </div>
 
-            <form action="<%= isEdit ? `/profile/address/${address._id}/edit` : '/address/add' %>"  method="POST" class="space-y-6">
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
-                    <input type="text" value="<%= address?.fullName || '' %>" name="fullName" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300" placeholder="Enter your full name">
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 md:p-12">
+
+                <div class="flex items-center gap-4 mb-10">
+                    <div
+                        class="bg-accent-navy text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                        1</div>
+                    <h2 class="text-2xl font-extrabold">Shipping Address</h2>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
-                    <input type="text" value="<%= address?.address || '' %>" name="address" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300" placeholder="123 Puppy Lane">
-                </div>
+                <form action="<%= isEdit ? `/profile/address/${address._id}/edit` : '/address/add' %>" method="POST"
+                    class="space-y-6">
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Landmark (optional)</label>
-                    <input type="text" value="<%= address?.landmark || '' %>" name="landmark" class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300" placeholder="Near central park">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">State</label>
-                    <input type="text" value="<%= address?.state || '' %>" name="state" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">City</label>
-                        <input type="text" value="<%= address?.city || '' %>" name="city" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
+                        <input type="text" value="<%= address?.fullName || '' %>" name="fullName"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300"
+                            placeholder="Enter your full name">
                     </div>
+
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Zip Code</label>
-                        <input type="text" value="<%= address?.zipCode || '' %>" name="zipCode" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                        <input type="text" value="<%= address?.address || '' %>" name="address"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300"
+                            placeholder="123 Puppy Lane">
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Phone</label>
-                    <input type="tel" value="<%= address?.phone || '' %>" name="phone" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
-                </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Landmark (optional)</label>
+                        <input type="text" value="<%= address?.landmark || '' %>" name="landmark"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300"
+                            placeholder="Near central park">
+                    </div>
 
-                <div class="pt-8">
-                    <button type="submit" class="w-full bg-brand-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">
-                        Confirm Address
-                    </button>
-                </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">State</label>
+                        <input type="text" value="<%= address?.state || '' %>" name="state"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                    </div>
 
-            </form>
-        </div>
-    </main>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">City</label>
+                            <input type="text" value="<%= address?.city || '' %>" name="city"
+                                class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Zip Code</label>
+                            <input type="text" value="<%= address?.zipCode || '' %>" name="zipCode"
+                                class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Phone</label>
+                        <input type="tel" value="<%= address?.phone || '' %>" name="phone"
+                            class="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-brand-500 transition font-medium placeholder:text-gray-300">
+                    </div>
+
+                    <div class="pt-8">
+                        <button type="submit"
+                            class="w-full bg-brand-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">
+                            Confirm Address
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+
+        <script>
+            const form = document.querySelector('form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const fields = {
+                fullName: {
+                    el: form.querySelector('input[name="fullName"]'),
+                    valid: false,
+                    validate: v => v.trim().length >= 3,
+                    message: 'Full name must be at least 3 characters'
+                },
+                address: {
+                    el: form.querySelector('input[name="address"]'),
+                    valid: false,
+                    validate: v => v.trim().length >= 5,
+                    message: 'Address must be at least 5 characters'
+                },
+                state: {
+                    el: form.querySelector('input[name="state"]'),
+                    valid: false,
+                    validate: v => v.trim().length > 0,
+                    message: 'State is required'
+                },
+                city: {
+                    el: form.querySelector('input[name="city"]'),
+                    valid: false,
+                    validate: v => v.trim().length > 0,
+                    message: 'City is required'
+                },
+                zipCode: {
+                    el: form.querySelector('input[name="zipCode"]'),
+                    valid: false,
+                    validate: v => /^\d{5,6}$/.test(v),
+                    message: 'Enter a valid zip code'
+                },
+                phone: {
+                    el: form.querySelector('input[name="phone"]'),
+                    valid: false,
+                    validate: v => /^\d{10}$/.test(v),
+                    message: 'Phone number must be 10 digits'
+                }
+            };
+
+            function showError(input, message) {
+                let error = input.parentNode.querySelector('.field-error');
+                if (!error) {
+                    error = document.createElement('p');
+                    error.className = 'field-error text-xs text-red-500 mt-1 font-bold';
+                    input.parentNode.appendChild(error);
+                }
+                error.textContent = message;
+                input.classList.add('border-red-500', 'bg-red-50');
+            }
+
+            function clearError(input) {
+                const error = input.parentNode.querySelector('.field-error');
+                if (error) error.remove();
+                input.classList.remove('border-red-500', 'bg-red-50');
+            }
+
+            function updateSubmitState() {
+                const allValid = Object.values(fields).every(f => f.valid);
+                submitBtn.disabled = !allValid;
+                submitBtn.classList.toggle('opacity-50', !allValid);
+                submitBtn.classList.toggle('cursor-not-allowed', !allValid);
+            }
+
+            // ✅ FIELD-LEVEL VALIDATION (THIS IS THE FIX)
+            Object.values(fields).forEach(field => {
+                field.el.addEventListener('input', () => {
+                    if (!field.validate(field.el.value)) {
+                        showError(field.el, field.message);
+                        field.valid = false;
+                    } else {
+                        clearError(field.el);
+                        field.valid = true;
+                    }
+                    updateSubmitState();
+                });
+            });
+            // ✅ INITIAL VALIDATION FOR EDIT MODE
+            Object.values(fields).forEach(field => {
+                if (field.validate(field.el.value)) {
+                    field.valid = true;
+                }
+            });
+
+            updateSubmitState();
+
+            // Initial state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        </script>
+
+
 
 </body>
+
 </html>

@@ -3,6 +3,7 @@ import User from "../../model/userModel.js";
 
 export const getUsers = async (req, res) => {
     try {
+        
         const users = await User.find({})
             // .select("fullName email isBlocked createdAt")
             .sort({ createdAt: -1 });
