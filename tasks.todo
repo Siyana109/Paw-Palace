@@ -6,7 +6,7 @@ User side:
     ✔ Implement forgot password @done (1/2/2026, 2:52:53 AM)
     ✔ User profile @done (1/2/2026, 5:49:04 AM)
     ✔ Show details, including profile image and address @done (1/2/2026, 12:12:54 AM)
-    ☐ Edit profile (separate edit and display pages)
+    ✔ Edit profile (separate edit and display pages) @done (1/2/2026, 12:02:49 PM)
     ✔ Email edit verification with OTP/token @done (1/2/2026, 5:08:42 AM)
     ✔ Change password functionality @done (1/2/2026, 3:46:38 AM)
     ✔ Address management (Add, Edit, Delete) @done (1/2/2026, 5:35:39 AM)
@@ -29,6 +29,24 @@ TODO :
     ☐ images
     ☐ otpEmail, otpReset - back & cancel buttons
     ☐ user listing
+
+PENDINGS: 
+User
+    ✔ Signup : Form Validationd @done (1/3/2026, 10:38:43 AM)
+    ✔ Signup OTP expiry is too short @done (1/3/2026, 2:33:38 PM)
+    ✔ Give a success msg after registration @done (1/3/2026, 2:33:55 PM)
+    ✔ After login, put the username in navbar @done (1/3/2026, 4:30:31 PM)
+    ☐ Google Login is partially Completed
+    ☐ Email Template of User Signup & Password Reset should be different
+    ☐ Change Email otp is not working
+    ☐ Profile Picture is pending
+    ☐ Don't pass the err msgs in url (Block user)
+
+Admin
+    ☐ Skip the object id from user table and add serial number
+    ☐ User Table Pagination
+    ☐ User Table Search is pending
+
 
 
 

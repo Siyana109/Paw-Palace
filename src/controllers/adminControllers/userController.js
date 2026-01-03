@@ -8,8 +8,9 @@ export const getUsers = async (req, res) => {
             // .select("fullName email isBlocked createdAt")
             .sort({ createdAt: -1 });
 console.log(users)
-        const formattedUsers = users.map(user => ({
-            id: user._id.toString(),
+
+        const formattedUsers = users.map((user,i) => ({
+            count: i+1,
             name: user.fullName,
             email: user.email,
             status: user.isBlocked ? "Blocked" : "Active",

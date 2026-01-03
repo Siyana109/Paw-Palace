@@ -96,14 +96,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validateEmail(show = true) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regex.test(emailInput.value.trim())) {
-            if (show) showError(errors.email, 'Enter a valid email address');
-            return false;
+    const email = emailInput.value.trim();
+
+    // Strong but realistic email regex
+    // const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+        const regex = /^[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}$/;
+    // Extra logical checks
+    if (!regex.test(email)) {
+        if (show) {
+            showError(errors.email, 'Enter a valid email (e.g. name@gmail.com)');
         }
-        hideError(errors.email);
-        return true;
+        return false;
     }
+
+    hideError(errors.email);
+    return true;
+}
+
 
     function validatePassword(show = true) {
         const strong = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;

@@ -1,41 +1,41 @@
 import User from "../../model/userModel.js"
 import bcrypt from "bcrypt"
 import OTP from "../../model/otpModel.js"
-import { generateOTP} from "../../../utils/otp.js";
+import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
 import passport from "passport";
 
 
 const landingPage = (req, res) => {
-    try {
-        res.render('landing', { 
-            title: 'PawPalace', // Your EJS template uses 'title', not 'pageTitle'
-            // announcement: '🎁 FREE TOY with every order over $50!',
-            products: [] 
-        });
-    } catch (error) {
-        console.error('Error rendering landing page', error);
-        res.status(500).render('error', {
-            message: 'Error loading landing page',
-            error: error.message
-        });
-    }
+  try {
+    res.render('landing', {
+      title: 'PawPalace', // Your EJS template uses 'title', not 'pageTitle'
+      // announcement: '🎁 FREE TOY with every order over $50!',
+      products: []
+    });
+  } catch (error) {
+    console.error('Error rendering landing page', error);
+    res.status(500).render('error', {
+      message: 'Error loading landing page',
+      error: error.message
+    });
+  }
 };
 
 
 
 
 const getSignup = (req, res) => {
-    try {
-        res.render('user/signup')
-    }
-    catch (error) {
-        console.error('Error render signup page', error)
-        res.status(500).render('error', {
-            message: 'Error loading signup page',
-            error: error.message
-        })
-    }
+  try {
+    res.render('user/signup')
+  }
+  catch (error) {
+    console.error('Error render signup page', error)
+    res.status(500).render('error', {
+      message: 'Error loading signup page',
+      error: error.message
+    })
+  }
 }
 
 
@@ -47,16 +47,26 @@ const postSignup = async (req, res) => {
     const { fullName, email, password, confirmPassword, terms } = req.body;
     const formData = { fullName, email };
 
-     if (!fullName || fullName.trim().length < 3) {
-            return res.render("user/signup", {
+    const emailRegex = /^[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+      return res.render("user/signup", {
+        errors: [{ msg: "Invalid email address" }],
+        formData: { fullName, email }
+      });
+    }
+
+
+    if (!fullName || fullName.trim().length < 3) {
+      return res.render("user/signup", {
         errors: [{ msg: 'Name must be at least 3 characters' }]
       });
-        }
- if (!email) {
-            return res.render("user/signup", {
+    }
+    if (!email) {
+      return res.render("user/signup", {
         errors: [{ msg: 'Email is required' }]
       });
-        }
+    }
 
     if (!password || password.length < 6) {
       return res.render("user/signup", {
@@ -70,12 +80,6 @@ const postSignup = async (req, res) => {
       });
     }
 
-    // if (!terms) {
-    //   return res.render("user/signup", {
-    //     errors: [{ msg: "Accept terms & conditions" }]
-    //   });
-    // }
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.render("user/signup", {
@@ -85,13 +89,13 @@ const postSignup = async (req, res) => {
     }
 
     const otp = generateOTP();
-    console.log("Generated OTP: ",otp)
+    console.log("Generated OTP: ", otp)
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await OTP.findOneAndUpdate(
       { email },
-      { otp, expiresAt: new Date(Date.now() + 30 * 1000) },
+      { otp, expiresAt: new Date(Date.now() + 60 * 1000) },
       { upsert: true }
     );
 
@@ -115,13 +119,13 @@ const postSignup = async (req, res) => {
 
 
 const getVerifyOtp = (req, res) => {
-    if (!req.session.signupData) {
-        return res.redirect("/signup");
-    }
+  if (!req.session.signupData) {
+    return res.redirect("/signup");
+  }
 
-    res.render("user/otpSignup", {
-        email: req.session.signupData.email
-    });
+  res.render("user/otpSignup", {
+    email: req.session.signupData.email
+  });
 };
 
 
@@ -168,6 +172,8 @@ const verifyOtp = async (req, res) => {
     await OTP.deleteOne({ email: signupData.email });
     req.session.signupData = null;
 
+    req.session.justSignedUp = true;
+
     res.redirect("/home");
 
   } catch (error) {
@@ -181,47 +187,48 @@ const verifyOtp = async (req, res) => {
 
 
 const resendOtp = async (req, res) => {
-    try {
-        const { email } = req.session.signupData;
+  try {
+    const { email } = req.session.signupData;
 
-        const otp = generateOTP();
+    const otp = generateOTP();
 
-        await OTP.findOneAndUpdate(
-            { email },
-            {
-                otp,
-                expiresAt: new Date(Date.now() + 30 * 1000)
+    await OTP.findOneAndUpdate(
+      { email },
+      {
+        otp,
+        expiresAt: new Date(Date.now() + 60 * 1000)
 
-            },
-            { upsert: true }
-        );
+      },
+      { upsert: true }
+    );
 
-        await sendOTPEmail(email, otp);
+    await sendOTPEmail(email, otp);
 
-        res.render("user/otp", {
-            success: "OTP resent successfully",
-            email
-        });
+    res.render("user/otpSignup", {
+      success: "OTP resent successfully",
+      email
+    });
 
-    } catch (error) {
-        console.error(error);
-    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 
 
-const googleSignup = (req,res) => {
-    passport.authenticate("google", { scope: ["profile", "email"] })
+const googleSignup = (req, res) => {
+  passport.authenticate("google", { scope: ["profile", "email"] })
     (req, res)
 }
 
 
-const googleCallback = (req,res) => {
-    passport.authenticate("google", {
+const googleCallback = (req, res) => {
+  passport.authenticate("google", {
     failureRedirect: "/login"
   })(req, res, () => {
     // Passport success → user is authenticated
     // Session is created → req.user is available
+    req.session.user = { id: req.user._id };
     res.redirect("/home");
   });
 }
@@ -229,25 +236,28 @@ const googleCallback = (req,res) => {
 
 
 
-const getLogin = (req,res) => {
-    try{
-        res.render('user/login')
-    }
-    catch (error) {
-        console.error('Error render login page', error)
-        res.status(500).render('error', {
-            message: 'Error loading login page',
-            error: error.message
-        })
-    }
+const getLogin = (req, res) => {
+  try {
+    res.render('user/login')
+  }
+  catch (error) {
+    console.error('Error render login page', error)
+    res.status(500).render('error', {
+      message: 'Error loading login page',
+      error: error.message
+    })
+  }
 }
 
 
 const homePage = (req, res) => {
-        res.render('user/home', { 
-            user: req.session.user, // Passing the user object to EJS
-            query: req.query
-        });
+  const showSignupSuccess = req.session.justSignedUp || false;
+
+  req.session.justSignedUp = null;
+  res.render('user/home', {
+    query: req.query,
+    showSignupSuccess
+  });
 };
 
 
@@ -288,7 +298,10 @@ export const postLogin = async (req, res) => {
 
     req.session.user = { id: user._id, };
 
-    return res.redirect("/home?login=success");
+    req.session.save(() => {
+      res.redirect("/home?login=success");
+    });
+
   } catch (error) {
     console.error("Login error:", error);
     res.render("user/login", {
@@ -306,12 +319,12 @@ export const postLogin = async (req, res) => {
 
 
 const forgotPassword = (req, res) => {
-    try{
-        res.render('user/forgotPassword')
-    }
-    catch (error){
-        console.error('error in rendering forgot Password',error)
-    }
+  try {
+    res.render('user/forgotPassword')
+  }
+  catch (error) {
+    console.error('error in rendering forgot Password', error)
+  }
 }
 
 
@@ -319,31 +332,32 @@ const forgotPassword = (req, res) => {
 
 
 const verifyEmailSendOtp = async (req, res) => {
-    try{
-        const {email} = req.body
-        const user = await User.findOne({email})
-        if(!user){
-            return res.render("user/forgotPassword", {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.render("user/forgotPassword", {
         error: "No account found with this email"
       });
-        }
-         const otp = generateOTP();
+    }
+    const otp = generateOTP();
 
     await OTP.findOneAndUpdate(
       { email },
-      { otp,
-        expiresAt: new Date(Date.now() + 30 * 1000)
+      {
+        otp,
+        expiresAt: new Date(Date.now() + 60 * 1000)
       },
       { upsert: true }
     );
 
     await sendOTPEmail(email, otp);
 
-     req.session.resetPassword = { email };
+    req.session.resetPassword = { email };
 
     res.redirect("/reset-password/verify-otp");
-    }
-    catch (error) {
+  }
+  catch (error) {
     console.error("Verify email error:", error);
     res.render("user/forgotPassword", {
       error: "Something went wrong"
@@ -410,7 +424,7 @@ const resendResetOtp = async (req, res) => {
 
     await OTP.findOneAndUpdate(
       { email },
-      { otp, expiresAt: new Date(Date.now() + 30 * 1000) },
+      { otp, expiresAt: new Date(Date.now() + 60 * 1000) },
       { upsert: true }
     );
 
@@ -540,8 +554,10 @@ export const logout = (req, res) => {
 
 
 
-export default { getSignup, postSignup, verifyEmailSendOtp, getVerifyOtp, verifyOtp, resendOtp, googleSignup, googleCallback,
-                 getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword, resendResetOtp,
-                 landingPage, homePage, logout }
+export default {
+  getSignup, postSignup, verifyEmailSendOtp, getVerifyOtp, verifyOtp, resendOtp, googleSignup, googleCallback,
+  getLogin, postLogin, forgotPassword, getResetOtp, verifyResetOtp, getResetPassword, resetPassword, resendResetOtp,
+  landingPage, homePage, logout
+}
 
 

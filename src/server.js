@@ -11,6 +11,7 @@ import MongoStore from "connect-mongo";
 import viewDataMiddleware from './middlewares/viewDataMiddleware.js';
 import passport from "passport";
 import "./config/passport.js";
+import attachUserToViews from "./middlewares/viewUser.js";
 
 connectDB();
 
@@ -62,6 +63,7 @@ app.use(passport.session());
 
 app.use(viewDataMiddleware);
 
+app.use(attachUserToViews);
 app.use('/',userRoutes)
 app.use('/admin',adminRoutes)
 

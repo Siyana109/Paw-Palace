@@ -4,46 +4,6 @@ import bcrypt from "bcrypt"
 import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
 
-// const getProfile = async (req, res) => {
-//     try {
-//         // assuming user id is stored in session after login
-//         const userId = req.session.user?.id;
-
-//         if (!userId) {
-//             return res.redirect('/login');
-//         }
-
-//         const user = await User.findById(userId).lean();
-
-//         if (!user) {
-//             return res.redirect('/login');
-//         }
-
-//         const addresses = await Address.find({ userId }).lean();
-//         console.log(await Address.find({ userId }));
-
-
-//         const isEditing = req.query.edit === 'true';
-
-//         res.render('user/profile', {
-//             title: 'My Profile | PawPalace',
-//             user,
-//             addresses,
-//             isEditing
-//         });
-
-//     } catch (error) {
-//         console.error('Profile page error:', error);
-//         res.status(500).render('error', {
-//             title: 'My Profile | PawPalace',
-//             user: null,
-//             addresses: [],
-//             isEditing: false,
-//             error: 'Failed to load profile'
-//         });
-//     }
-// };
-
 
 const getProfile = async (req, res) => {
   try {
@@ -498,7 +458,7 @@ const verifyEmailOtp = async (req, res) => {
             sessionData.otp !== otp ||
             Date.now() > sessionData.expiresAt
         ) {
-            return res.render('user/verifyEmailOtp', {
+            return res.render('user/otpEmail', {
                 email: sessionData.newEmail,
                 error: 'Invalid or expired OTP'
             });
@@ -518,7 +478,7 @@ const verifyEmailOtp = async (req, res) => {
 
         const sessionData = req.session.emailChange;
 
-        return res.status(500).render('user/verifyEmailOtp', {
+        return res.status(500).render('user/otpEmail', {
             title: 'Verify Email | PawPalace',
             email: sessionData?.newEmail,
             error: 'Something went wrong. Please try again.'
@@ -539,7 +499,7 @@ const resendEmailOtp = async (req, res) => {
 
     await sendOTPEmail(sessionData.newEmail, otp);
 
-    res.render('user/verifyEmailOtp', {
+    res.render('user/otpEmail', {
         email: sessionData.newEmail,
         success: 'A new OTP has been sent'
     });

@@ -83,7 +83,7 @@
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 text-gray-400 text-xs font-bold uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-6 py-4">User ID</th>
+                                    <th class="px-6 py-4">S.no:</th>
                                     <th class="px-6 py-4">Name</th>
                                     <th class="px-6 py-4">Email</th>
                                     <th class="px-6 py-4">Status</th>
@@ -96,7 +96,7 @@
                                 <% users.forEach(user=> { %>
                                     <tr class="hover:bg-gray-50/50 transition">
                                         <td class="px-6 py-4 text-sm font-medium text-gray-400">
-                                            <%= user.id %>
+                                            <%= user.count %>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
@@ -217,7 +217,7 @@
             </div>
         </div>
     </div>
-    <!-- 
+    
     <script>
         const searchInput = document.getElementById("searchInput");
         const tableBody = document.getElementById("usersTableBody");
@@ -275,9 +275,9 @@
                 </tr>`;
             });
         }
-    </script> -->
+    </script>
 
-    <script>
+    <!-- <script>
         let currentPage = 1;
         const limit = 8;
 
@@ -394,7 +394,7 @@
 
         // 🚀 Initial load
         fetchUsers("", 1);
-    </script>
+    </script> -->
 
 
 

@@ -38,7 +38,9 @@
             <p class="text-gray-500 font-medium">We're currently building something amazing for your furry friends. Stay tuned!</p>
         </div>
     </main>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <% if (query?.login === 'success') { %>
 <script>
   Swal.fire({
@@ -50,6 +52,19 @@
   });
 </script>
 <% } %>
+
+<% if (showSignupSuccess) { %>
+<script>
+Swal.fire({
+  title: 'Welcome to PawPalace! 🐾',
+  text: 'Your account has been created successfully',
+  icon: 'success',
+  confirmButtonColor: '#f43f5e',
+  confirmButtonText: 'Let’s Explore',
+});
+</script>
+<% } %>
+
 
 </body>
 </html>

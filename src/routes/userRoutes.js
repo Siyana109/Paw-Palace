@@ -30,22 +30,22 @@ router.post("/reset-password/verify-otp", authController.verifyResetOtp)
 router.get("/reset-password", authController.getResetPassword)
 router.post("/reset-password", authController.resetPassword)
 
-router.get('/profile', profileController.getProfile)
-router.post('/profile/update', profileController.updateProfile)
-router.get('/profile/address/add', profileController.getAddAddress);
-router.post('/address/add', profileController.addAddress);
-router.get('/profile/address/:id/edit', profileController.getEditAddress);
-router.post('/profile/address/:id/edit', profileController.updateAddress);
-router.post('/profile/address/:id/delete', profileController.deleteAddress);
+router.get('/profile', userMiddleware.checkSession, profileController.getProfile)
+router.post('/profile/update', userMiddleware.checkSession, profileController.updateProfile)
+router.get('/profile/address/add', userMiddleware.checkSession, profileController.getAddAddress);
+router.post('/address/add', userMiddleware.checkSession, profileController.addAddress);
+router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
+router.post('/profile/address/:id/edit', userMiddleware.checkSession, profileController.updateAddress);
+router.post('/profile/address/:id/delete',userMiddleware.checkSession, profileController.deleteAddress);
 
 router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);
 router.post('/change-password', userMiddleware.checkSession, profileController.postChangePassword);
 
-router.get('/change-email', profileController.getChangeEmail);
-router.post('/change-email', profileController.postChangeEmail);
-router.get('/verify-email-otp', profileController.getVerifyEmailOtp);
-router.post('/reset-email/verify-otp', profileController.verifyEmailOtp);
-router.post('/reset-email/resend-otp', profileController.resendEmailOtp);
+router.get('/change-email', userMiddleware.checkSession, profileController.getChangeEmail);
+router.post('/change-email', userMiddleware.checkSession, profileController.postChangeEmail);
+router.get('/verify-email-otp', userMiddleware.checkSession, profileController.getVerifyEmailOtp);
+router.post('/reset-email/verify-otp', userMiddleware.checkSession, userMiddleware.checkSession, profileController.verifyEmailOtp);
+router.post('/reset-email/resend-otp', userMiddleware.checkSession, profileController.resendEmailOtp);
 
 
 router.post('/logout', authController.logout)
