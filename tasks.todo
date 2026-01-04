@@ -1,3 +1,4 @@
+WEEK - 8
 User side:
     ✔ Home page setup @done (1/2/2026, 12:12:24 AM)
     ✔ User signs up & logs in with validation @done (1/2/2026, 12:12:28 AM)
@@ -21,31 +22,57 @@ Admin side:
 
 
 
+User side:
+    Category management
+    Add, Edit, Delete (soft delete)
+    Search with cancel/clear button (backend)
+    Pagination (backend)
+    Sort the category table in descending order
+    Product management
+    Add, Edit, Delete (soft delete)
+    Multiple images upload (minimum 3)
+    Image cropping and resizing before upload
+
+Admin side:
+    Product listing page
+    Search with cancel/clear button (backend)
+    Pagination (backend)
+    Sorting options (Price low to high, high to low, A-Z, Z-A)
+    Filters (Category, Price range, Brand optional)
+    Combined search, sort, filter
+    Hide blocked/unlisted products
+    Product details page
+    Zoomable images
+    Breadcrumbs, ratings, price, discounts/coupons, reviews, stock info
+    Error handling for sold out/unavailable/out of stock
+    Product highlights and related product recommendations
+    Redirect to listing if product blocked/unavailable (on refresh or actions)
+
+
 
 
 TODO :
     ☐ session handling
     ☐ otp resent and submitting attempt limit
-    ☐ images
-    ☐ otpEmail, otpReset - back & cancel buttons
-    ☐ user listing
 
-PENDINGS: 
+
+
+WEEK-8 PENDINGS: 
 User
     ✔ Signup : Form Validationd @done (1/3/2026, 10:38:43 AM)
     ✔ Signup OTP expiry is too short @done (1/3/2026, 2:33:38 PM)
     ✔ Give a success msg after registration @done (1/3/2026, 2:33:55 PM)
     ✔ After login, put the username in navbar @done (1/3/2026, 4:30:31 PM)
     ☐ Google Login is partially Completed
-    ☐ Email Template of User Signup & Password Reset should be different
+    ✔ Email Template of User Signup & Password Reset should be different @done (1/3/2026, 4:37:55 PM)
     ☐ Change Email otp is not working
     ☐ Profile Picture is pending
     ☐ Don't pass the err msgs in url (Block user)
 
 Admin
-    ☐ Skip the object id from user table and add serial number
-    ☐ User Table Pagination
-    ☐ User Table Search is pending
+    ✔ Skip the object id from user table and add serial number @done (1/4/2026, 7:07:54 PM)
+    ✔ User Table Pagination @today @done (1/5/2026, 1:59:15 AM)
+    ✔ User Table Search is pending @done (1/4/2026, 7:07:47 PM)
 
 
 
@@ -70,7 +97,7 @@ Admin
 
 
 
-
+FIGMA:
 
 User
  OTP resend timer 

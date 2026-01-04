@@ -13,6 +13,6 @@ router.get('/users', adminMiddleware.adminSession, userController.getUsers)
 router.post('/users/:userId/block', adminMiddleware.adminSession, userController.blockUser)
 router.post('/users/:userId/unblock', adminMiddleware.adminSession, userController.unblockUser);
 
-router.get("/users/search", adminMiddleware.adminSession, userController.searchUsers);
+router.get("/users/list", adminMiddleware.adminSession, userController.listUsers);
 
 export default router

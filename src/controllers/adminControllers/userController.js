@@ -62,26 +62,42 @@ export const unblockUser = async (req, res) => {
     }
 };
 
-
-
-export const searchUsers = async (req, res) => {
+export const listUsers = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 8;
         const search = req.query.q?.trim() || "";
+        const status = req.query.status || "all";
+        const sort = req.query.sort || "latest";
 
+        /* ---------- Filter ---------- */
         const filter = {
-            isAdmin: false,
             ...(search && {
                 $or: [
                     { fullName: { $regex: search, $options: "i" } },
                     { email: { $regex: search, $options: "i" } }
                 ]
-            })
+            }),
+            ...(status === "active" && { isBlocked: false }),
+            ...(status === "blocked" && { isBlocked: true })
         };
 
-        const users = await User.find(filter).sort({ createdAt: -1 });
+        /* ---------- Sorting ---------- */
+        const sortOption =
+            sort === "oldest"
+                ? { createdAt: 1 }
+                : { createdAt: -1 };
 
-        const formattedUsers = users.map(user => ({
-            id: user._id.toString(),
+        const totalUsers = await User.countDocuments(filter);
+
+        const users = await User.find(filter)
+            .sort(sortOption)
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const formattedUsers = users.map((user, index) => ({
+            id: user._id,
+            count: (page - 1) * limit + index + 1,
             name: user.fullName,
             email: user.email,
             status: user.isBlocked ? "Blocked" : "Active",
@@ -89,10 +105,15 @@ export const searchUsers = async (req, res) => {
             orderCount: 0
         }));
 
-        res.json({ users: formattedUsers });
+        res.json({
+            users: formattedUsers,
+            currentPage: page,
+            totalPages: Math.ceil(totalUsers / limit),
+            totalUsers
+        });
 
     } catch (error) {
-        console.error("Live search error:", error);
+        console.error("User list error:", error);
         res.status(500).json({ users: [] });
     }
 };
@@ -100,4 +121,4 @@ export const searchUsers = async (req, res) => {
 
 
 
-export default {getUsers, blockUser, unblockUser, searchUsers}
+export default {getUsers, blockUser, unblockUser, listUsers}

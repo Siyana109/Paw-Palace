@@ -3,57 +3,58 @@ import Address from "../../model/addressModel.js";
 import bcrypt from "bcrypt"
 import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
+import OTP from "../../model/otpModel.js"
 
 
 const getProfile = async (req, res) => {
-  try {
-    const userId = req.session.user?.id;
+    try {
+        const userId = req.session.user?.id;
 
-    // 🔐 Safety check
-    if (!userId) {
-      return res.redirect('/login');
+        // 🔐 Safety check
+        if (!userId) {
+            return res.redirect('/login');
+        }
+
+        // 👤 Fetch user
+        const user = await User.findById(userId).lean();
+        if (!user) {
+            req.session.destroy();
+            return res.redirect('/login');
+        }
+
+        // 📍 Fetch addresses
+        const addresses = await Address.find({ userId }).lean();
+
+        // ✏️ Edit mode
+        const isEditing = req.query.edit === 'true';
+
+        // 🧩 Render
+        res.render('user/profile', {
+            title: 'My Profile | PawPalace',
+            user,
+            addresses,
+            isEditing,
+
+            // 🔽 IMPORTANT: defaults for shared partials
+            wishlistCount: 0,
+            cartCount: 0,
+            currentPath: req.path
+        });
+
+    } catch (error) {
+        console.error('Profile page error:', error);
+
+        res.status(500).render('user/profile', {
+            title: 'My Profile | PawPalace',
+            user: null,
+            addresses: [],
+            isEditing: false,
+            wishlistCount: 0,
+            cartCount: 0,
+            currentPath: req.path,
+            error: 'Failed to load profile'
+        });
     }
-
-    // 👤 Fetch user
-    const user = await User.findById(userId).lean();
-    if (!user) {
-      req.session.destroy();
-      return res.redirect('/login');
-    }
-
-    // 📍 Fetch addresses
-    const addresses = await Address.find({ userId }).lean();
-
-    // ✏️ Edit mode
-    const isEditing = req.query.edit === 'true';
-
-    // 🧩 Render
-    res.render('user/profile', {
-      title: 'My Profile | PawPalace',
-      user,
-      addresses,
-      isEditing,
-
-      // 🔽 IMPORTANT: defaults for shared partials
-      wishlistCount: 0,
-      cartCount: 0,
-      currentPath: req.path
-    });
-
-  } catch (error) {
-    console.error('Profile page error:', error);
-
-    res.status(500).render('user/profile', {
-      title: 'My Profile | PawPalace',
-      user: null,
-      addresses: [],
-      isEditing: false,
-      wishlistCount: 0,
-      cartCount: 0,
-      currentPath: req.path,
-      error: 'Failed to load profile'
-    });
-  }
 };
 
 
@@ -343,8 +344,6 @@ const postChangePassword = async (req, res) => {
         // });
         req.session.profileSuccess = 'Password updated successfully';
         return res.redirect('/profile');
-
-        console.log('error 8')
     } catch (error) {
         console.error('Change password error:', error);
         res.status(500).render('user/changePassword', {
@@ -385,7 +384,7 @@ const postChangeEmail = async (req, res) => {
                 error: 'Incorrect password'
             });
         }
-console.log('error 1')
+        console.log('error 1')
         /* ---------- Same email check ---------- */
         if (newEmail === user.email) {
             return res.render('user/changeEmail', {
@@ -393,7 +392,7 @@ console.log('error 1')
                 error: 'New email cannot be the same as current email'
             });
         }
-console.log('error 2')
+        console.log('error 2')
         /* ---------- Email uniqueness ---------- */
         const emailExists = await User.findOne({ email: newEmail });
         if (emailExists) {
@@ -402,20 +401,27 @@ console.log('error 2')
                 error: 'Email already in use'
             });
         }
-console.log('error 3')
+        console.log('error 3')
         /* ---------- Generate OTP ---------- */
         const otp = generateOTP();
 
-        req.session.emailChange = {
-            newEmail,
-            otp,
-            expiresAt: new Date(Date.now() + 30 * 1000)
-        };
-console.log(otp)
+        await OTP.findOneAndUpdate(
+            { userId},
+            {
+                userId,
+                email: newEmail,
+                otp,
+                expiresAt: new Date(Date.now() + 60 * 1000)
+            },
+            { upsert: true, new: true }
+        );
+        console.log(otp)
+
         await sendOTPEmail(newEmail, otp);
 
         res.redirect('/verify-email-otp');
-console.log('error 5')
+        console.log('error 5')
+
     } catch (error) {
         console.error('Change email error:', error);
 
@@ -494,8 +500,16 @@ const resendEmailOtp = async (req, res) => {
 
     const otp = generateOTP();
 
-    sessionData.otp = otp;
-    sessionData.expiresAt = new Date(Date.now() + 30 * 1000)
+     await OTP.findOneAndUpdate(
+            { userId},
+            {
+                userId,
+                email: newEmail,
+                otp,
+                expiresAt: new Date(Date.now() + 60 * 1000)
+            },
+            { upsert: true, new: true }
+        );
 
     await sendOTPEmail(sessionData.newEmail, otp);
 
