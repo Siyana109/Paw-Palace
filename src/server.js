@@ -67,6 +67,10 @@ app.use(attachUserToViews);
 app.use('/',userRoutes)
 app.use('/admin',adminRoutes)
 
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
+  next();
+});
 
 
 app.listen(port, () => {

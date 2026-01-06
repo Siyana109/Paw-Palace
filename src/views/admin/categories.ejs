@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 500: '#f43f5e' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy">
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold">Categories</h1>
+                        <p class="text-gray-500 text-sm font-medium">View and manage all categories</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                            A</div>
+                        <div>
+                            <p class="text-sm font-bold">Admin User</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+
+                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                Total Categories: <span class="text-accent-navy ml-1">
+                                    <%= totalCategories %>
+                                </span>
+                            </div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                Active: <span class="text-green-500 ml-1">
+                                    <%= categories.filter(c=> c.status === 'Active').length %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="relative w-64">
+                                <i
+                                    class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                <input type="text" id="searchInput" placeholder="Search categories..."
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 text-sm">
+                            </div>
+                            <select id="sortSelect"
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 focus:outline-none">
+                                <option value="">Sort By</option>
+                                <option value="az">Name A–Z</option>
+                                <option value="za">Name Z–A</option>
+                            </select>
+
+                            <button onclick="openAddModal()"
+                                class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+                                <i class="fa-solid fa-plus"></i> Add Category
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-8 py-5">Category</th>
+                                    <th class="px-6 py-5">Items Count</th>
+                                    <th class="px-6 py-5">Status</th>
+                                    <th class="px-8 py-5">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% categories.forEach(cat=> { %>
+                                    <tr class="hover:bg-gray-50/50 transition">
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-4">
+                                                <div
+                                                    class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center border border-brand-100">
+                                                    <i
+                                                        class="fa-solid fa-layer-group text-brand-500 text-sm opacity-40"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-sm text-accent-navy">
+                                                        <%= cat.name %>
+                                                    </p>
+                                                    <p
+                                                        class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                                                        <%= cat.catId %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                                            <%= cat.itemCount %> products
+                                        </td>
+                                        <td class="px-6 py-5">
+                                            <span
+                                                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide <%= cat.status === 'Active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' %>">
+                                                <%= cat.status %>
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-3">
+                                                <button
+                                                    onclick="openEditModal('<%= cat._id %>', '<%= cat.name %>', '<%= cat.status %>')"
+                                                    class="flex items-center gap-2 bg-teal-50 text-accent-teal px-4 py-1.5 rounded-lg text-[10px] font-bold hover:bg-accent-teal hover:text-white transition">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                </button>
+                                                <button onclick="openDeleteModal('<%= cat._id %>', '<%= cat.name %>')"
+                                                    class="w-8 h-8 flex items-center justify-center bg-red-50 text-brand-500 rounded-lg text-xs hover:bg-brand-500 hover:text-white transition">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <tr id="noResultsRow" class="hidden">
+                                            <td colspan="4" class="text-center py-10 text-sm text-gray-400 font-medium">
+                                                No categories found
+                                            </td>
+                                        </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+    </div>
+
+
+    <div class="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-100">
+
+        <!-- Left text -->
+        <div class="text-xs font-medium text-gray-400">
+            Page <span class="font-bold text-accent-navy">
+                <%= currentPage %>
+            </span> of
+            <span class="font-bold text-accent-navy">
+                <%= totalPages %>
+            </span>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center gap-2 text-xs font-bold">
+
+            <!-- Previous -->
+            <a href="?page=<%= Math.max(1, currentPage - 1) %>" class="px-3 py-1 rounded-lg border
+  <%= currentPage === 1
+      ? 'pointer-events-none opacity-40'
+      : 'hover:bg-brand-50 text-brand-500' %>">
+                ‹ Previous
+            </a>
+
+
+            <!-- Page Numbers -->
+            <% for (let i=1; i <=totalPages; i++) { %>
+                <% if ( i===1 || i===totalPages || (i>= currentPage - 1 && i <= currentPage + 1) ) { %>
+                        <a href="?page=<%= i %>" class="px-3 py-1 rounded-lg
+           <%= i === currentPage
+              ? 'bg-brand-500 text-white'
+              : 'hover:bg-brand-50 text-gray-500' %>">
+                            <%= i %>
+                        </a>
+                        <% } else if (i===currentPage - 2 || i===currentPage + 2) { %>
+                            <span class="px-2 text-gray-300">…</span>
+                            <% } %>
+                                <% } %>
+
+                                    <!-- Next -->
+                                    <a href="?page=<%= Math.min(totalPages, currentPage + 1) %>" class="px-3 py-1 rounded-lg border
+  <%= currentPage === totalPages
+      ? 'pointer-events-none opacity-40'
+      : 'hover:bg-brand-50 text-brand-500' %>">
+                                        Next ›
+                                    </a>
+
+
+        </div>
+    </div>
+
+
+    <div id="addModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-white/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-brand-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+            <h3 class="text-2xl font-bold text-accent-navy mb-6">New Category</h3>
+            <form action="/admin/categories/add" method="POST">
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Category
+                            Name</label>
+                        <input type="text" name="name" required placeholder="e.g. Dog Accessories"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
+                        <select name="status"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button type="submit"
+                        class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">Create
+                        Category</button>
+                    <button type="button" onclick="closeModal('addModal')"
+                        class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-white/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+            <h3 class="text-2xl font-bold text-accent-navy mb-6">Edit Category</h3>
+            <form id="editForm" method="POST">
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Category
+                            Name</label>
+                        <input type="text" id="editName" name="name" required
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-accent-teal focus:bg-white transition outline-none font-medium text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
+                        <select id="editStatus" name="status"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-accent-teal focus:bg-white transition outline-none font-medium text-sm">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button type="submit"
+                        class="w-full py-4 bg-accent-teal text-white rounded-2xl font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-1 transition-all">Save
+                        Changes</button>
+                    <button type="button" onclick="closeModal('editModal')"
+                        class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl text-center border-4 border-white/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+            <div
+                class="w-20 h-20 bg-red-50 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-accent-navy mb-2">Delete Category?</h3>
+            <p class="text-gray-500 text-sm mb-8 leading-relaxed">Are you sure you want to delete <span
+                    id="deleteCatName" class="font-bold"></span>? All associated products will lose this category
+                reference.</p>
+            <div class="flex flex-col gap-3">
+                <form id="deleteForm" method="POST">
+                    <button type="submit"
+                        class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">Yes,
+                        Confirm Delete</button>
+                </form>
+                <button type="button" onclick="closeModal('deleteModal')"
+                    class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tableBody = document.querySelector('tbody');
+        const noResultsRow = document.getElementById('noResultsRow');
+    </script>
+
+
+    <script>
+        function openAddModal() {
+            const modal = document.getElementById('addModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openEditModal(id, name, status) {
+            const modal = document.getElementById('editModal');
+            document.getElementById('editForm').action = `/admin/categories/edit/${id}`;
+            document.getElementById('editName').value = name;
+            document.getElementById('editStatus').value = status;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openDeleteModal(id, name) {
+            const modal = document.getElementById('deleteModal');
+            document.getElementById('deleteForm').action = `/admin/categories/delete/${id}`;
+            document.getElementById('deleteCatName').innerText = name;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close on background click
+        window.onclick = function (event) {
+            if (event.target.classList.contains('backdrop-blur-sm')) {
+                event.target.classList.add('hidden');
+                event.target.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+    <script>
+        const sortSelect = document.getElementById('sortSelect');
+
+        sortSelect.addEventListener('change', () => {
+            const value = sortSelect.value;
+
+            const rows = Array.from(
+                tableBody.querySelectorAll('tr:not(#noResultsRow)')
+            );
+
+            rows.sort((a, b) => {
+                const nameA = a.querySelector('td:nth-child(1) p.font-bold').innerText.toLowerCase();
+                const nameB = b.querySelector('td:nth-child(1) p.font-bold').innerText.toLowerCase();
+
+                const statusA = a.querySelector('td:nth-child(3) span').innerText;
+                const statusB = b.querySelector('td:nth-child(3) span').innerText;
+
+                if (value === 'az') return nameA.localeCompare(nameB);
+                if (value === 'za') return nameB.localeCompare(nameA);
+
+                if (value === 'active') {
+                    if (statusA === statusB) return 0;
+                    return statusA === 'Active' ? -1 : 1;
+                }
+
+                if (value === 'inactive') {
+                    if (statusA === statusB) return 0;
+                    return statusA === 'Inactive' ? -1 : 1;
+                }
+
+                return 0;
+            });
+
+            tableBody.innerHTML = '';
+            rows.forEach(row => tableBody.appendChild(row));
+
+            // 🔑 re-attach noResults row
+            tableBody.appendChild(noResultsRow);
+        });
+    </script>
+
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+
+        searchInput.addEventListener('keyup', () => {
+            const searchValue = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr:not(#noResultsRow)');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const categoryName = row.querySelector('td:nth-child(1) p.font-bold')
+                    .innerText.toLowerCase();
+
+                if (categoryName.includes(searchValue)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Show / hide "No results"
+            if (visibleCount === 0) {
+                noResultsRow.classList.remove('hidden');
+            } else {
+                noResultsRow.classList.add('hidden');
+            }
+        });
+
+    </script>
+
+
+
+</body>
+
+</html>

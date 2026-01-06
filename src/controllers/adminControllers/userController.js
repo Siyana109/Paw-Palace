@@ -1,7 +1,7 @@
 import User from "../../model/userModel.js";
 
 
-export const getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
         
         const users = await User.find({})
@@ -31,7 +31,7 @@ console.log(users)
 };
 
 
-export const blockUser = async (req, res) => {
+const blockUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -47,7 +47,7 @@ export const blockUser = async (req, res) => {
 };
 
 
-export const unblockUser = async (req, res) => {
+const unblockUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -62,7 +62,7 @@ export const unblockUser = async (req, res) => {
     }
 };
 
-export const listUsers = async (req, res) => {
+const listUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 8;

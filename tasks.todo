@@ -17,8 +17,8 @@ Admin side:
     ✔ User management @done (1/2/2026, 12:13:29 AM)
     ✔ Implement block and unblock user (with confirmation) @done (1/2/2026, 1:01:07 AM)
     ✔ Implement search with cancel/clear button (backend) @done (1/2/2026, 1:40:38 AM)
-    ☐ Implement pagination (backend)
-    ☐ Sort the user table in descending order (latest first)
+    ✔ Implement pagination (backend) @done (1/5/2026, 9:55:23 AM)
+    ✔ Sort the user table in descending order (latest first) @done (1/5/2026, 9:55:28 AM)
 
 
 
@@ -32,6 +32,8 @@ User side:
     Add, Edit, Delete (soft delete)
     Multiple images upload (minimum 3)
     Image cropping and resizing before upload
+    Product highlights and related product recommendations
+    Redirect to listing if product blocked/unavailable (on refresh or actions)
 
 Admin side:
     Product listing page
@@ -45,8 +47,6 @@ Admin side:
     Zoomable images
     Breadcrumbs, ratings, price, discounts/coupons, reviews, stock info
     Error handling for sold out/unavailable/out of stock
-    Product highlights and related product recommendations
-    Redirect to listing if product blocked/unavailable (on refresh or actions)
 
 
 

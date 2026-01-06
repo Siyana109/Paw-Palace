@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Management | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 500: '#f43f5e' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy">
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold">Brands</h1>
+                        <p class="text-gray-500 text-sm font-medium">Create and manage all brands</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                            A</div>
+                        <div>
+                            <p class="text-sm font-bold">Admin User</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4 border border-gray-100">
+                        <div
+                            class="w-12 h-12 bg-red-50 text-brand-500 rounded-2xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-medal"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Brands</p>
+                            <p class="text-2xl font-bold">
+                                <%= totalBrands %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4 border border-gray-100">
+                        <div
+                            class="w-12 h-12 bg-teal-50 text-accent-teal rounded-2xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Top Brand</p>
+                            <p class="text-2xl font-bold">...</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4 border border-gray-100">
+                        <div
+                            class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Products</p>
+                            <p class="text-2xl font-bold">
+                                <%= totalProducts %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
+                        <div class="relative w-full max-w-lg">
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Search brands..."
+                                class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
+                            </button>
+                            <button onclick="openAddBrandModal()"
+                                class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+                                <i class="fa-solid fa-plus"></i> Add Brand
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-8 py-5">Brand</th>
+                                    <th class="px-6 py-5">Products</th>
+                                    <th class="px-6 py-5">Status</th>
+                                    <th class="px-8 py-5">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% brands.forEach(brand=> { %>
+                                    <tr class="hover:bg-gray-50/50 transition">
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-4">
+                                                <div
+                                                    class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">
+                                                    <i class="fa-solid fa-paw text-brand-500 opacity-20"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-sm text-accent-navy">
+                                                        <%= brand.brandName %>
+                                                    </p>
+                                                    <p
+                                                        class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                                                        <!-- <%= brand.bid %>pe -->
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-5">
+                                            <div class="flex items-center gap-3 w-40">
+                                                <div class="flex-1 bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="bg-brand-500 h-full rounded-full" style="width: 60%">
+                                                    </div>
+                                                </div>
+                                                <span class="text-xs font-bold text-gray-500">
+                                                    <%= brand.productCount || 0%>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-5">
+                                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+    <%= brand.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' %>">
+                                                <%= brand.isActive ? 'Active' : 'Inactive' %>
+                                            </span>
+
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-3">
+                                                <button
+                                                    onclick="openEditModal(
+                                                    '<%= brand._id %>',
+                                                        '<%= brand.brandName %>',
+                                                            '<%= brand.isActive ? "Active" : "Inactive" %>'
+                                                                )"
+
+                                                                class="flex items-center gap-2 bg-teal-50
+                                                                text-accent-teal px-4 py-1.5 rounded-lg text-[10px]
+                                                                font-bold hover:bg-accent-teal hover:text-white
+                                                                transition">
+                                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                </button>
+                                                <button
+                                                    onclick="openDeleteModal('<%= brand._id %>', '<%= brand.brandName %>')"
+                                                    class="w-8 h-8 flex items-center justify-center bg-red-50 text-brand-500 rounded-lg text-xs hover:bg-brand-500 hover:text-white transition">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+    </div>
+
+    <div id="editModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-white/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+            <h3 class="text-2xl font-bold text-accent-navy mb-6">Edit Brand</h3>
+
+            <form id="editForm" method="POST">
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Brand Name</label>
+                        <input type="text" id="editName" name="name"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-accent-teal focus:bg-white transition outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
+                        <select id="editStatus" name="status"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-accent-teal focus:bg-white transition outline-none font-medium">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button type="submit"
+                        class="w-full py-4 bg-accent-teal text-white rounded-2xl font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-1 transition-all">Save
+                        Changes</button>
+                    <button type="button" onclick="closeModal('editModal')"
+                        class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl text-center border-4 border-white/50 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+            <div
+                class="w-20 h-20 bg-red-50 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-accent-navy mb-2">Delete Brand?</h3>
+            <p class="text-gray-500 text-sm mb-8 leading-relaxed">Are you sure you want to delete <span
+                    id="deleteBrandName" class="font-bold"></span>? This will affect all associated products.</p>
+
+            <div class="flex flex-col gap-3">
+                <form id="deleteForm" method="POST">
+                    <button type="submit"
+                        class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">Confirm
+                        Delete</button>
+                </form>
+                <button type="button" onclick="closeModal('deleteModal')"
+                    class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBrandModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-white/50 relative overflow-hidden">
+
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-brand-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
+            </div>
+
+            <h3 class="text-2xl font-bold text-accent-navy mb-6">Add New Brand</h3>
+
+            <form action="/admin/brands/add" method="POST">
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Brand Name</label>
+                        <input type="text" name="name" placeholder="e.g. Royal Canin" required
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Initial
+                            Status</label>
+                        <select name="status"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button type="submit"
+                        class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">
+                        Create Brand
+                    </button>
+                    <button type="button" onclick="closeModal('addBrandModal')"
+                        class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const addModal = document.getElementById('addBrandModal');
+        const editModal = document.getElementById('editModal');
+        const deleteModal = document.getElementById('deleteModal');
+
+        /**
+         * Opens the Add Brand Modal
+         */
+        function openAddBrandModal() {
+            addModal.classList.remove('hidden');
+            addModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        /**
+         * Opens the Edit Modal and populates data
+         */
+        function openEditModal(id, name, status) {
+            document.getElementById('editForm').action = `/admin/brands/edit/${id}`;
+            document.getElementById('editName').value = name;
+            document.getElementById('editStatus').value = status;
+
+            editModal.classList.remove('hidden');
+            editModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        /**
+         * Opens the Delete Modal
+         */
+        function openDeleteModal(id, name) {
+            document.getElementById('deleteForm').action = `/admin/brands/delete/${id}`;
+            document.getElementById('deleteBrandName').innerText = name;
+
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        /**
+         * Generic Close Function
+         */
+        function closeModal(modalId) {
+            const targetModal = document.getElementById(modalId);
+            targetModal.classList.add('hidden');
+            targetModal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close on backdrop click
+        window.onclick = function (event) {
+            if (event.target.classList.contains('backdrop-blur-sm')) {
+                event.target.classList.add('hidden');
+                event.target.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const success = params.get("success");
+        const error = params.get("error");
+
+        if (success) {
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: success,
+                confirmButtonColor: "#f43f5e"
+            }).then(() => {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        }
+
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error,
+                confirmButtonColor: "#f43f5e"
+            }).then(() => {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        }
+    </script>
+
+
+</body>
+
+</html>

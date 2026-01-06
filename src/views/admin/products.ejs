@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 500: '#f43f5e' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy">
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold">Products</h1>
+                        <p class="text-gray-500">View and manage all products</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                            A</div>
+                        <div>
+                            <p class="text-sm font-bold">Admin User</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
+                        <div class="relative w-full max-w-lg">
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Search products..."
+                                class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                                <option>Category</option>
+                            </select>
+                            <select
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                                <option>Brand</option>
+                            </select>
+                            <select
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                                <option>Status</option>
+                            </select>
+                            <button
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
+                            </button>
+                            <button onclick="openAddProductModal()"
+  class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+  <i class="fa-solid fa-plus"></i> Add Product
+</button>
+
+                            <!-- <a href="/admin/products/add"
+                                class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+                                <i class="fa-solid fa-plus"></i> Add Product
+                            </a> -->
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-8 py-5">Product</th>
+                                    <th class="px-6 py-5">Category</th>
+                                    <th class="px-6 py-5">Brand</th>
+                                    <th class="px-6 py-5">Stock</th>
+                                    <th class="px-6 py-5">Status</th>
+                                    <th class="px-8 py-5">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+<% products.forEach(product => { %>
+
+<tr class="hover:bg-gray-50/50 transition">
+    <!-- PRODUCT -->
+    <td class="px-8 py-5">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50 shadow-sm">
+                <img src="<%= product.coverImage %>" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <p class="font-bold text-sm text-accent-navy">
+                    <%= product.productName %>
+                </p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    <%= product._id %>
+                </p>
+            </div>
+        </div>
+    </td>
+
+    <!-- BRAND -->
+<td class="px-6 py-5 text-sm font-medium text-gray-500">
+<%= product.brandId ? product.brandId.brandName : '-' %>
+</td>
+
+
+    <!-- CATEGORY -->
+    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+        <%= product.categoryId ? product.categoryId.categoryName : '-' %>
+    </td>
+
+    <!-- STOCK -->
+    <td class="px-6 py-5">
+        <% if (product.totalStock === 0) { %>
+            <span class="text-xs font-bold text-red-500">Out of Stock</span>
+        <% } else { %>
+            <span class="text-sm font-medium text-gray-500">
+                <%= product.totalStock %>
+            </span>
+        <% } %>
+    </td>
+
+    <!-- STATUS -->
+    <td class="px-6 py-5">
+        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+            <%= product.isActive ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600' %>">
+            <%= product.isActive ? 'Active' : 'Inactive' %>
+        </span>
+    </td>
+
+    <!-- ACTIONS -->
+    <td class="px-8 py-5">
+        <div class="flex items-center gap-4 text-gray-300">
+
+          <!-- EDIT (MODAL) -->
+<a
+  onclick="openEditProductModal(this)"
+  data-id="<%= product._id %>"
+  data-name="<%= product.productName %>"
+  data-brand="<%= product.brandId ? product.brandId._id : '' %>"
+  data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
+  data-description="<%= product.description %>"
+  class="cursor-pointer hover:text-brand-500 transition"
+>
+  <i class="fa-solid fa-pen-to-square text-sm"></i>
+</a>
+
+
+            <!-- VARIANTS (THIS IS THE KEY ICON) -->
+            <a onclick="toggleVariantRow('<%= product._id %>')"
+               class="cursor-pointer hover:text-teal-500 transition">
+                <i class="fa-solid fa-layer-group text-sm"></i>
+            </a>
+
+        </div>
+    </td>
+</tr>
+
+<!-- VARIANT ACTION ROW -->
+<tr id="variant-row-<%= product._id %>" class="hidden bg-gray-50">
+    <td colspan="6" class="px-8 py-6">
+
+        <div class="flex gap-4">
+            <button onclick="openVariantForm('<%= product._id %>')"
+                class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold">
+                ➕ Add Variant
+            </button>
+
+            <a href="/admin/products/<%= product._id %>/variants"
+               class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
+                👁 View Variants
+            </a>
+        </div>
+
+        <div id="variant-form-<%= product._id %>" class="mt-6 hidden"></div>
+
+    </td>
+</tr>
+
+<% }) %>
+</tbody>
+
+                        </table>
+                    </div>
+
+                    <div class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
+                        <p>Showing 1-8 of <%= totalProducts %> products</p>
+                        <div class="flex items-center gap-2">
+                            <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i
+                                    class="fa-solid fa-chevron-left"></i> Previous</button>
+                            <button class="w-10 h-10 rounded-xl bg-brand-500 text-white">1</button>
+                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">2</button>
+                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">3</button>
+                            <span class="px-2">...</span>
+                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">161</button>
+                            <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next
+                                <i class="fa-solid fa-chevron-right ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+    </div>
+
+    <!-- ADD PRODUCT MODAL -->
+<div id="addProductModal"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+
+    <!-- CLOSE -->
+    <button onclick="closeAddProductModal()"
+            class="absolute top-6 right-6 text-gray-400 hover:text-black">
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </button>
+
+    <h2 class="text-2xl font-bold mb-6">Add Product</h2>
+
+    <form method="POST" action="/admin/products/add" class="space-y-4">
+
+      <!-- PRODUCT NAME -->
+      <div>
+        <label class="block text-sm font-bold mb-1">Product Name</label>
+        <input name="productName" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+      </div>
+
+      <!-- BRAND -->
+      <div>
+        <label class="block text-sm font-bold mb-1">Brand</label>
+        <select name="brandId" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          <option value="">Select Brand</option>
+          <% brands.forEach(brand => { %>
+            <option value="<%= brand._id %>"><%= brand.brandName %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- CATEGORY -->
+      <div>
+        <label class="block text-sm font-bold mb-1">Category</label>
+        <select name="categoryId" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          <option value="">Select Category</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat._id %>"><%= cat.categoryName %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div>
+        <label class="block text-sm font-bold mb-1">Description</label>
+        <textarea name="description" required minlength="10" maxlength="250"
+          rows="4"
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none"></textarea>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="flex justify-end gap-4 pt-4">
+        <button type="button"
+          onclick="closeAddProductModal()"
+          class="px-6 py-2.5 rounded-xl border border-gray-200 font-bold">
+          Cancel
+        </button>
+
+        <button type="submit"
+          class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+          Save Product
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div id="editProductModal"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+
+    <button onclick="closeEditProductModal()"
+      class="absolute top-6 right-6 text-gray-400 hover:text-black">
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </button>
+
+    <h2 class="text-2xl font-bold mb-6">Edit Product</h2>
+
+    <form method="POST" id="editProductForm" class="space-y-4">
+
+      <input type="hidden" name="id" id="editProductId">
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Product Name</label>
+        <input id="editProductName" name="productName" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Brand</label>
+        <select id="editBrandId" name="brandId" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          <% brands.forEach(brand => { %>
+            <option value="<%= brand._id %>"><%= brand.brandName %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Category</label>
+        <select id="editCategoryId" name="categoryId" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat._id %>"><%= cat.categoryName %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Description</label>
+        <textarea id="editDescription" name="description" rows="4" required
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-4 pt-4">
+        <button type="button" onclick="closeEditProductModal()"
+          class="px-6 py-2.5 rounded-xl border font-bold">
+          Cancel
+        </button>
+
+        <button type="submit"
+          class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+          Update
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+
+</body>
+
+<script>
+function toggleVariantRow(productId) {
+  document.querySelectorAll("[id^='variant-row-']").forEach(row => {
+    if (row.id !== `variant-row-${productId}`) {
+      row.classList.add("hidden");
+    }
+  });
+
+  const row = document.getElementById(`variant-row-${productId}`);
+  row.classList.toggle("hidden");
+}
+
+async function openVariantForm(productId) {
+  const container = document.getElementById(`variant-form-${productId}`);
+
+  // toggle if already loaded
+  if (container.innerHTML.trim()) {
+    container.classList.toggle("hidden");
+    return;
+  }
+
+  const res = await fetch(`/admin/products/${productId}/variant-form`);
+  const html = await res.text();
+
+  container.innerHTML = html;
+  container.classList.remove("hidden");
+}
+</script>
+<script>
+function openAddProductModal() {
+  document.getElementById("addProductModal").classList.remove("hidden");
+  document.getElementById("addProductModal").classList.add("flex");
+}
+
+function closeAddProductModal() {
+  document.getElementById("addProductModal").classList.add("hidden");
+  document.getElementById("addProductModal").classList.remove("flex");
+}
+</script>
+<script>
+async function openEditProductModal(productId) {
+  const modal = document.getElementById("editProductModal");
+  const container = document.getElementById("editProductFormContainer");
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  const res = await fetch(`/admin/products/edit/${productId}`);
+  const html = await res.text();
+
+  container.innerHTML = html;
+}
+
+function closeEditProductModal() {
+  document.getElementById("editProductModal").classList.add("hidden");
+  document.getElementById("editProductModal").classList.remove("flex");
+}
+</script>
+
+
+
+</html>

@@ -1,3 +1,10 @@
+<%
+  const isActive = (path) =>
+    currentPath.startsWith(path)
+      ? 'bg-brand-50 text-brand-700 shadow-sm shadow-brand-100/50'
+      : 'text-gray-700 hover:bg-gray-50';
+%>
+
 <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
     <div class="p-6 border-b border-gray-50">
         <div class="flex items-center gap-3">
@@ -12,39 +19,69 @@
     </div>
 
     <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition group">
+        
+        <a href="/admin/dashboard"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/dashboard') %>">
             <i class="fa-solid fa-grid-horizontal w-5"></i> Dashboard
         </a>
         
-        <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm bg-brand-50 text-brand-500 transition shadow-sm shadow-brand-100/50">
+        <a href="/admin/users"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/users') %>">
             <i class="fa-solid fa-users w-5"></i> Users
         </a>
 
-        <a href="/admin/products" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
-            <i class="fa-solid fa-box w-5"></i> Products
+        <a href="/admin/brands"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/brands') %>">
+            <i class="fa-solid fa-tags w-5"></i> Brands
         </a>
 
-        <a href="/admin/categories" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
+        <a href="/admin/categories"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/categories') %>">
             <i class="fa-solid fa-layer-group w-5"></i> Categories
         </a>
 
-        <a href="/admin/offers" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
+        <a href="/admin/products"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/products') %>">
+            <i class="fa-solid fa-box w-5"></i> Products
+        </a>
+
+        <a href="/admin/offers"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/offers') %>">
             <i class="fa-solid fa-percent w-5"></i> Offers
         </a>
 
-        <a href="/admin/coupons" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
+        <a href="/admin/coupons"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/coupons') %>">
             <i class="fa-solid fa-ticket w-5"></i> Coupons
         </a>
 
-        <a href="/admin/transactions" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
+        <a href="/admin/orders"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/orders') %>">
+            <i class="fa-solid fa-clock-rotate-left w-5"></i> Order History
+        </a>
+
+        <a href="/admin/reviews"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/reviews') %>">
+            <i class="fa-solid fa-star w-5"></i> Reviews
+        </a>
+
+        <a href="/admin/transactions"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/transactions') %>">
             <i class="fa-solid fa-wallet w-5"></i> Transactions
+        </a>
+
+        <a href="/admin/sales-report"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/sales-report') %>">
+            <i class="fa-solid fa-chart-line w-5"></i> Sales report
         </a>
 
         <hr class="border-gray-50 my-4 mx-4">
 
-        <a href="/admin/settings" class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-gray-400 hover:bg-gray-50 transition">
-            <i class="fa-solid fa-gear w-5"></i> Settings
-        </a>
+        <form action="/admin/logout" method="POST">
+            <button class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-red-600 hover:bg-red-50 hover:text-red-500 transition">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Logout
+            </button>
+        </form>
     </nav>
 
     <div class="p-4 border-t border-gray-50">
