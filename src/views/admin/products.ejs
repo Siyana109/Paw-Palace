@@ -308,8 +308,6 @@
 
     <form method="POST" id="editProductForm" class="space-y-4">
 
-      <input type="hidden" name="id" id="editProductId">
-
       <div>
         <label class="block text-sm font-bold mb-1">Product Name</label>
         <input id="editProductName" name="productName" required
@@ -391,28 +389,20 @@ async function openVariantForm(productId) {
 }
 </script>
 <script>
-function openAddProductModal() {
-  document.getElementById("addProductModal").classList.remove("hidden");
-  document.getElementById("addProductModal").classList.add("flex");
-}
-
-function closeAddProductModal() {
-  document.getElementById("addProductModal").classList.add("hidden");
-  document.getElementById("addProductModal").classList.remove("flex");
-}
-</script>
-<script>
-async function openEditProductModal(productId) {
+function openEditProductModal(el) {
   const modal = document.getElementById("editProductModal");
-  const container = document.getElementById("editProductFormContainer");
+  const form = document.getElementById("editProductForm");
 
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
-  const res = await fetch(`/admin/products/edit/${productId}`);
-  const html = await res.text();
+  document.getElementById("editProductName").value = el.dataset.name;
+  document.getElementById("editBrandId").value = el.dataset.brand;
+  document.getElementById("editCategoryId").value = el.dataset.category;
+  document.getElementById("editDescription").value = el.dataset.description;
 
-  container.innerHTML = html;
+  // ✅ THIS IS THE KEY LINE
+  form.action = `/admin/products/edit/${el.dataset.id}`;
 }
 
 function closeEditProductModal() {
@@ -420,6 +410,7 @@ function closeEditProductModal() {
   document.getElementById("editProductModal").classList.remove("flex");
 }
 </script>
+
 
 
 

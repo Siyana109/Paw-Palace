@@ -49,21 +49,6 @@ const categories = await Category.find({ isActive: true }).lean();
   }
 };
 
-const getAddProduct = async (req, res) => {
-  try {
-    const brands = await Brand.find({ isActive: true }).lean();
-    const categories = await Category.find({ isActive: true }).lean();
-
-    res.render("admin/addProduct", {
-      brands,
-      categories
-    });
-  } catch (error) {
-    console.error(error);
-    res.redirect("/admin/products");
-  }
-};
-
 const postAddProduct = async (req, res) => {
   try {
     const { productName, brandId, categoryId, description } = req.body;
@@ -88,50 +73,6 @@ const postAddProduct = async (req, res) => {
 };
 
 
-/* ================================
-   LOAD VARIANT FORM (AJAX)
-================================ */
-const getVariantForm = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).lean();
-    if (!product) return res.status(404).send("Product not found");
-
-    res.render("admin/partials/variantForm", { product });
-
-  } catch (err) {
-    res.status(500).send("Error loading variant form");
-  }
-};
-
-/* ================================
-   VIEW PRODUCT
-================================ */
-const viewProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id)
-    .populate("categoryId");
-
-  if (!product) return res.redirect("/admin/products");
-
-  res.render("admin/productView", { product });
-};
-
-/* ================================
-   EDIT PRODUCT
-================================ */
-const editProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id).lean();
-  const brands = await Brand.find({ isActive: true }).lean();
-  const categories = await Category.find({ isActive: true }).lean();
-
-  if (!product) return res.send("Product not found");
-
-  res.render("admin/partials/editProductForm", {
-    product,
-    brands,
-    categories
-  });
-};
-
 const updateProduct = async (req, res) => {
   const { productName, brandId, categoryId, description } = req.body;
 
@@ -146,4 +87,4 @@ const updateProduct = async (req, res) => {
 };
 
 
-export default { listProducts, getVariantForm, viewProduct, editProduct, getAddProduct, postAddProduct, updateProduct }
+export default { listProducts, postAddProduct, updateProduct }

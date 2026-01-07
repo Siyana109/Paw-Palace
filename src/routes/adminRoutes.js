@@ -30,6 +30,7 @@ router.post('/categories/edit/:id', adminMiddleware.adminSession, brandCategoryC
 router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategoryController.deleteCategory);
 
 
+
 router.get("/products", productController.listProducts);
 /* ADD PRODUCT SUBMIT */
 router.post(
@@ -38,11 +39,12 @@ router.post(
   productController.postAddProduct
 );
 
-/* PRODUCT VIEW */
-router.get("/products/view/:id", productController.viewProduct);
+// /* PRODUCT VIEW */
+// router.get("/products/view/:id", productController.viewProduct);
 
-/* PRODUCT EDIT */
-router.get("/products/edit/:id", productController.editProduct);
+// /* PRODUCT EDIT */
+// router.get("/products/edit/:id", productController.editProduct);
+
 router.post(
   "/products/edit/:id",
   adminMiddleware.adminSession,
@@ -53,18 +55,12 @@ router.post(
 
 
 
-/* LOAD VARIANT FORM (AJAX) */
-router.get("/products/:id/variant-form", productController.getVariantForm);
-
 /* ADD VARIANT */
-router.post(
-  "/products/:productId/variants",
-  adminMiddleware.adminSession,
-  variantController.addVariant
-);
-
-/* LIST VARIANTS (OPTIONAL PAGE) */
-router.get("/products/:productId/variants", variantController.listVariants);
+// router.post(
+//   "/products/:productId/variants",
+//   adminMiddleware.adminSession,
+//   variantController.addVariant
+// );
 
 /* DELETE VARIANT */
 router.delete("/variants/:variantId", variantController.deleteVariant);
