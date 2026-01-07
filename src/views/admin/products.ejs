@@ -158,7 +158,9 @@
   data-brand="<%= product.brandId ? product.brandId._id : '' %>"
   data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
   data-description="<%= product.description %>"
-  class="cursor-pointer hover:text-brand-500 transition"
+  data-status="<%= product.isActive %>"
+  class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
+  title="Edit Product"
 >
   <i class="fa-solid fa-pen-to-square text-sm"></i>
 </a>
@@ -266,6 +268,17 @@
         </select>
       </div>
 
+      <!-- STATUS -->
+<div>
+  <label class="block text-sm font-bold mb-1">Status</label>
+  <select name="isActive"
+    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+    <option value="true" selected>Active</option>
+    <option value="false">Inactive</option>
+  </select>
+</div>
+
+
       <!-- DESCRIPTION -->
       <div>
         <label class="block text-sm font-bold mb-1">Description</label>
@@ -334,6 +347,17 @@
         </select>
       </div>
 
+      <!-- STATUS -->
+<div>
+  <label class="block text-sm font-bold mb-1">Status</label>
+  <select id="editIsActive" name="isActive"
+    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+    <option value="true">Active</option>
+    <option value="false">Inactive</option>
+  </select>
+</div>
+
+
       <div>
         <label class="block text-sm font-bold mb-1">Description</label>
         <textarea id="editDescription" name="description" rows="4" required
@@ -355,6 +379,19 @@
     </form>
   </div>
 </div>
+<script>
+function openAddProductModal() {
+  const modal = document.getElementById("addProductModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeAddProductModal() {
+  const modal = document.getElementById("addProductModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+</script>
 
 
 
@@ -401,15 +438,21 @@ function openEditProductModal(el) {
   document.getElementById("editCategoryId").value = el.dataset.category;
   document.getElementById("editDescription").value = el.dataset.description;
 
-  // ✅ THIS IS THE KEY LINE
+  // ✅ SET STATUS
+  document.getElementById("editIsActive").value = el.dataset.status;
+
   form.action = `/admin/products/edit/${el.dataset.id}`;
 }
 
+</script>
+<script>
 function closeEditProductModal() {
-  document.getElementById("editProductModal").classList.add("hidden");
-  document.getElementById("editProductModal").classList.remove("flex");
+  const modal = document.getElementById("editProductModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
 }
 </script>
+
 
 
 

@@ -51,7 +51,7 @@ const categories = await Category.find({ isActive: true }).lean();
 
 const postAddProduct = async (req, res) => {
   try {
-    const { productName, brandId, categoryId, description } = req.body;
+    const { productName, brandId, categoryId, description, isActive } = req.body;
 
     // basic validation
     if (!productName || !brandId || !categoryId || !description) {
@@ -62,7 +62,8 @@ const postAddProduct = async (req, res) => {
       productName,
       brandId,
       categoryId,
-      description
+      description,
+      isActive: isActive === "true"
     });
 
     res.redirect("/admin/products");
@@ -74,13 +75,14 @@ const postAddProduct = async (req, res) => {
 
 
 const updateProduct = async (req, res) => {
-  const { productName, brandId, categoryId, description } = req.body;
+  const { productName, brandId, categoryId, description, isActive } = req.body;
 
   await Product.findByIdAndUpdate(req.params.id, {
     productName,
     brandId,
     categoryId,
-    description
+    description,
+    isActive: isActive === "true"
   });
 
   res.redirect("/admin/products");
