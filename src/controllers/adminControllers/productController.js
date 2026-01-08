@@ -89,4 +89,24 @@ const updateProduct = async (req, res) => {
 };
 
 
-export default { listProducts, postAddProduct, updateProduct }
+
+const deleteProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    // 1️⃣ Delete variants first
+    await Variant.deleteMany({ product: productId });
+
+    // 2️⃣ Delete product
+    await Product.findByIdAndDelete(productId);
+
+    res.redirect("/admin/products");
+
+  } catch (error) {
+    console.error("❌ Error deleting product:", error);
+    res.redirect("/admin/products");
+  }
+};
+
+
+export default { listProducts, postAddProduct, updateProduct, deleteProduct }

@@ -2,403 +2,511 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management | PawPalace Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#fff1f2', 500: '#f43f5e' },
-                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
-                    }
-                }
-            }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management | PawPalace Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#fff1f2', 500: '#f43f5e' },
+            accent: { navy: '#0f172a', teal: '#2dd4bf' }
+          }
         }
-    </script>
+      }
+    }
+  </script>
 </head>
 
 <body class="bg-gray-50 font-sans text-accent-navy">
 
-    <div class="flex min-h-screen">
-        <%- include('../partials/adminSidebar') %>
+  <div class="flex min-h-screen">
+    <%- include('../partials/adminSidebar') %>
 
-            <main class="flex-1 p-8">
-                <header class="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 class="text-3xl font-bold">Products</h1>
-                        <p class="text-gray-500">View and manage all products</p>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold">
-                            A</div>
-                        <div>
-                            <p class="text-sm font-bold">Admin User</p>
-                            <p class="text-xs text-gray-400">Super Admin</p>
-                        </div>
-                    </div>
-                </header>
-
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
-                        <div class="relative w-full max-w-lg">
-                            <i
-                                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" placeholder="Search products..."
-                                class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <select
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                                <option>Category</option>
-                            </select>
-                            <select
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                                <option>Brand</option>
-                            </select>
-                            <select
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                                <option>Status</option>
-                            </select>
-                            <button
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
-                                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
-                            </button>
-                            <button onclick="openAddProductModal()"
-  class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
-  <i class="fa-solid fa-plus"></i> Add Product
-</button>
-
-                            <!-- <a href="/admin/products/add"
-                                class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
-                                <i class="fa-solid fa-plus"></i> Add Product
-                            </a> -->
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                                <tr>
-                                    <th class="px-8 py-5">Product</th>
-                                    <th class="px-6 py-5">Category</th>
-                                    <th class="px-6 py-5">Brand</th>
-                                    <th class="px-6 py-5">Stock</th>
-                                    <th class="px-6 py-5">Status</th>
-                                    <th class="px-8 py-5">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-<% products.forEach(product => { %>
-
-<tr class="hover:bg-gray-50/50 transition">
-    <!-- PRODUCT -->
-    <td class="px-8 py-5">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50 shadow-sm">
-                <img src="<%= product.coverImage %>" class="w-full h-full object-cover">
-            </div>
+      <main class="flex-1 p-8">
+        <header class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-3xl font-bold">Products</h1>
+            <p class="text-gray-500">View and manage all products</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold">
+              A</div>
             <div>
-                <p class="font-bold text-sm text-accent-navy">
-                    <%= product.productName %>
-                </p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    <%= product._id %>
-                </p>
+              <p class="text-sm font-bold">Admin User</p>
+              <p class="text-xs text-gray-400">Super Admin</p>
             </div>
-        </div>
-    </td>
+          </div>
+        </header>
 
-    <!-- BRAND -->
-<td class="px-6 py-5 text-sm font-medium text-gray-500">
-<%= product.brandId ? product.brandId.brandName : '-' %>
-</td>
+        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
+            <div class="relative w-full max-w-lg">
+              <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              <input type="text" placeholder="Search products..."
+                class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
+            </div>
+            <div class="flex items-center gap-3">
+              <select
+                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                <option>Category</option>
+              </select>
+              <select
+                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                <option>Brand</option>
+              </select>
+              <select
+                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
+                <option>Status</option>
+              </select>
+              <button
+                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
+              </button>
+              <button onclick="openAddProductModal()"
+                class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+                <i class="fa-solid fa-plus"></i> Add Product
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                <tr>
+                  <th class="px-8 py-5">Product</th>
+                  <th class="px-6 py-5">Category</th>
+                  <th class="px-6 py-5">Brand</th>
+                  <th class="px-6 py-5">Stock</th>
+                  <th class="px-6 py-5">Status</th>
+                  <th class="px-8 py-5">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <% products.forEach(product=> { %>
+
+                  <tr class="hover:bg-gray-50/50 transition">
+                    <!-- PRODUCT -->
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50 shadow-sm">
+                          <img src="<%= product.coverImage %>" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                          <p class="font-bold text-sm text-accent-navy">
+                            <%= product.productName %>
+                          </p>
+                          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <%= product._id %>
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- BRAND -->
+                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                      <%= product.brandId ? product.brandId.brandName : '-' %>
+                    </td>
 
 
-    <!-- CATEGORY -->
-    <td class="px-6 py-5 text-sm font-medium text-gray-500">
-        <%= product.categoryId ? product.categoryId.categoryName : '-' %>
-    </td>
+                    <!-- CATEGORY -->
+                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                      <%= product.categoryId ? product.categoryId.categoryName : '-' %>
+                    </td>
 
-    <!-- STOCK -->
-    <td class="px-6 py-5">
-        <% if (product.totalStock === 0) { %>
-            <span class="text-xs font-bold text-red-500">Out of Stock</span>
-        <% } else { %>
-            <span class="text-sm font-medium text-gray-500">
-                <%= product.totalStock %>
-            </span>
-        <% } %>
-    </td>
+                    <!-- STOCK -->
+                    <td class="px-6 py-5">
+                      <% if (product.totalStock===0) { %>
+                        <span class="text-xs font-bold text-red-500">Out of Stock</span>
+                        <% } else { %>
+                          <span class="text-sm font-medium text-gray-500">
+                            <%= product.totalStock %>
+                          </span>
+                          <% } %>
+                    </td>
 
-    <!-- STATUS -->
-    <td class="px-6 py-5">
-        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+                    <!-- STATUS -->
+                    <td class="px-6 py-5">
+                      <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
             <%= product.isActive ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600' %>">
-            <%= product.isActive ? 'Active' : 'Inactive' %>
-        </span>
-    </td>
+                        <%= product.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
 
-    <!-- ACTIONS -->
-    <td class="px-8 py-5">
-        <div class="flex items-center gap-4 text-gray-300">
+                    <!-- ACTIONS -->
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-4 text-gray-300">
 
-          <!-- EDIT (MODAL) -->
-<a
-  onclick="openEditProductModal(this)"
-  data-id="<%= product._id %>"
-  data-name="<%= product.productName %>"
-  data-brand="<%= product.brandId ? product.brandId._id : '' %>"
-  data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
-  data-description="<%= product.description %>"
-  data-status="<%= product.isActive %>"
-  class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
-  title="Edit Product"
->
-  <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        <!-- EDIT (MODAL) -->
+                        <a onclick="openEditProductModal(this)" data-id="<%= product._id %>"
+                          data-name="<%= product.productName %>"
+                          data-brand="<%= product.brandId ? product.brandId._id : '' %>"
+                          data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
+                          data-description="<%= product.description %>" data-status="<%= product.isActive %>"
+                          class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
+                          title="Edit Product">
+                          <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        </a>
+
+
+                        <!-- VARIANTS (THIS IS THE KEY ICON) -->
+                        <a onclick="toggleVariantActions('<%= product._id %>')"
+   class="cursor-pointer hover:text-teal-500 transition">
+  <i class="fa-solid fa-layer-group text-sm"></i>
 </a>
 
 
-            <!-- VARIANTS (THIS IS THE KEY ICON) -->
-            <a onclick="toggleVariantRow('<%= product._id %>')"
-               class="cursor-pointer hover:text-teal-500 transition">
-                <i class="fa-solid fa-layer-group text-sm"></i>
-            </a>
+                        <!-- DELETE (TRASH) -->
+                        <a onclick="openDeleteModal('product', '<%= product._id %>')"
+                          class="cursor-pointer text-gray-400 hover:text-red-500 transition-colors duration-200"
+                          title="Delete Product">
+                          <i class="fa-solid fa-trash text-sm"></i>
+                        </a>
 
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- VARIANT ACTION ROW -->
+                  <tr id="variant-row-<%= product._id %>" class="hidden bg-gray-50">
+                    <td colspan="6" class="px-8 py-6">
+
+                      <div class="flex gap-4">
+                        <button onclick="openAddVariantModal('<%= product._id %>')"
+                          class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold">
+                          ➕ Add Variant
+                        </button>
+
+                       <button onclick="loadVariants('<%= product._id %>')"
+        class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
+        👁 View Variants
+      </button>
+
+                      </div>
+
+                      <div id="variant-form-<%= product._id %>" class="mt-6 hidden"></div>
+
+                    </td>
+                  </tr>
+
+                  <% }) %>
+              </tbody>
+
+            </table>
+          </div>
+
+          <div class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
+            <p>Showing 1-8 of <%= totalProducts %> products</p>
+            <div class="flex items-center gap-2">
+              <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i
+                  class="fa-solid fa-chevron-left"></i> Previous</button>
+              <button class="w-10 h-10 rounded-xl bg-brand-500 text-white">1</button>
+              <button class="w-10 h-10 rounded-xl hover:bg-gray-50">2</button>
+              <button class="w-10 h-10 rounded-xl hover:bg-gray-50">3</button>
+              <span class="px-2">...</span>
+              <button class="w-10 h-10 rounded-xl hover:bg-gray-50">161</button>
+              <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next
+                <i class="fa-solid fa-chevron-right ml-1"></i></button>
+            </div>
+          </div>
         </div>
-    </td>
-</tr>
+      </main>
+  </div>
 
-<!-- VARIANT ACTION ROW -->
-<tr id="variant-row-<%= product._id %>" class="hidden bg-gray-50">
-    <td colspan="6" class="px-8 py-6">
+  <!-- ADD PRODUCT MODAL -->
+  <div id="addProductModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
 
-        <div class="flex gap-4">
-            <button onclick="openVariantForm('<%= product._id %>')"
-                class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold">
-                ➕ Add Variant
-            </button>
+    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
 
-            <a href="/admin/products/<%= product._id %>/variants"
-               class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
-                👁 View Variants
-            </a>
+      <!-- CLOSE -->
+      <button onclick="closeAddProductModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <h2 class="text-2xl font-bold mb-6">Add Product</h2>
+
+      <form method="POST" action="/admin/products/add" class="space-y-4">
+
+        <!-- PRODUCT NAME -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Product Name</label>
+          <input name="productName" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
         </div>
 
-        <div id="variant-form-<%= product._id %>" class="mt-6 hidden"></div>
+        <!-- BRAND -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Brand</label>
+          <select name="brandId" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="">Select Brand</option>
+            <% brands.forEach(brand=> { %>
+              <option value="<%= brand._id %>">
+                <%= brand.brandName %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
 
-    </td>
-</tr>
+        <!-- CATEGORY -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Category</label>
+          <select name="categoryId" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="">Select Category</option>
+            <% categories.forEach(cat=> { %>
+              <option value="<%= cat._id %>">
+                <%= cat.categoryName %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
 
-<% }) %>
-</tbody>
+        <!-- STATUS -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Status</label>
+          <select name="isActive" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="true" selected>Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
 
-                        </table>
-                    </div>
 
-                    <div class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
-                        <p>Showing 1-8 of <%= totalProducts %> products</p>
-                        <div class="flex items-center gap-2">
-                            <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i
-                                    class="fa-solid fa-chevron-left"></i> Previous</button>
-                            <button class="w-10 h-10 rounded-xl bg-brand-500 text-white">1</button>
-                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">2</button>
-                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">3</button>
-                            <span class="px-2">...</span>
-                            <button class="w-10 h-10 rounded-xl hover:bg-gray-50">161</button>
-                            <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next
-                                <i class="fa-solid fa-chevron-right ml-1"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </main>
+        <!-- DESCRIPTION -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Description</label>
+          <textarea name="description" required minlength="10" maxlength="250" rows="4"
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none"></textarea>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" onclick="closeAddProductModal()"
+            class="px-6 py-2.5 rounded-xl border border-gray-200 font-bold">
+            Cancel
+          </button>
+
+          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+            Save Product
+          </button>
+        </div>
+
+      </form>
+
     </div>
+  </div>
 
-    <!-- ADD PRODUCT MODAL -->
-<div id="addProductModal"
-     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <!-- EDIT PRODUCT MODAL -->
+  <div id="editProductModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
 
-  <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
 
-    <!-- CLOSE -->
-    <button onclick="closeAddProductModal()"
-            class="absolute top-6 right-6 text-gray-400 hover:text-black">
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </button>
+      <button onclick="closeEditProductModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
 
-    <h2 class="text-2xl font-bold mb-6">Add Product</h2>
+      <h2 class="text-2xl font-bold mb-6">Edit Product</h2>
 
-    <form method="POST" action="/admin/products/add" class="space-y-4">
+      <form method="POST" id="editProductForm" class="space-y-4">
 
-      <!-- PRODUCT NAME -->
-      <div>
-        <label class="block text-sm font-bold mb-1">Product Name</label>
-        <input name="productName" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+        <div>
+          <label class="block text-sm font-bold mb-1">Product Name</label>
+          <input id="editProductName" name="productName" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold mb-1">Brand</label>
+          <select id="editBrandId" name="brandId" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+            <% brands.forEach(brand=> { %>
+              <option value="<%= brand._id %>">
+                <%= brand.brandName %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold mb-1">Category</label>
+          <select id="editCategoryId" name="categoryId" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+            <% categories.forEach(cat=> { %>
+              <option value="<%= cat._id %>">
+                <%= cat.categoryName %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <!-- STATUS -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Status</label>
+          <select id="editIsActive" name="isActive"
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+
+
+        <div>
+          <label class="block text-sm font-bold mb-1">Description</label>
+          <textarea id="editDescription" name="description" rows="4" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" onclick="closeEditProductModal()" class="px-6 py-2.5 rounded-xl border font-bold">
+            Cancel
+          </button>
+
+          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+            Update
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD VARIANT MODAL -->
+  <div id="addVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+
+      <button onclick="closeAddVariantModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <h2 class="text-2xl font-bold mb-6">Add Variant</h2>
+
+      <form method="POST" action="/admin/products/add-variant" enctype="multipart/form-data" class="space-y-4"
+        onsubmit="return validateVariantForm()">
+        <input type="hidden" name="productId" id="variantProductId">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Price</label>
+            <input type="number" name="price" required min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Stock</label>
+            <input type="number" name="stock" required min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Size</label>
+            <select name="size" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="XXL">XXL</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Color</label>
+            <input type="text" name="color" placeholder="e.g. Red, Blue"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold mb-1">Cover Image</label>
+          <div class="space-y-2">
+            <input type="file" name="coverImage" required accept="image/*"
+              onchange="previewImage(this, 'variantCoverPreview')"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <div id="variantCoverPreview"
+              class="hidden w-24 h-24 rounded-lg overflow-hidden border border-dashed border-gray-300"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold mb-1">Sub Images (Min 3 - Max 5)</label>
+          <div class="space-y-2">
+            <input type="file" name="subImages" multiple accept="image/*"
+              onchange="previewImages(this, 'variantSubPreview')"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <div id="variantSubPreview" class="hidden flex flex-wrap gap-2"></div>
+            <p id="imageLimitError" class="hidden text-red-500 text-xs font-bold">You can only upload up to 3 images.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" onclick="closeAddVariantModal()"
+            class="px-6 py-2.5 rounded-xl border border-gray-200 font-bold">
+            Cancel
+          </button>
+
+          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+            Save Variant
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  <script>
+    function openAddProductModal() {
+      const modal = document.getElementById("addProductModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeAddProductModal() {
+      const modal = document.getElementById("addProductModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  </script>
+
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div id="deleteConfirmationModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl relative text-center">
+
+      <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
       </div>
 
-      <!-- BRAND -->
-      <div>
-        <label class="block text-sm font-bold mb-1">Brand</label>
-        <select name="brandId" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-          <option value="">Select Brand</option>
-          <% brands.forEach(brand => { %>
-            <option value="<%= brand._id %>"><%= brand.brandName %></option>
-          <% }) %>
-        </select>
-      </div>
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Confirmation</h3>
+      <p class="text-sm text-gray-500 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
 
-      <!-- CATEGORY -->
-      <div>
-        <label class="block text-sm font-bold mb-1">Category</label>
-        <select name="categoryId" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-          <option value="">Select Category</option>
-          <% categories.forEach(cat => { %>
-            <option value="<%= cat._id %>"><%= cat.categoryName %></option>
-          <% }) %>
-        </select>
-      </div>
-
-      <!-- STATUS -->
-<div>
-  <label class="block text-sm font-bold mb-1">Status</label>
-  <select name="isActive"
-    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-    <option value="true" selected>Active</option>
-    <option value="false">Inactive</option>
-  </select>
-</div>
-
-
-      <!-- DESCRIPTION -->
-      <div>
-        <label class="block text-sm font-bold mb-1">Description</label>
-        <textarea name="description" required minlength="10" maxlength="250"
-          rows="4"
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none"></textarea>
-      </div>
-
-      <!-- ACTIONS -->
-      <div class="flex justify-end gap-4 pt-4">
-        <button type="button"
-          onclick="closeAddProductModal()"
-          class="px-6 py-2.5 rounded-xl border border-gray-200 font-bold">
+      <div class="flex gap-3 justify-center">
+        <button onclick="closeDeleteModal()"
+          class="px-5 py-2.5 rounded-xl border border-gray-200 font-bold text-sm text-gray-600 hover:bg-gray-50 transition">
           Cancel
         </button>
-
-        <button type="submit"
-          class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
-          Save Product
-        </button>
+        <form id="deleteForm" method="POST">
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-red-500 font-bold text-sm text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
+            Delete
+          </button>
+        </form>
       </div>
 
-    </form>
-
+    </div>
   </div>
-</div>
-
-<!-- EDIT PRODUCT MODAL -->
-<div id="editProductModal"
-     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-
-  <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
-
-    <button onclick="closeEditProductModal()"
-      class="absolute top-6 right-6 text-gray-400 hover:text-black">
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </button>
-
-    <h2 class="text-2xl font-bold mb-6">Edit Product</h2>
-
-    <form method="POST" id="editProductForm" class="space-y-4">
-
-      <div>
-        <label class="block text-sm font-bold mb-1">Product Name</label>
-        <input id="editProductName" name="productName" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-      </div>
-
-      <div>
-        <label class="block text-sm font-bold mb-1">Brand</label>
-        <select id="editBrandId" name="brandId" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-          <% brands.forEach(brand => { %>
-            <option value="<%= brand._id %>"><%= brand.brandName %></option>
-          <% }) %>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-bold mb-1">Category</label>
-        <select id="editCategoryId" name="categoryId" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-          <% categories.forEach(cat => { %>
-            <option value="<%= cat._id %>"><%= cat.categoryName %></option>
-          <% }) %>
-        </select>
-      </div>
-
-      <!-- STATUS -->
-<div>
-  <label class="block text-sm font-bold mb-1">Status</label>
-  <select id="editIsActive" name="isActive"
-    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-    <option value="true">Active</option>
-    <option value="false">Inactive</option>
-  </select>
-</div>
-
-
-      <div>
-        <label class="block text-sm font-bold mb-1">Description</label>
-        <textarea id="editDescription" name="description" rows="4" required
-          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5"></textarea>
-      </div>
-
-      <div class="flex justify-end gap-4 pt-4">
-        <button type="button" onclick="closeEditProductModal()"
-          class="px-6 py-2.5 rounded-xl border font-bold">
-          Cancel
-        </button>
-
-        <button type="submit"
-          class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
-          Update
-        </button>
-      </div>
-
-    </form>
-  </div>
-</div>
-<script>
-function openAddProductModal() {
-  const modal = document.getElementById("addProductModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
-
-function closeAddProductModal() {
-  const modal = document.getElementById("addProductModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-}
-</script>
 
 
 
 </body>
 
 <script>
-function toggleVariantRow(productId) {
+function toggleVariantActions(productId) {
   document.querySelectorAll("[id^='variant-row-']").forEach(row => {
     if (row.id !== `variant-row-${productId}`) {
       row.classList.add("hidden");
@@ -406,51 +514,307 @@ function toggleVariantRow(productId) {
   });
 
   const row = document.getElementById(`variant-row-${productId}`);
-  row.classList.toggle("hidden");
-}
-
-async function openVariantForm(productId) {
   const container = document.getElementById(`variant-form-${productId}`);
 
-  // toggle if already loaded
-  if (container.innerHTML.trim()) {
-    container.classList.toggle("hidden");
+  const isOpening = row.classList.contains("hidden");
+
+  row.classList.toggle("hidden");
+
+  // If closing → also close variants
+  if (!isOpening) {
+    container.classList.add("hidden");
+    container.innerHTML = "";
+  }
+}
+
+</script>
+
+<script>
+  function openEditProductModal(el) {
+    const modal = document.getElementById("editProductModal");
+    const form = document.getElementById("editProductForm");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    document.getElementById("editProductName").value = el.dataset.name;
+    document.getElementById("editBrandId").value = el.dataset.brand;
+    document.getElementById("editCategoryId").value = el.dataset.category;
+    document.getElementById("editDescription").value = el.dataset.description;
+
+    // ✅ SET STATUS
+    document.getElementById("editIsActive").value = el.dataset.status;
+
+    form.action = `/admin/products/edit/${el.dataset.id}`;
+  }
+
+</script>
+
+<script>
+  async function loadVariants(productId) {
+  const container = document.getElementById(`variant-form-${productId}`);
+
+  // Toggle close
+  if (!container.classList.contains("hidden")) {
+    closeVariants(productId);
     return;
   }
 
-  const res = await fetch(`/admin/products/${productId}/variant-form`);
-  const html = await res.text();
+  const res = await fetch(`/admin/products/${productId}/variants/json`);
+  const data = await res.json();
+
+  if (!data.success || data.variants.length === 0) {
+    container.innerHTML = `
+      <p class="text-sm text-gray-400">No variants added yet</p>
+      <button onclick="closeVariants('${productId}')"
+        class="mt-4 text-xs text-gray-500 underline">
+        Close Variants
+      </button>
+    `;
+    container.classList.remove("hidden");
+    return;
+  }
+
+  let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+
+  data.variants.forEach(v => {
+    html += `
+      <div class="bg-white rounded-xl border p-4 flex justify-between items-center">
+        <div>
+          <p class="text-sm font-bold">₹ ${v.price}</p>
+          <p class="text-xs text-gray-500">
+            Size: ${v.size || '-'} | Color: ${v.color || '-'}
+          </p>
+          <p class="text-xs text-gray-500">Stock: ${v.stock}</p>
+        </div>
+        <button onclick="openDeleteModal('variant', '${v._id}')"
+          class="text-red-500 hover:text-red-600">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    `;
+  });
+
+  html += `
+    </div>
+    <button onclick="closeVariants('${productId}')"
+      class="mt-4 text-xs text-gray-500 underline">
+      Close Variants
+    </button>
+  `;
 
   container.innerHTML = html;
   container.classList.remove("hidden");
 }
-</script>
-<script>
-function openEditProductModal(el) {
-  const modal = document.getElementById("editProductModal");
-  const form = document.getElementById("editProductForm");
-
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-
-  document.getElementById("editProductName").value = el.dataset.name;
-  document.getElementById("editBrandId").value = el.dataset.brand;
-  document.getElementById("editCategoryId").value = el.dataset.category;
-  document.getElementById("editDescription").value = el.dataset.description;
-
-  // ✅ SET STATUS
-  document.getElementById("editIsActive").value = el.dataset.status;
-
-  form.action = `/admin/products/edit/${el.dataset.id}`;
-}
 
 </script>
+
 <script>
-function closeEditProductModal() {
-  const modal = document.getElementById("editProductModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  function closeVariants(productId) {
+  const container = document.getElementById(`variant-form-${productId}`);
+  const viewBtn = document.getElementById(`view-btn-${productId}`);
+
+  container.classList.add("hidden");
+  container.innerHTML = "";
+  viewBtn.innerText = "👁 View Variants";
 }
+</script>
+
+<script>
+  function closeEditProductModal() {
+    const modal = document.getElementById("editProductModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  function openAddVariantModal(productId) {
+    const modal = document.getElementById("addVariantModal");
+    document.getElementById("variantProductId").value = productId;
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeAddVariantModal() {
+    const modal = document.getElementById("addVariantModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+
+    // Clear file inputs and previews
+    document.getElementById("addVariantModal").querySelector("form").reset();
+    document.getElementById("variantCoverPreview").innerHTML = '';
+    document.getElementById("variantCoverPreview").classList.add("hidden");
+    document.getElementById("variantSubPreview").innerHTML = '';
+    document.getElementById("variantSubPreview").classList.add("hidden");
+    selectedVariantSubImages = []; // Reset the file array
+  }
+
+  function previewImage(input, previewId) {
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'w-full h-full object-cover';
+        preview.appendChild(img);
+        preview.classList.remove('hidden');
+      }
+
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      preview.classList.add('hidden');
+    }
+  }
+
+  let selectedVariantSubImages = [];
+
+  function previewImages(input, previewId) {
+    const preview = document.getElementById(previewId);
+    const errorMsg = document.getElementById("imageLimitError");
+
+    // Don't clear preview immediately, we will rebuild it
+    errorMsg.classList.add("hidden");
+
+    if (input.files && input.files.length > 0) {
+      const newFiles = Array.from(input.files);
+
+      // Filter out duplicates based on name and size
+      const uniqueNewFiles = newFiles.filter(file =>
+        !selectedVariantSubImages.some(existing =>
+          existing.name === file.name && existing.size === file.size
+        )
+      );
+
+      if (uniqueNewFiles.length + selectedVariantSubImages.length > 5) {
+        errorMsg.classList.remove("hidden");
+        errorMsg.innerText = `You can only upload up to 5 images. You already have ${selectedVariantSubImages.length}.`;
+        // Do not add the new files if they exceed limit (or added partially? Let's strict block for now)
+      } else {
+        selectedVariantSubImages = [...selectedVariantSubImages, ...uniqueNewFiles];
+      }
+    }
+
+    // Sync back to input.files using DataTransfer
+    const dataTransfer = new DataTransfer();
+    selectedVariantSubImages.forEach(file => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+
+    // Rebuild Preview
+    preview.innerHTML = '';
+    if (selectedVariantSubImages.length > 0) {
+      preview.classList.remove('hidden');
+      selectedVariantSubImages.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          // Check if this image is already in preview to avoid flashing? 
+          // Simpler to just append all.
+          const div = document.createElement('div');
+          div.className = 'w-16 h-16 rounded-lg overflow-hidden border border-dashed border-gray-300 relative group';
+
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-full h-full object-cover';
+
+          // Remove button
+          const removeBtn = document.createElement('button');
+          removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          removeBtn.className = 'absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer';
+          removeBtn.onclick = (ev) => {
+            ev.preventDefault(); // Prevent bubbling
+            removeSubImage(index, input, previewId);
+          };
+
+          div.appendChild(img);
+          div.appendChild(removeBtn);
+          preview.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+      });
+    } else {
+      preview.classList.add('hidden');
+    }
+  }
+
+  function removeSubImage(index, input, previewId) {
+    selectedVariantSubImages.splice(index, 1);
+    // Trigger update
+    const dataTransfer = new DataTransfer();
+    selectedVariantSubImages.forEach(file => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+    // We manually call previewImages with empty input just to trigger rebuild? 
+    // Or just copy rebuild logic. 
+    // Let's call a rebuild helper or just recurse slightly differently.
+    // Actually `previewImages` relies on reading `input.files` for *new* files.
+    // We should separate "add" from "render".
+
+    // Quick fix: manually rebuild preview here for simple remove
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+    if (selectedVariantSubImages.length === 0) {
+      preview.classList.add('hidden');
+      return;
+    }
+
+    // Re-render (duplicate logic... a bit messy but safe for this tool usage)
+    selectedVariantSubImages.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const div = document.createElement('div');
+        div.className = 'w-16 h-16 rounded-lg overflow-hidden border border-dashed border-gray-300 relative group';
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'w-full h-full object-cover';
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        removeBtn.className = 'absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer';
+        removeBtn.onclick = (ev) => {
+          ev.preventDefault();
+          removeSubImage(idx, input, previewId);
+        };
+        div.appendChild(img);
+        div.appendChild(removeBtn);
+        preview.appendChild(div);
+      }
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function validateVariantForm() {
+    const errorMsg = document.getElementById("imageLimitError");
+    if (selectedVariantSubImages.length < 3) {
+      errorMsg.classList.remove("hidden");
+      errorMsg.innerText = `You must upload at least 3 images. You currently have ${selectedVariantSubImages.length}.`;
+      return false;
+    }
+    return true;
+  }
+
+  function openDeleteModal(type, id) {
+    const modal = document.getElementById("deleteConfirmationModal");
+    const form = document.getElementById("deleteForm");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    if (type === 'product') {
+      form.action = `/admin/products/delete/${id}`;
+    } else if (type === 'variant') {
+      // Assuming backend route for variant delete
+      // Method might need to be overridden to DELETE if using REST, but form is POST by default in HTML?
+      // Usually we use POST for delete in simple implementation, or fetch with DELETE.
+      // User said "I will handle backend logics". I will use standard convention.
+      form.action = `/admin/products/variants/delete/${id}`; // or similar
+    }
+  }
+
+  function closeDeleteModal() {
+    const modal = document.getElementById("deleteConfirmationModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
 </script>
 
 

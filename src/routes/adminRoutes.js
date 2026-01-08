@@ -10,6 +10,8 @@ import brandCategoryController from "../controllers/adminControllers/brandCatego
 import productController from "../controllers/adminControllers/productController.js"
 import variantController from "../controllers/adminControllers/variantController.js"
 
+import variantUpload from "../middlewares/upload.js"
+
 
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)
 router.post('/login', authController.postAdmin)
@@ -32,37 +34,22 @@ router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategor
 
 
 router.get("/products", productController.listProducts);
-/* ADD PRODUCT SUBMIT */
-router.post(
-  "/products/add",
-  adminMiddleware.adminSession,
-  productController.postAddProduct
-);
+router.post("/products/add", adminMiddleware.adminSession, productController.postAddProduct);
 
-// /* PRODUCT VIEW */
-// router.get("/products/view/:id", productController.viewProduct);
-
-// /* PRODUCT EDIT */
-// router.get("/products/edit/:id", productController.editProduct);
-
-router.post(
-  "/products/edit/:id",
-  adminMiddleware.adminSession,
-  productController.updateProduct
-);
+router.post("/products/edit/:id", adminMiddleware.adminSession, productController.updateProduct);
+router.post("/products/delete/:productId", adminMiddleware.adminSession, productController.deleteProduct);
 
 
 
 
+router.post("/products/add-variant", variantUpload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "subImages", maxCount: 5 }
+  ]),variantController.postAddVariant);
 
-/* ADD VARIANT */
-// router.post(
-//   "/products/:productId/variants",
-//   adminMiddleware.adminSession,
-//   variantController.addVariant
-// );
+  
 
-/* DELETE VARIANT */
-router.delete("/variants/:variantId", variantController.deleteVariant);
+router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
+router.delete("/products/variants/:variantId", variantController.deleteVariant);
 
 export default router

@@ -21,22 +21,20 @@ Admin side:
     ✔ Sort the user table in descending order (latest first) @done (1/5/2026, 9:55:28 AM)
 
 
+WEEK - 9
+Admin side:
+    ✔ Category management @done (1/7/2026, 3:19:03 PM)
+    ✔ Add, Edit, Delete (soft delete) @done (1/7/2026, 3:19:50 PM)
+    ✔ Search with cancel/clear button (backend) @done (1/7/2026, 3:19:59 PM)
+    Pagination (backend)
+    ✔ Sort the category table in descending order @done (1/7/2026, 3:20:12 PM)
+    ✔ Product management @done (1/7/2026, 3:19:07 PM)
+    Add, Edit, Delete (soft delete)
+    ☐ Multiple images upload (minimum 3)
+    Image cropping and resizing before upload
 
 User side:
-    Category management
-    Add, Edit, Delete (soft delete)
-    Search with cancel/clear button (backend)
-    Pagination (backend)
-    Sort the category table in descending order
-    Product management
-    Add, Edit, Delete (soft delete)
-    Multiple images upload (minimum 3)
-    Image cropping and resizing before upload
-    Product highlights and related product recommendations
-    Redirect to listing if product blocked/unavailable (on refresh or actions)
-
-Admin side:
-    Product listing page
+    ☐ Product listing page
     Search with cancel/clear button (backend)
     Pagination (backend)
     Sorting options (Price low to high, high to low, A-Z, Z-A)
@@ -45,6 +43,8 @@ Admin side:
     Hide blocked/unlisted products
     Product details page
     Zoomable images
+    Product highlights and related product recommendations
+    Redirect to listing if product blocked/unavailable (on refresh or actions)
     Breadcrumbs, ratings, price, discounts/coupons, reviews, stock info
     Error handling for sold out/unavailable/out of stock
 
