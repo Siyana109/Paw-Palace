@@ -28,7 +28,7 @@ Admin side:
     ✔ Search with cancel/clear button (backend) @done (1/7/2026, 3:19:59 PM)
     ☐ Pagination (backend)
     ✔ Sort the category table in descending order @done (1/7/2026, 3:20:12 PM)
-    ✔ Product management @done (1/7/2026, 3:19:07 PM)
+    ☐ Product management (1/7/2026, 3:19:07 PM)
     ☐ Add, Edit, Delete (soft delete)
     ☐ Multiple images upload (minimum 3)
     ☐ Image cropping and resizing before upload

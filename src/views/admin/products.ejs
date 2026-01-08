@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -92,10 +94,8 @@
               <tbody class="divide-y divide-gray-50">
                 <% products.forEach(product=> { %>
 
-                  <tr 
-  class="hover:bg-gray-50/50 transition"
-  data-product-row="<%= product._id %>">
- 
+                  <tr class="hover:bg-gray-50/50 transition" data-product-row="<%= product._id %>">
+
                     <!-- PRODUCT -->
                     <td class="px-8 py-5">
                       <div class="flex items-center gap-4">
@@ -125,8 +125,7 @@
                     </td>
 
                     <!-- STOCK -->
-<td class="px-6 py-5"
-    data-product-stock="<%= product._id %>">
+                    <td class="px-6 py-5" data-product-stock="<%= product._id %>">
                       <% if (product.totalStock===0) { %>
                         <span class="text-xs font-bold text-red-500">Out of Stock</span>
                         <% } else { %>
@@ -162,9 +161,9 @@
 
                         <!-- VARIANTS (THIS IS THE KEY ICON) -->
                         <a onclick="toggleVariantActions('<%= product._id %>')"
-   class="cursor-pointer hover:text-teal-500 transition">
-  <i class="fa-solid fa-layer-group text-sm"></i>
-</a>
+                          class="cursor-pointer hover:text-teal-500 transition">
+                          <i class="fa-solid fa-layer-group text-sm"></i>
+                        </a>
 
 
                         <!-- DELETE (TRASH) -->
@@ -188,10 +187,10 @@
                           ➕ Add Variant
                         </button>
 
-                       <button onclick="loadVariants('<%= product._id %>')"
-        class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
-        👁 View Variants
-      </button>
+                        <button onclick="loadVariants('<%= product._id %>')"
+                          class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
+                          👁 View Variants
+                        </button>
 
                       </div>
 
@@ -465,11 +464,124 @@
 
     </div>
   </div>
+  <!-- EDIT VARIANT MODAL -->
+  <div id="editVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+
+      <button onclick="closeEditVariantModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <h2 class="text-2xl font-bold mb-6">Edit Variant</h2>
+
+      <form id="editVariantForm" class="space-y-4">
+
+        <input type="hidden" id="editVariantId">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Price</label>
+            <input id="editVariantPrice" type="number" min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1">Stock</label>
+            <input id="editVariantStock" type="number" min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Size</label>
+            <input id="editVariantSize" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1">Color</label>
+            <input id="editVariantColor" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" onclick="closeEditVariantModal()" class="px-6 py-2.5 rounded-xl border font-bold">
+            Cancel
+          </button>
+
+          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+            Update Variant
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  <!-- EDIT VARIANT MODAL -->
+  <div id="editVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
+
+      <button onclick="closeEditVariantModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <h2 class="text-2xl font-bold mb-6">Edit Variant</h2>
+
+      <form id="editVariantForm" class="space-y-4">
+
+        <input type="hidden" id="editVariantId">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Price</label>
+            <input id="editVariantPrice" type="number" min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1">Stock</label>
+            <input id="editVariantStock" type="number" min="0"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Size</label>
+            <input id="editVariantSize" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1">Color</label>
+            <input id="editVariantColor" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" onclick="closeEditVariantModal()" class="px-6 py-2.5 rounded-xl border font-bold">
+            Cancel
+          </button>
+
+          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
+            Update Variant
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
 
   <script>
-  let deleteType = null;
-  let deleteId = null;
-</script>
+    let deleteType = null;
+    let deleteId = null;
+  </script>
+
+
 
   <script>
     function openAddProductModal() {
@@ -502,12 +614,10 @@
           Cancel
         </button>
         <form id="deleteForm" method="POST">
-          <button
-  type="button"
-  onclick="confirmDelete()"
-  class="px-5 py-2.5 rounded-xl bg-red-500 font-bold text-sm text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
-  Delete
-</button>
+          <button type="button" onclick="confirmDelete()"
+            class="px-5 py-2.5 rounded-xl bg-red-500 font-bold text-sm text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
+            Delete
+          </button>
 
         </form>
       </div>
@@ -515,103 +625,119 @@
     </div>
   </div>
 
+  <!-- CROPPER MODAL -->
+  <div id="cropperModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[70]">
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl h-[80vh] flex flex-col">
+      <h3 class="text-lg font-bold mb-4">Crop Image</h3>
+      <div class="flex-1 overflow-hidden relative bg-gray-900 rounded-xl flex items-center justify-center">
+        <img id="imageToCrop" class="max-w-full max-h-full block">
+      </div>
+      <div class="flex justify-end gap-4 pt-6 shrink-0">
+        <button type="button" onclick="cancelCrop()"
+          class="px-6 py-2.5 rounded-xl border border-gray-200 font-bold hover:bg-gray-50 transition">Cancel</button>
+        <button type="button" onclick="cropImage()"
+          class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-0.5 transition">Crop</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 <script>
-async function confirmDelete() {
+  async function confirmDelete() {
 
-  // PRODUCT DELETE
-  if (deleteType === "product") {
-    try {
-      const res = await fetch(`/admin/products/delete/${deleteId}`, {
-        method: "POST"
-      });
+    // PRODUCT DELETE
+    if (deleteType === "product") {
+      try {
+        const res = await fetch(`/admin/products/delete/${deleteId}`, {
+          method: "POST"
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!data.success) {
-        Swal.fire("Error", "Failed to delete product", "error");
-        return;
+        if (!data.success) {
+          Swal.fire("Error", "Failed to delete product", "error");
+          return;
+        }
+
+        // remove product row
+        document
+          .querySelector(`[data-product-row="${deleteId}"]`)
+          ?.remove();
+
+        // remove variant row
+        document.getElementById(`variant-row-${deleteId}`)?.remove();
+
+        closeDeleteModal();
+
+        Swal.fire("Deleted!", "Product deleted successfully", "success");
+
+      } catch (err) {
+        Swal.fire("Error", "Something went wrong", "error");
       }
+    }
 
-      // remove product row
-      document
-        .querySelector(`[data-product-row="${deleteId}"]`)
-        ?.remove();
+    // VARIANT DELETE
+    if (deleteType === "variant") {
+      try {
+        const res = await fetch(`/admin/products/variants/delete/${deleteId}`, {
+          method: "POST"
+        });
 
-      // remove variant row
-      document.getElementById(`variant-row-${deleteId}`)?.remove();
+        const data = await res.json();
 
-      closeDeleteModal();
+        if (!data.success) {
+          Swal.fire("Error", "Failed to delete variant", "error");
+          return;
+        }
 
-      Swal.fire("Deleted!", "Product deleted successfully", "success");
+        document
+          .querySelector(`[data-variant-id="${deleteId}"]`)
+          ?.remove();
 
-    } catch (err) {
-      Swal.fire("Error", "Something went wrong", "error");
+        const stockCell = document.querySelector(
+          `[data-product-stock="${data.productId}"]`
+        );
+
+        if (stockCell) {
+          stockCell.innerHTML =
+            data.totalStock === 0
+              ? `<span class="text-xs font-bold text-red-500">Out of Stock</span>`
+              : `<span class="text-sm font-medium text-gray-500">${data.totalStock}</span>`;
+        }
+
+        closeDeleteModal();
+
+        Swal.fire("Deleted!", "Variant deleted successfully", "success");
+
+      } catch (err) {
+        Swal.fire("Error", "Something went wrong", "error");
+      }
     }
   }
-
-  // VARIANT DELETE
-  if (deleteType === "variant") {
-    try {
-      const res = await fetch(`/admin/products/variants/delete/${deleteId}`, {
-        method: "POST"
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        Swal.fire("Error", "Failed to delete variant", "error");
-        return;
-      }
-
-      document
-        .querySelector(`[data-variant-id="${deleteId}"]`)
-        ?.remove();
-
-      const stockCell = document.querySelector(
-        `[data-product-stock="${data.productId}"]`
-      );
-
-      if (stockCell) {
-        stockCell.innerHTML =
-          data.totalStock === 0
-            ? `<span class="text-xs font-bold text-red-500">Out of Stock</span>`
-            : `<span class="text-sm font-medium text-gray-500">${data.totalStock}</span>`;
-      }
-
-      closeDeleteModal();
-
-      Swal.fire("Deleted!", "Variant deleted successfully", "success");
-
-    } catch (err) {
-      Swal.fire("Error", "Something went wrong", "error");
-    }
-  }
-}
 </script>
 
 
 <script>
-function toggleVariantActions(productId) {
-  document.querySelectorAll("[id^='variant-row-']").forEach(row => {
-    if (row.id !== `variant-row-${productId}`) {
-      row.classList.add("hidden");
+  function toggleVariantActions(productId) {
+    document.querySelectorAll("[id^='variant-row-']").forEach(row => {
+      if (row.id !== `variant-row-${productId}`) {
+        row.classList.add("hidden");
+      }
+    });
+
+    const row = document.getElementById(`variant-row-${productId}`);
+    const container = document.getElementById(`variant-form-${productId}`);
+
+    const isOpening = row.classList.contains("hidden");
+
+    row.classList.toggle("hidden");
+
+    // If closing → also close variants
+    if (!isOpening) {
+      container.classList.add("hidden");
+      container.innerHTML = "";
     }
-  });
-
-  const row = document.getElementById(`variant-row-${productId}`);
-  const container = document.getElementById(`variant-form-${productId}`);
-
-  const isOpening = row.classList.contains("hidden");
-
-  row.classList.toggle("hidden");
-
-  // If closing → also close variants
-  if (!isOpening) {
-    container.classList.add("hidden");
-    container.innerHTML = "";
   }
-}
 
 </script>
 
@@ -638,33 +764,33 @@ function toggleVariantActions(productId) {
 
 <script>
   async function loadVariants(productId) {
-  const container = document.getElementById(`variant-form-${productId}`);
+    const container = document.getElementById(`variant-form-${productId}`);
 
-  // Toggle close
-  if (!container.classList.contains("hidden")) {
-    closeVariants(productId);
-    return;
-  }
+    // Toggle close
+    if (!container.classList.contains("hidden")) {
+      closeVariants(productId);
+      return;
+    }
 
-  const res = await fetch(`/admin/products/${productId}/variants/json`);
-  const data = await res.json();
+    const res = await fetch(`/admin/products/${productId}/variants/json`);
+    const data = await res.json();
 
-  if (!data.success || data.variants.length === 0) {
-    container.innerHTML = `
+    if (!data.success || data.variants.length === 0) {
+      container.innerHTML = `
       <p class="text-sm text-gray-400">No variants added yet</p>
       <button onclick="closeVariants('${productId}')"
         class="mt-4 text-xs text-gray-500 underline">
         Close Variants
       </button>
     `;
-    container.classList.remove("hidden");
-    return;
-  }
+      container.classList.remove("hidden");
+      return;
+    }
 
-  let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+    let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
 
-  data.variants.forEach(v => {
-    html += `
+    data.variants.forEach(v => {
+      html += `
 <div 
   class="bg-white rounded-xl border p-4 flex justify-between items-center"
   data-variant-id="${v._id}">
@@ -675,15 +801,27 @@ function toggleVariantActions(productId) {
           </p>
           <p class="text-xs text-gray-500">Stock: ${v.stock}</p>
         </div>
-        <button onclick="openDeleteModal('variant', '${v._id}')"
-          class="text-red-500 hover:text-red-600">
-          <i class="fa-solid fa-trash"></i>
-        </button>
+        <div class="flex gap-3">
+  <!-- EDIT -->
+  <button
+    onclick="openEditVariantModal('${v._id}', '${v.price}', '${v.stock}', '${v.size}', '${v.color}')"
+    class="text-blue-500 hover:text-blue-600">
+    <i class="fa-solid fa-pen"></i>
+  </button>
+
+  <!-- DELETE -->
+  <button
+    onclick="openDeleteModal('variant', '${v._id}')"
+    class="text-red-500 hover:text-red-600">
+    <i class="fa-solid fa-trash"></i>
+  </button>
+</div>
+
       </div>
     `;
-  });
+    });
 
-  html += `
+    html += `
     </div>
     <button onclick="closeVariants('${productId}')"
       class="mt-4 text-xs text-gray-500 underline">
@@ -691,21 +829,21 @@ function toggleVariantActions(productId) {
     </button>
   `;
 
-  container.innerHTML = html;
-  container.classList.remove("hidden");
-}
+    container.innerHTML = html;
+    container.classList.remove("hidden");
+  }
 
 </script>
 
 <script>
   function closeVariants(productId) {
-  const container = document.getElementById(`variant-form-${productId}`);
-  const viewBtn = document.getElementById(`view-btn-${productId}`);
+    const container = document.getElementById(`variant-form-${productId}`);
+    const viewBtn = document.getElementById(`view-btn-${productId}`);
 
-  container.classList.add("hidden");
-  container.innerHTML = "";
-  viewBtn.innerText = "👁 View Variants";
-}
+    container.classList.add("hidden");
+    container.innerHTML = "";
+    viewBtn.innerText = "👁 View Variants";
+  }
 </script>
 
 <script>
@@ -736,90 +874,175 @@ function toggleVariantActions(productId) {
     selectedVariantSubImages = []; // Reset the file array
   }
 
+  // --- CROPPER STATE & HELPERS ---
+  let cropper = null;
+  let currentCropCallback = null;
+  let cropQueue = [];
+  let currentInput = null;
+
+  function startCropper(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const image = document.getElementById('imageToCrop');
+      image.src = e.target.result;
+
+      const modal = document.getElementById('cropperModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(image, {
+        viewMode: 1,
+        aspectRatio: 1, // Enforce Square
+        autoCropArea: 1,
+        background: false,
+      });
+      currentCropCallback = callback;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function closeCropperModal() {
+    const modal = document.getElementById('cropperModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  }
+
+  function cancelCrop() {
+    closeCropperModal();
+    cropQueue = []; // Abort queue
+
+    // Restore input state if needed
+    if (currentInput && currentInput.name === 'subImages') {
+      updateSubInputFiles(currentInput);
+    } else if (currentInput) {
+      currentInput.value = '';
+    }
+  }
+
+  function cropImage() {
+    if (!cropper) return;
+
+    cropper.getCroppedCanvas({
+      maxWidth: 1024,
+      maxHeight: 1024,
+      fillColor: '#fff',
+    }).toBlob((blob) => {
+      if (currentCropCallback) {
+        currentCropCallback(blob);
+      }
+      closeCropperModal();
+
+      // Next
+      if (cropQueue.length > 0) {
+        setTimeout(processCropQueue, 200);
+      }
+    }, 'image/jpeg', 0.9);
+  }
+
+  function processCropQueue() {
+    if (cropQueue.length === 0) return;
+
+    const { file, input, previewId } = cropQueue.shift();
+    currentInput = input;
+
+    startCropper(file, (blob) => {
+      const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+
+      selectedVariantSubImages.push(newFile);
+
+      renderSubImagesPreview(previewId);
+      updateSubInputFiles(input);
+    });
+  }
+
   function previewImage(input, previewId) {
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-
     if (input.files && input.files[0]) {
-      const reader = new FileReader();
+      const file = input.files[0];
+      currentInput = input;
 
-      reader.onload = function (e) {
+      startCropper(file, (blob) => {
+        const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+
+        // Update Input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(newFile);
+        input.files = dataTransfer.files;
+
+        // Preview
+        const preview = document.getElementById(previewId);
+        preview.innerHTML = '';
         const img = document.createElement('img');
-        img.src = e.target.result;
+        img.src = URL.createObjectURL(blob);
         img.className = 'w-full h-full object-cover';
         preview.appendChild(img);
         preview.classList.remove('hidden');
-      }
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      preview.classList.add('hidden');
+      });
     }
   }
 
   let selectedVariantSubImages = [];
 
   function previewImages(input, previewId) {
-    const preview = document.getElementById(previewId);
     const errorMsg = document.getElementById("imageLimitError");
-
-    // Don't clear preview immediately, we will rebuild it
     errorMsg.classList.add("hidden");
 
     if (input.files && input.files.length > 0) {
-      const newFiles = Array.from(input.files);
-
-      // Filter out duplicates based on name and size
-      const uniqueNewFiles = newFiles.filter(file =>
-        !selectedVariantSubImages.some(existing =>
-          existing.name === file.name && existing.size === file.size
-        )
-      );
-
-      if (uniqueNewFiles.length + selectedVariantSubImages.length > 5) {
+      if (selectedVariantSubImages.length + input.files.length > 5) {
         errorMsg.classList.remove("hidden");
-        errorMsg.innerText = `You can only upload up to 5 images. You already have ${selectedVariantSubImages.length}.`;
-        // Do not add the new files if they exceed limit (or added partially? Let's strict block for now)
-      } else {
-        selectedVariantSubImages = [...selectedVariantSubImages, ...uniqueNewFiles];
+        errorMsg.innerText = `You can only upload up to 5 images.`;
+        updateSubInputFiles(input);
+        return;
+      }
+
+      Array.from(input.files).forEach(file => {
+        // Simple Duplicate Check (by name) just to avoid immediate double-add if user drags same file twice?
+        // But cropping changes it, so we rely on user.
+        cropQueue.push({ file, input, previewId });
+      });
+
+      if (!document.getElementById('cropperModal').classList.contains('flex')) {
+        processCropQueue();
       }
     }
+  }
 
-    // Sync back to input.files using DataTransfer
+  function updateSubInputFiles(input) {
     const dataTransfer = new DataTransfer();
     selectedVariantSubImages.forEach(file => dataTransfer.items.add(file));
     input.files = dataTransfer.files;
+  }
 
-    // Rebuild Preview
+  function renderSubImagesPreview(previewId) {
+    const preview = document.getElementById(previewId);
     preview.innerHTML = '';
+
     if (selectedVariantSubImages.length > 0) {
       preview.classList.remove('hidden');
       selectedVariantSubImages.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          // Check if this image is already in preview to avoid flashing? 
-          // Simpler to just append all.
-          const div = document.createElement('div');
-          div.className = 'w-16 h-16 rounded-lg overflow-hidden border border-dashed border-gray-300 relative group';
+        const div = document.createElement('div');
+        div.className = 'w-16 h-16 rounded-lg overflow-hidden border border-dashed border-gray-300 relative group';
 
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'w-full h-full object-cover';
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.className = 'w-full h-full object-cover';
 
-          // Remove button
-          const removeBtn = document.createElement('button');
-          removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-          removeBtn.className = 'absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer';
-          removeBtn.onclick = (ev) => {
-            ev.preventDefault(); // Prevent bubbling
-            removeSubImage(index, input, previewId);
-          };
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        removeBtn.className = 'absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer';
+        removeBtn.onclick = (ev) => {
+          ev.preventDefault();
+          removeSubImage(index, document.querySelector('input[name="subImages"]'), previewId);
+        };
 
-          div.appendChild(img);
-          div.appendChild(removeBtn);
-          preview.appendChild(div);
-        }
-        reader.readAsDataURL(file);
+        div.appendChild(img);
+        div.appendChild(removeBtn);
+        preview.appendChild(div);
       });
     } else {
       preview.classList.add('hidden');
@@ -828,46 +1051,8 @@ function toggleVariantActions(productId) {
 
   function removeSubImage(index, input, previewId) {
     selectedVariantSubImages.splice(index, 1);
-    // Trigger update
-    const dataTransfer = new DataTransfer();
-    selectedVariantSubImages.forEach(file => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-    // We manually call previewImages with empty input just to trigger rebuild? 
-    // Or just copy rebuild logic. 
-    // Let's call a rebuild helper or just recurse slightly differently.
-    // Actually `previewImages` relies on reading `input.files` for *new* files.
-    // We should separate "add" from "render".
-
-    // Quick fix: manually rebuild preview here for simple remove
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-    if (selectedVariantSubImages.length === 0) {
-      preview.classList.add('hidden');
-      return;
-    }
-
-    // Re-render (duplicate logic... a bit messy but safe for this tool usage)
-    selectedVariantSubImages.forEach((file, idx) => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const div = document.createElement('div');
-        div.className = 'w-16 h-16 rounded-lg overflow-hidden border border-dashed border-gray-300 relative group';
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'w-full h-full object-cover';
-        const removeBtn = document.createElement('button');
-        removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        removeBtn.className = 'absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer';
-        removeBtn.onclick = (ev) => {
-          ev.preventDefault();
-          removeSubImage(idx, input, previewId);
-        };
-        div.appendChild(img);
-        div.appendChild(removeBtn);
-        preview.appendChild(div);
-      }
-      reader.readAsDataURL(file);
-    });
+    updateSubInputFiles(input);
+    renderSubImagesPreview(previewId);
   }
 
   function validateVariantForm() {
@@ -880,14 +1065,14 @@ function toggleVariantActions(productId) {
     return true;
   }
 
-function openDeleteModal(type, id) {
-  deleteType = type;
-  deleteId = id;
+  function openDeleteModal(type, id) {
+    deleteType = type;
+    deleteId = id;
 
-  const modal = document.getElementById("deleteConfirmationModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
+    const modal = document.getElementById("deleteConfirmationModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
 
 
   function closeDeleteModal() {
@@ -895,6 +1080,27 @@ function openDeleteModal(type, id) {
     modal.classList.add("hidden");
     modal.classList.remove("flex");
   }
+</script>
+
+<script>
+  function openEditVariantModal(id, price, stock, size, color) {
+    document.getElementById("editVariantId").value = id;
+    document.getElementById("editVariantPrice").value = price;
+    document.getElementById("editVariantStock").value = stock;
+    document.getElementById("editVariantSize").value = size || '';
+    document.getElementById("editVariantColor").value = color || '';
+
+    const modal = document.getElementById("editVariantModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeEditVariantModal() {
+    const modal = document.getElementById("editVariantModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
 </script>
 
 
