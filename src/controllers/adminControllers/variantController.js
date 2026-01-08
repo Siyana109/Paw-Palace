@@ -70,9 +70,41 @@ const getVariantsByProduct = async (req, res) => {
 
 
 //   DELETE VARIANT
+// DELETE VARIANT (FINAL)
 const deleteVariant = async (req, res) => {
-  await Variant.findByIdAndDelete(req.params.variantId);
-  res.status(200).json({ success: true });
+  try {
+    const variant = await Variant.findById(req.params.variantId);
+    if (!variant) {
+      return res.json({ success: false });
+    }
+
+    const productId = variant.product;
+
+    // delete variant
+    await Variant.findByIdAndDelete(req.params.variantId);
+
+    // recalculate total stock
+    const variants = await Variant.find({ product: productId });
+    const totalStock = variants.reduce(
+      (sum, v) => sum + v.stock,
+      0
+    );
+
+    // update product stock
+    await Product.findByIdAndUpdate(productId, {
+      totalStock
+    });
+
+    res.json({
+      success: true,
+      productId,
+      totalStock
+    });
+
+  } catch (err) {
+    console.error("Delete variant error:", err);
+    res.json({ success: false });
+  }
 };
 
 

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Management | PawPalace Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
@@ -91,7 +92,10 @@
               <tbody class="divide-y divide-gray-50">
                 <% products.forEach(product=> { %>
 
-                  <tr class="hover:bg-gray-50/50 transition">
+                  <tr 
+  class="hover:bg-gray-50/50 transition"
+  data-product-row="<%= product._id %>">
+ 
                     <!-- PRODUCT -->
                     <td class="px-8 py-5">
                       <div class="flex items-center gap-4">
@@ -121,7 +125,8 @@
                     </td>
 
                     <!-- STOCK -->
-                    <td class="px-6 py-5">
+<td class="px-6 py-5"
+    data-product-stock="<%= product._id %>">
                       <% if (product.totalStock===0) { %>
                         <span class="text-xs font-bold text-red-500">Out of Stock</span>
                         <% } else { %>
@@ -460,6 +465,12 @@
 
     </div>
   </div>
+
+  <script>
+  let deleteType = null;
+  let deleteId = null;
+</script>
+
   <script>
     function openAddProductModal() {
       const modal = document.getElementById("addProductModal");
@@ -491,19 +502,94 @@
           Cancel
         </button>
         <form id="deleteForm" method="POST">
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-red-500 font-bold text-sm text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
-            Delete
-          </button>
+          <button
+  type="button"
+  onclick="confirmDelete()"
+  class="px-5 py-2.5 rounded-xl bg-red-500 font-bold text-sm text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
+  Delete
+</button>
+
         </form>
       </div>
 
     </div>
   </div>
 
-
-
 </body>
+<script>
+async function confirmDelete() {
+
+  // PRODUCT DELETE
+  if (deleteType === "product") {
+    try {
+      const res = await fetch(`/admin/products/delete/${deleteId}`, {
+        method: "POST"
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", "Failed to delete product", "error");
+        return;
+      }
+
+      // remove product row
+      document
+        .querySelector(`[data-product-row="${deleteId}"]`)
+        ?.remove();
+
+      // remove variant row
+      document.getElementById(`variant-row-${deleteId}`)?.remove();
+
+      closeDeleteModal();
+
+      Swal.fire("Deleted!", "Product deleted successfully", "success");
+
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
+
+  // VARIANT DELETE
+  if (deleteType === "variant") {
+    try {
+      const res = await fetch(`/admin/products/variants/delete/${deleteId}`, {
+        method: "POST"
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", "Failed to delete variant", "error");
+        return;
+      }
+
+      document
+        .querySelector(`[data-variant-id="${deleteId}"]`)
+        ?.remove();
+
+      const stockCell = document.querySelector(
+        `[data-product-stock="${data.productId}"]`
+      );
+
+      if (stockCell) {
+        stockCell.innerHTML =
+          data.totalStock === 0
+            ? `<span class="text-xs font-bold text-red-500">Out of Stock</span>`
+            : `<span class="text-sm font-medium text-gray-500">${data.totalStock}</span>`;
+      }
+
+      closeDeleteModal();
+
+      Swal.fire("Deleted!", "Variant deleted successfully", "success");
+
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
+}
+</script>
+
 
 <script>
 function toggleVariantActions(productId) {
@@ -579,7 +665,9 @@ function toggleVariantActions(productId) {
 
   data.variants.forEach(v => {
     html += `
-      <div class="bg-white rounded-xl border p-4 flex justify-between items-center">
+<div 
+  class="bg-white rounded-xl border p-4 flex justify-between items-center"
+  data-variant-id="${v._id}">
         <div>
           <p class="text-sm font-bold">₹ ${v.price}</p>
           <p class="text-xs text-gray-500">
@@ -792,23 +880,15 @@ function toggleVariantActions(productId) {
     return true;
   }
 
-  function openDeleteModal(type, id) {
-    const modal = document.getElementById("deleteConfirmationModal");
-    const form = document.getElementById("deleteForm");
+function openDeleteModal(type, id) {
+  deleteType = type;
+  deleteId = id;
 
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+  const modal = document.getElementById("deleteConfirmationModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
 
-    if (type === 'product') {
-      form.action = `/admin/products/delete/${id}`;
-    } else if (type === 'variant') {
-      // Assuming backend route for variant delete
-      // Method might need to be overridden to DELETE if using REST, but form is POST by default in HTML?
-      // Usually we use POST for delete in simple implementation, or fetch with DELETE.
-      // User said "I will handle backend logics". I will use standard convention.
-      form.action = `/admin/products/variants/delete/${id}`; // or similar
-    }
-  }
 
   function closeDeleteModal() {
     const modal = document.getElementById("deleteConfirmationModal");

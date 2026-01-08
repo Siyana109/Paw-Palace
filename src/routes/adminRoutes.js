@@ -42,14 +42,13 @@ router.post("/products/delete/:productId", adminMiddleware.adminSession, product
 
 
 
+router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
+
 router.post("/products/add-variant", variantUpload.fields([
     { name: "coverImage", maxCount: 1 },
     { name: "subImages", maxCount: 5 }
   ]),variantController.postAddVariant);
 
-  
-
-router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
-router.delete("/products/variants/:variantId", variantController.deleteVariant);
+router.post("/products/variants/delete/:variantId", variantController.deleteVariant);
 
 export default router

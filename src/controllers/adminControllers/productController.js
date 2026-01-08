@@ -89,24 +89,25 @@ const updateProduct = async (req, res) => {
 };
 
 
-
+// DELETE PRODUCT (AJAX)
 const deleteProduct = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    // 1️⃣ Delete variants first
+    // delete variants
     await Variant.deleteMany({ product: productId });
 
-    // 2️⃣ Delete product
+    // delete product
     await Product.findByIdAndDelete(productId);
 
-    res.redirect("/admin/products");
+    return res.json({ success: true });
 
-  } catch (error) {
-    console.error("❌ Error deleting product:", error);
-    res.redirect("/admin/products");
+  } catch (err) {
+    console.error("❌ Delete product error:", err);
+    res.json({ success: false });
   }
 };
+
 
 
 export default { listProducts, postAddProduct, updateProduct, deleteProduct }
