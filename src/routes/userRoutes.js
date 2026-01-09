@@ -3,11 +3,10 @@ const router = express.Router();
 import authController from "../controllers/userControllers/authController.js";
 import userMiddleware from "../middlewares/userMiddleware.js"
 import profileController from "../controllers/userControllers/profileController.js";
+import homeController from "../controllers/userControllers/homeController.js";
 
 
 router.get('/',authController.landingPage)
-
-router.get('/home', authController.homePage)
 
 router.get('/signup', authController.getSignup)
 router.post('/signup', authController.postSignup)
@@ -47,8 +46,8 @@ router.get('/verify-email-otp', userMiddleware.checkSession, profileController.g
 router.post('/reset-email/verify-otp', userMiddleware.checkSession, userMiddleware.checkSession, profileController.verifyEmailOtp);
 router.post('/reset-email/resend-otp', userMiddleware.checkSession, profileController.resendEmailOtp);
 
+router.get("/home", homeController.homePage);
 
 router.post('/logout', authController.logout)
-// router.get('/address/add', profileController.getAddAddress)
 
 export default router

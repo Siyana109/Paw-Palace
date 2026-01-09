@@ -25,7 +25,12 @@ const productSchema = new mongoose.Schema({
         required: true,
         minLength: 10,
         maxLength: 250
-    }
+    },
+    petType: {
+         type: String,
+        enum: ['Dog', 'Cat', 'Puppy', 'Kitten'],
+        required: true
+    },
 }, { timestamps: true });
 
 export default mongoose.model("Product", productSchema);
