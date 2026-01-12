@@ -34,13 +34,13 @@ const listProducts = async (req, res) => {
       coverImage: variantMap[p._id]?.coverImage || "/images/placeholder.png"
     }));
     const brands = await Brand.find({ isActive: true }).lean();
-const categories = await Category.find({ isActive: true }).lean();
+    const categories = await Category.find({ isActive: true }).lean();
 
     res.render("admin/products", {
       products: finalProducts,
       totalProducts: finalProducts.length,
-       brands,
-  categories
+      brands,
+      categories
     });
 
   } catch (err) {

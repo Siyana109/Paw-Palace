@@ -34,6 +34,11 @@
         }
     </script>
     <style>
+        #zoomContainer:hover img {
+            transform: scale(2);
+            /* zoom level */
+        }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -51,16 +56,35 @@
 
         <!-- BREADCRUMBS -->
         <nav class="py-6 px-6 md:px-12 max-w-7xl mx-auto w-full">
-            <ol class="flex items-center space-x-2 text-xs md:text-sm text-gray-400 font-medium">
-                <li><a href="/home" class="hover:text-brand-500 transition">Home</a></li>
-                <li>/</li>
-                <li><a href="/home?category=<%= product.categoryId._id %>" class="hover:text-brand-500 transition">
-                        <%= product.categoryId.name %>
-                    </a></li>
-                <li>/</li>
-                <li class="text-brand-500 line-clamp-1">
-                    <%= product.productName %>
+            <ol class="flex items-center gap-2 text-sm font-medium text-gray-400">
+
+                <!-- Home -->
+                <li>
+                    <a href="/home" class="hover:text-brand-500 transition">
+                        Home
+                    </a>
                 </li>
+
+                <% if (product.categoryId && product.categoryId.name) { %>
+
+                    <li class="text-gray-300">/</li>
+
+                    <!-- Category -->
+                    <li>
+                        <a href="/home?category=<%= product.categoryId._id %>" class="hover:text-brand-500 transition">
+                            <%= product.categoryId.name %>
+                        </a>
+                    </li>
+
+                    <% } %>
+
+                        <li class="text-gray-300">/</li>
+
+                        <!-- Current Product -->
+                        <li class="text-brand-500 font-semibold line-clamp-1 max-w-[220px]">
+                            <%= product.productName %>
+                        </li>
+
             </ol>
         </nav>
 
@@ -70,17 +94,14 @@
                 <!-- LEFT COLUMN: IMAGES -->
                 <div class="space-y-6 select-none relative">
                     <!-- Main Image -->
-                    <div class="relative w-full aspect-square bg-gray-100 rounded-[2.5rem] overflow-hidden group">
-                        <!-- Best Seller Badge -->
-                        <div class="absolute top-6 right-6 z-10">
-                            <span class="bg-white text-brand-500 text-xs font-bold px-4 py-2 rounded-full shadow-sm">
-                                Best Seller
-                            </span>
-                        </div>
+                    <div id="zoomContainer"
+                        class="relative w-full aspect-square bg-gray-100 rounded-[2.5rem] overflow-hidden group cursor-zoom-in">
 
                         <img id="mainImage" src="<%= variants[0].coverImage %>" alt="<%= product.productName %>"
-                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                            class="w-full h-full object-cover transition-transform duration-200" />
+
                     </div>
+
 
                     <!-- Thumbnails -->
                     <div class="flex gap-4" id="thumbnailContainer">
@@ -143,13 +164,13 @@
                             <input type="number" id="quantityInput" value="1" min="1" max="5"
                                 class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
                             <button id="qtyPlusBtn" onclick="updateQuantity(1)"
-  class="w-8 h-full flex items-center justify-center font-bold text-lg transition">
-  +
-</button>
-                            </div>
-<p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
-  Only <span id="stockCount"></span> items available
-</p>
+                                class="w-8 h-full flex items-center justify-center font-bold text-lg transition">
+                                +
+                            </button>
+                        </div>
+                        <p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
+                            Only <span id="stockCount"></span> items available
+                        </p>
 
                         <!-- Add to Cart -->
                         <form class="flex-1" id="addToCartForm">
@@ -158,33 +179,28 @@
                             <input type="hidden" name="quantity" id="formQuantity" value="1">
 
                             <% if (isInCart) { %>
-  <a href="/cart"
-     class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
+                                <a href="/cart" class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
             flex items-center justify-center hover:bg-black transition">
-    Go to Cart
-  </a>
-<% } else { %>
-  <button type="submit" id="addToCartBtn"
-    class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm
+                                    Go to Cart
+                                </a>
+                                <% } else { %>
+                                    <button type="submit" id="addToCartBtn" class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm
            hover:bg-brand-600 transition">
-    Add to Cart
-  </button>
-<% } %>
+                                        Add to Cart
+                                    </button>
+                                    <% } %>
 
                         </form>
 
                         <!-- Wishlist -->
-                       <button
-  id="wishlistBtn"
-  data-variant="<%= variants[0]._id %>"
-  class="w-12 h-12 bg-white border border-gray-200 rounded-xl
+                        <button id="wishlistBtn" data-variant="<%= variants[0]._id %>" class="w-12 h-12 bg-white border border-gray-200 rounded-xl
          text-gray-400 hover:border-brand-500 hover:text-brand-500
          transition-all active:scale-95 flex items-center justify-center">
-  <i id="wishlistIcon"
-   class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
-</i>
+                            <i id="wishlistIcon"
+                                class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
+                            </i>
 
-</button>
+                        </button>
 
                     </div>
 
@@ -239,39 +255,39 @@
 
             <!-- RELATED PRODUCTS -->
             <section class="mt-24">
-  <h2 class="text-xl font-bold text-accent-navy mb-8">You might also like</h2>
+                <h2 class="text-xl font-bold text-accent-navy mb-8">You might also like</h2>
 
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-    <% relatedProducts.forEach(item => { %>
-      <% if (item.variant) { %>
-        <a href="/product/<%= item.product._id %>"
-          class="group block bg-white rounded-3xl p-3 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <% relatedProducts.forEach(item=> { %>
+                        <% if (item.variant) { %>
+                            <a href="/product/<%= item.product._id %>"
+                                class="group block bg-white rounded-3xl p-3 shadow-sm hover:shadow-lg transition-all duration-300">
 
-          <div class="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden mb-3">
-            <img src="<%= item.variant.coverImage %>"
-              class="w-full h-full object-cover group-hover:scale-105 transition">
-          </div>
+                                <div class="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden mb-3">
+                                    <img src="<%= item.variant.coverImage %>"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition">
+                                </div>
 
-          <div class="px-1">
-            <p class="text-xs uppercase text-brand-500 font-bold mb-1">
-              <%= item.product.petType %>
-            </p>
+                                <div class="px-1">
+                                    <p class="text-xs uppercase text-brand-500 font-bold mb-1">
+                                        <%= item.product.petType %>
+                                    </p>
 
-            <h3 class="font-bold text-gray-800 text-sm line-clamp-1 mb-2
+                                    <h3 class="font-bold text-gray-800 text-sm line-clamp-1 mb-2
               group-hover:text-brand-500 transition">
-              <%= item.product.productName %>
-            </h3>
+                                        <%= item.product.productName %>
+                                    </h3>
 
-            <span class="font-bold text-sm text-brand-500">
-              ₹<%= item.variant.offerApplied ? item.variant.offerPrice : item.variant.price %>
-            </span>
-          </div>
+                                    <span class="font-bold text-sm text-brand-500">
+                                        ₹<%= item.variant.offerApplied ? item.variant.offerPrice : item.variant.price %>
+                                    </span>
+                                </div>
 
-        </a>
-      <% } %>
-    <% }) %>
-  </div>
-</section>
+                            </a>
+                            <% } %>
+                                <% }) %>
+                </div>
+            </section>
 
 
         </main>
@@ -280,7 +296,7 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <%- JSON.stringify(variants) %>;
+                const variants = <% - JSON.stringify(variants) %>;
                 let activeVariant = variants[0];
 
                 // Color Mapping Helper
@@ -399,12 +415,12 @@
                     updateImages(activeVariant);
                     updateStock(activeVariant);
 
-                   // Reset quantity based on new variant
-document.getElementById('quantityInput').value = 1;
-document.getElementById('formQuantity').value = 1;
+                    // Reset quantity based on new variant
+                    document.getElementById('quantityInput').value = 1;
+                    document.getElementById('formQuantity').value = 1;
 
-// Hide stock message
-document.getElementById('stockMessage').classList.add('hidden');
+                    // Hide stock message
+                    document.getElementById('stockMessage').classList.add('hidden');
                 }
 
                 function updatePrice(variant) {
@@ -453,38 +469,38 @@ document.getElementById('stockMessage').classList.add('hidden');
                 }
 
                 function updateQuantity(change) {
-  const input = document.getElementById('quantityInput');
-  const formInput = document.getElementById('formQuantity');
-  const stockMsg = document.getElementById('stockMessage');
-  const stockCount = document.getElementById('stockCount');
+                    const input = document.getElementById('quantityInput');
+                    const formInput = document.getElementById('formQuantity');
+                    const stockMsg = document.getElementById('stockMessage');
+                    const stockCount = document.getElementById('stockCount');
 
-  let val = parseInt(input.value) + change;
-  const maxStock = activeVariant.stock;
+                    let val = parseInt(input.value) + change;
+                    const maxStock = activeVariant.stock;
 
-  const plusBtn = document.getElementById('qtyPlusBtn');
+                    const plusBtn = document.getElementById('qtyPlusBtn');
 
-if (val >= maxStock) {
-  plusBtn.classList.add('text-gray-300', 'cursor-not-allowed');
-} else {
-  plusBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
-}
+                    if (val >= maxStock) {
+                        plusBtn.classList.add('text-gray-300', 'cursor-not-allowed');
+                    } else {
+                        plusBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
+                    }
 
 
-  if (val < 1) val = 1;
+                    if (val < 1) val = 1;
 
-  if (val > maxStock) {
-    val = maxStock;
+                    if (val > maxStock) {
+                        val = maxStock;
 
-    // Show stock warning
-    stockCount.innerText = maxStock;
-    stockMsg.classList.remove('hidden');
-  } else {
-    stockMsg.classList.add('hidden');
-  }
+                        // Show stock warning
+                        stockCount.innerText = maxStock;
+                        stockMsg.classList.remove('hidden');
+                    } else {
+                        stockMsg.classList.add('hidden');
+                    }
 
-  input.value = val;
-  formInput.value = val;
-}
+                    input.value = val;
+                    formInput.value = val;
+                }
 
 
                 function switchTab(tab) {
@@ -507,165 +523,180 @@ if (val >= maxStock) {
 
 
 
-        //script
+                //script
 
-              document.getElementById("wishlistBtn").addEventListener("click", async () => {
-  const btn = document.getElementById("wishlistBtn");
-  const icon = document.getElementById("wishlistIcon");
+                document.getElementById("wishlistBtn").addEventListener("click", async () => {
+                    const btn = document.getElementById("wishlistBtn");
+                    const icon = document.getElementById("wishlistIcon");
 
-  const variantId = btn.dataset.variant;
-  const productId = "<%= product._id %>";
+                    const variantId = btn.dataset.variant;
+                    const productId = "<%= product._id %>";
 
-  try {
-    const res = await fetch("/wishlist/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ productId, variantId })
-    });
+                    try {
+                        const res = await fetch("/wishlist/add", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ productId, variantId })
+                        });
 
-    const data = await res.json();
+                        const data = await res.json();
 
-    // 🔐 Not logged in
-    if (!data.success && data.redirect) {
-      window.location.href = data.redirect;
-      return;
-    }
+                        // 🔐 Not logged in
+                        if (!data.success && data.redirect) {
+                            window.location.href = data.redirect;
+                            return;
+                        }
 
-    // 🤍 → ❤️ Added
-    if (data.added) {
-      icon.classList.remove("fa-regular", "text-gray-400");
-      icon.classList.add("fa-solid", "text-brand-500");
-      btn.classList.add("border-brand-500");
-    }
+                        // 🤍 → ❤️ Added
+                        if (data.added) {
+                            icon.classList.remove("fa-regular", "text-gray-400");
+                            icon.classList.add("fa-solid", "text-brand-500");
+                            btn.classList.add("border-brand-500");
+                        }
 
-    // ❤️ → 🤍 Removed
-    if (data.removed) {
-      icon.classList.remove("fa-solid", "text-brand-500");
-      icon.classList.add("fa-regular", "text-gray-400");
-      btn.classList.remove("border-brand-500");
-    }
+                        // ❤️ → 🤍 Removed
+                        if (data.removed) {
+                            icon.classList.remove("fa-solid", "text-brand-500");
+                            icon.classList.add("fa-regular", "text-gray-400");
+                            btn.classList.remove("border-brand-500");
+                        }
 
-  } catch (err) {
-    console.error("Wishlist toggle error:", err);
-  }
-});
-
-
+                    } catch (err) {
+                        console.error("Wishlist toggle error:", err);
+                    }
+                });
 
 
 
 
-//script
-const isLoggedIn = <%=user?'true':'false'%>;
 
-  document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
-    .forEach(form => {
-      form.addEventListener('submit', function (e) {
-        if (!isLoggedIn) {
-          e.preventDefault();
 
-          Swal.fire({
-            icon: 'warning',
-            title: 'Login Required',
-            text: 'Please login to continue',
-            confirmButtonText: 'Login',
-            confirmButtonColor: '#ff4d6d'
-          }).then(() => {
-            window.location.href = '/login';
-          });
-        }
-      });
-    });
-</script>
+                //script
+                const isLoggedIn = <%=user?'true': 'false' %>;
 
-<script>
-document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+                document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
+                    .forEach(form => {
+                        form.addEventListener('submit', function (e) {
+                            if (!isLoggedIn) {
+                                e.preventDefault();
 
-  const btn = document.getElementById('addToCartBtn');
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Login Required',
+                                    text: 'Please login to continue',
+                                    confirmButtonText: 'Login',
+                                    confirmButtonColor: '#ff4d6d'
+                                }).then(() => {
+                                    window.location.href = '/login';
+                                });
+                            }
+                        });
+                    });
+            </script>
 
-  // If already converted → go to cart
-  if (btn.dataset.state === 'go') {
-    window.location.href = '/cart';
-    return;
-  }
+            <script>
+                document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
 
-  const payload = {
-    productId: "<%= product._id %>",
-    variantId: document.getElementById('cartVariantId').value,
-    quantity: document.getElementById('formQuantity').value
-  };
+                    const btn = document.getElementById('addToCartBtn');
 
-  try {
-    const res = await fetch('/cart/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+                    // If already converted → go to cart
+                    if (btn.dataset.state === 'go') {
+                        window.location.href = '/cart';
+                        return;
+                    }
 
-    const data = await res.json();
+                    const payload = {
+                        productId: "<%= product._id %>",
+                        variantId: document.getElementById('cartVariantId').value,
+                        quantity: document.getElementById('formQuantity').value
+                    };
 
-    // 🔐 Not logged in → redirect
-    if (res.status === 401 && data.redirect) {
-      window.location.href = data.redirect;
-      return;
-    }
+                    try {
+                        const res = await fetch('/cart/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
 
-    if (!data.success && data.redirect) {
-  Swal.fire({
-    icon: 'warning',
-    title: 'Product Unavailable',
-    text: 'This product is no longer available',
-    confirmButtonColor: '#ff4d6d'
-  }).then(() => {
-    window.location.href = data.redirect;
-  });
-  return;
-}
+                        const data = await res.json();
 
-    // ✅ Success
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Added to Cart',
-        text: 'Item successfully added to your cart',
-        timer: 1600,
-        showConfirmButton: false
-      });
+                        // 🔐 Not logged in → redirect
+                        if (res.status === 401 && data.redirect) {
+                            window.location.href = data.redirect;
+                            return;
+                        }
 
-      // 🔁 Change button to "Go to Cart"
-      btn.innerText = 'Go to Cart';
-      btn.innerText = 'Go to Cart';
+                        if (!data.success && data.redirect) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Product Unavailable',
+                                text: 'This product is no longer available',
+                                confirmButtonColor: '#ff4d6d'
+                            }).then(() => {
+                                window.location.href = data.redirect;
+                            });
+                            return;
+                        }
 
-btn.classList.remove(
-  'bg-brand-500',
-  'hover:bg-brand-600'
-);
+                        // ✅ Success
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Added to Cart',
+                                text: 'Item successfully added to your cart',
+                                timer: 1600,
+                                showConfirmButton: false
+                            });
 
-btn.classList.add(
-  'bg-[#2dd4bf]',        // teal
-  'hover:bg-[#14b8a6]',  // darker teal
-  'text-white'
-);
+                            // 🔁 Change button to "Go to Cart"
+                            btn.innerText = 'Go to Cart';
+                            btn.innerText = 'Go to Cart';
 
-btn.dataset.state = 'go';
-    }
+                            btn.classList.remove(
+                                'bg-brand-500',
+                                'hover:bg-brand-600'
+                            );
 
-  } catch (err) {
-    console.error(err);
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops!',
-      text: 'Something went wrong'
-    });
-  }
-});
+                            btn.classList.add(
+                                'bg-[#2dd4bf]',        // teal
+                                'hover:bg-[#14b8a6]',  // darker teal
+                                'text-white'
+                            );
+
+                            btn.dataset.state = 'go';
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: 'Something went wrong'
+                        });
+                    }
+                });
 
             </script>
 
+            <script>
+                const zoomContainer = document.getElementById("zoomContainer");
+                const zoomImage = document.getElementById("mainImage");
 
+                zoomContainer.addEventListener("mousemove", (e) => {
+                    const rect = zoomContainer.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                    zoomImage.style.transformOrigin = `${x}% ${y}%`;
+                });
+
+                zoomContainer.addEventListener("mouseleave", () => {
+                    zoomImage.style.transformOrigin = "center center";
+                });
+            </script>
 
 </body>
 
