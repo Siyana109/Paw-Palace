@@ -4,6 +4,7 @@ import authController from "../controllers/userControllers/authController.js";
 import userMiddleware from "../middlewares/userMiddleware.js"
 import profileController from "../controllers/userControllers/profileController.js";
 import homeController from "../controllers/userControllers/homeController.js";
+import productController from "../controllers/userControllers/productController.js";
 
 
 router.get('/',authController.landingPage)
@@ -47,6 +48,7 @@ router.post('/reset-email/verify-otp', userMiddleware.checkSession, userMiddlewa
 router.post('/reset-email/resend-otp', userMiddleware.checkSession, profileController.resendEmailOtp);
 
 router.get("/home", homeController.homePage);
+router.get('/product/:id', productController.getProductDetails);
 
 router.post('/logout', authController.logout)
 

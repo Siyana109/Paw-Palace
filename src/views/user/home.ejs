@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Our Collection | PawPalace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -21,120 +23,154 @@
         }
     </script>
 </head>
+
 <body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen">
 
     <%- include('../partials/header') %>
 
-    <section class="bg-[#fff1f2] py-16 px-6 text-center">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-brand-500 bg-white px-3 py-1 rounded-full shadow-sm mb-4 inline-block">Premium Selection</span>
-        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Shop Our Collection</h1>
-        <p class="text-gray-500 max-w-2xl mx-auto font-medium">Discover the happiest toys, tastiest treats, and coziest beds. Filter by category to find exactly what your furry friend needs.</p>
-    </section>
+        <section class="bg-[#fff1f2] py-16 px-6 text-center">
+            <span
+                class="text-[10px] font-bold uppercase tracking-widest text-brand-500 bg-white px-3 py-1 rounded-full shadow-sm mb-4 inline-block">Premium
+                Selection</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Shop Our Collection</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto font-medium">Discover the happiest toys, tastiest treats, and
+                coziest beds. Filter by category to find exactly what your furry friend needs.</p>
+        </section>
 
-    <main class="max-w-7xl mx-auto py-12 px-6">
-        <div class="flex flex-col lg:flex-row gap-12">
-            
-            <aside class="w-full lg:w-64 space-y-8">
-                <div class="relative group">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-brand-500 transition"></i>
-                    <input type="text" placeholder="Search products" class="w-full pl-11 pr-4 py-3 rounded-2xl border-2 border-transparent bg-white shadow-sm focus:border-brand-500 outline-none transition font-medium">
-                </div>
+        <main class="max-w-7xl mx-auto py-12 px-6">
+            <div class="flex flex-col lg:flex-row gap-12">
 
-                <div>
-                    <h3 class="font-bold mb-4 flex justify-between items-center">Pet Type <i class="fa-solid fa-chevron-up text-[10px]"></i></h3>
-                    <div class="space-y-3">
-                        <% const petTypes = ['Dogs', 'Puppies', 'Cats', 'Kittens']; %>
-                        <% petTypes.forEach(type => { %>
-                            <label class="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500 accent-brand-500">
-                                <span class="text-sm font-bold text-gray-500 group-hover:text-accent-navy transition"><%= type %></span>
-                            </label>
-                        <% }) %>
-                    </div>
-                </div>
+                <aside class="w-full lg:w-64 space-y-8">
+                    <form method="GET" action="/home" class="relative">
+                        <input type="text" name="search" value="<%= query.search || '' %>" placeholder="Search products"
+                            class="w-full pl-11 pr-10 py-3 rounded-2xl bg-white shadow-sm" />
 
-                <div>
-                    <h3 class="font-bold mb-4 flex justify-between items-center">Categories <i class="fa-solid fa-chevron-up text-[10px]"></i></h3>
-                    <div class="space-y-3">
-                        <% const filterCats = ['Bedding & Mats', 'Toys & Play', 'Apparel', 'Grooming & Spa']; %>
-                        <% filterCats.forEach(cat => { %>
-                            <label class="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500 accent-brand-500">
-                                <span class="text-sm font-bold text-gray-500 group-hover:text-accent-navy transition"><%= cat %></span>
-                            </label>
-                        <% }) %>
-                    </div>
-                </div>
-            </aside>
+                        <% if (query.search) { %>
+                            <a href="/home" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                ✕
+                            </a>
+                            <% } %>
+                    </form>
 
-            <div class="flex-1">
-                <div class="flex justify-end mb-8">
-                    <button class="bg-white px-6 py-2 rounded-xl shadow-sm font-bold text-sm flex items-center gap-2 border border-gray-100 hover:bg-gray-50 transition">
-                        Sort by: Featured <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                    </button>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    <% products.forEach(product => { %>
-                        <div class="bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-xl transition-all duration-500 group relative">
-                            <div class="relative aspect-square rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
-                                <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                                
-                                <% if (product.isSale) { %>
-                                    <span class="absolute top-4 left-4 bg-brand-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Sale</span>
-                                <% } %>
-
-                                <% if (product.isBestSeller) { %>
-                                    <span class="absolute top-4 left-4 bg-accent-navy text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Best Seller</span>
-                                <% } %>
-
-                                <div class="absolute inset-0 bg-accent-navy/20 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center gap-3">
-                                    <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-accent-navy hover:bg-brand-500 hover:text-white transition transform translate-y-4 group-hover:translate-y-0 duration-500">
-                                        <i class="fa-solid fa-heart"></i>
-                                    </button>
-                                    <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-accent-navy hover:bg-brand-500 hover:text-white transition transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75">
-                                        <i class="fa-solid fa-cart-shopping"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="px-2 pb-2">
-                                <p class="text-[10px] font-bold text-accent-teal uppercase tracking-widest mb-1"><%= product.category %></p>
-                                <h3 class="font-extrabold text-lg mb-2 group-hover:text-brand-500 transition line-clamp-1"><%= product.name %></h3>
-                                
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <% if (product.salePrice) { %>
-                                            <span class="text-xl font-black text-brand-500">₹<%= product.salePrice %></span>
-<span class="text-sm text-gray-300 line-through font-bold">₹<%= product.price %></span>
-
-                                        <% } else { %>
-                                            <span class="text-xl font-black text-accent-navy">₹<%= product.price %></span>
-
-                                        <% } %>
-                                    </div>
-                                    <div class="flex text-yellow-400 text-[10px] gap-0.5">
-                                        <% for(let i=0; i<5; i++) { %>
-                                            <i class="fa-solid fa-star <%= i < product.rating ? '' : 'text-gray-200' %>"></i>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            </div>
+                    <div>
+                        <h3 class="font-bold mb-4 flex justify-between items-center">Pet Type <i
+                                class="fa-solid fa-chevron-up text-[10px]"></i></h3>
+                        <div class="space-y-3">
+                            <% const petTypes=['Dogs', 'Puppies' , 'Cats' , 'Kittens' ]; %>
+                                <% petTypes.forEach(type=> { %>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox"
+                                            class="w-5 h-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500 accent-brand-500">
+                                        <span
+                                            class="text-sm font-bold text-gray-500 group-hover:text-accent-navy transition">
+                                            <%= type %>
+                                        </span>
+                                    </label>
+                                    <% }) %>
                         </div>
-                    <% }) %>
-                </div>
+                    </div>
 
-                <div class="mt-16 flex justify-center items-center gap-2">
-                    <button class="w-10 h-10 rounded-xl border border-gray-100 text-gray-400 hover:bg-white transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-                    <button class="w-10 h-10 rounded-xl bg-brand-500 text-white font-bold">1</button>
-                    <button class="w-10 h-10 rounded-xl bg-white text-gray-400 font-bold hover:text-brand-500 transition">2</button>
-                    <button class="w-10 h-10 rounded-xl bg-white text-gray-400 font-bold hover:text-brand-500 transition">3</button>
-                    <button class="w-10 h-10 rounded-xl border border-gray-100 text-gray-400 hover:bg-white transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                    <div>
+                        <h3 class="font-bold mb-4 flex justify-between items-center">Categories <i
+                                class="fa-solid fa-chevron-up text-[10px]"></i></h3>
+
+                    </div>
+
+
+
+                </aside>
+
+
+                <div class="flex-1">
+                    <div class="flex justify-end mb-8">
+                        <form method="GET">
+                            <select name="sort" onchange="this.form.submit()"
+                                class="bg-white px-4 py-2 rounded-xl font-bold text-sm">
+
+                                <option value="featured">Featured</option>
+                                <option value="price_asc">Price: Low → High</option>
+                                <option value="price_desc">Price: High → Low</option>
+                                <option value="name_asc">Name A → Z</option>
+                                <option value="name_desc">Name Z → A</option>
+
+                            </select>
+                        </form>
+
+                    </div>
+
+                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+  <% products.forEach(product => { %>
+    <div class="bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-xl
+                transition-all duration-500 group relative flex flex-col">
+
+      <!-- IMAGE -->
+      <a href="/product/<%= product._id %>">
+        <div class="relative aspect-square rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
+          <img src="<%= product.image %>" alt="<%= product.name %>"
+               class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+        </div>
+      </a>
+
+      <!-- HOVER ACTIONS -->
+      <div class="absolute inset-0 bg-accent-navy/20 opacity-0 group-hover:opacity-100
+                  transition duration-300 flex items-center justify-center gap-3 pointer-events-none">
+        <form action="/wishlist/add" method="POST" class="pointer-events-auto">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white">
+            <i class="fa-solid fa-heart"></i>
+          </button>
+        </form>
+
+        <form action="/cart/add" method="POST" class="pointer-events-auto">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white">
+            <i class="fa-solid fa-cart-shopping"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="px-2 pb-2 flex flex-col flex-grow justify-between">
+        <div>
+          <p class="text-[10px] font-bold text-accent-teal uppercase tracking-widest mb-1 line-clamp-1">
+            <%= product.category %>
+          </p>
+
+          <a href="/product/<%= product._id %>">
+            <h3 class="font-extrabold text-lg mb-2 hover:text-brand-500 transition line-clamp-2 min-h-[3rem]">
+              <%= product.name %>
+            </h3>
+          </a>
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+          <span class="text-xl font-black">₹<%= product.price %></span>
+        </div>
+      </div>
+
+    </div>
+  <% }) %>
+
+</div>
+
+                    </div>
+
+                    <div class="flex justify-center gap-2 mt-10">
+                        <% for (let i=1; i <=totalPages; i++) { %>
+                            <a href="?page=<%= i %>" class="w-10 h-10 flex items-center justify-center rounded-xl
+       <%= currentPage === i ? 'bg-brand-500 text-white' : 'bg-white' %>">
+                                <%= i %>
+                            </a>
+                            <% } %>
+                    </div>
+
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
 
-    <%- include('../partials/footer') %>
+        <%- include('../partials/footer') %>
 </body>
+
 </html>

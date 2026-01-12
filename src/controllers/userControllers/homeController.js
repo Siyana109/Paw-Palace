@@ -1,69 +1,122 @@
 import Variant from "../../model/variantModel.js";
 import Product from "../../model/productModel.js";
+import mongoose from "mongoose";
 
 const homePage = async (req, res) => {
   try {
-    const products = await Product.find({ isActive: true })
-      .populate("categoryId", "categoryName")
-      .lean();
+    /* ------------------ QUERY PARAMS ------------------ */
+    const {
+      search = "",
+      category,
+      minPrice,
+      maxPrice,
+      sort = "featured",
+      page = 1
+    } = req.query;
 
-    // ✅ CORRECT
-    const productIds = products.map(p => p._id);
+    const limit = 6;
+    const skip = (page - 1) * limit;
 
-    const variants = await Variant.aggregate([
-  {
-    $addFields: {
-      productObjId: {
-        $toObjectId: "$product"
-      }
-    }
-  },
-  {
-    $match: {
-      productObjId: { $in: productIds }
-    }
-  },
-  {
-    $group: {
-      _id: "$productObjId",
-      price: { $min: "$price" },
-      coverImage: { $first: "$coverImage" }
-    }
-  }
-]);
+    /* ------------------ PRODUCT MATCH ------------------ */
+    const productMatch = {
+      isActive: true
+    };
 
-    const variantMap = {};
-    variants.forEach(v => {
-      variantMap[v._id.toString()] = v;
+    if (search) {
+      productMatch.productName = {
+        $regex: search,
+        $options: "i"
+      };
+    }
+
+    if (category) {
+      productMatch.categoryId = new mongoose.Types.ObjectId(category);
+    }
+
+    /* ------------------ SORT LOGIC ------------------ */
+    let sortStage = {};
+
+    switch (sort) {
+      case "price_asc":
+        sortStage = { price: 1 };
+        break;
+      case "price_desc":
+        sortStage = { price: -1 };
+        break;
+      case "name_asc":
+        sortStage = { name: 1 };
+        break;
+      case "name_desc":
+        sortStage = { name: -1 };
+        break;
+      default:
+        sortStage = { createdAt: -1 };
+    }
+
+    /* ------------------ AGGREGATION ------------------ */
+    const pipeline = [
+      { $match: productMatch },
+
+      {
+        $lookup: {
+          from: "variants",
+          localField: "_id",
+          foreignField: "product",
+          as: "variants"
+        }
+      },
+
+      { $unwind: "$variants" },
+
+      /* Price Filter */
+      ...(minPrice || maxPrice
+        ? [{
+            $match: {
+              "variants.price": {
+                ...(minPrice && { $gte: Number(minPrice) }),
+                ...(maxPrice && { $lte: Number(maxPrice) })
+              }
+            }
+          }]
+        : []),
+
+      /* Group per product */
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$productName" },
+          category: { $first: "$categoryId" },
+          image: { $first: "$variants.coverImage" },
+          price: { $min: "$variants.price" },
+          createdAt: { $first: "$createdAt" }
+        }
+      },
+
+      { $sort: sortStage },
+      { $skip: skip },
+      { $limit: limit }
+    ];
+
+    const products = await Product.aggregate(pipeline);
+
+    /* ------------------ COUNT FOR PAGINATION ------------------ */
+    const countPipeline = [...pipeline];
+    countPipeline.splice(-3); // remove skip & limit
+
+    const totalProducts = await Product.aggregate(countPipeline);
+
+    const totalPages = Math.ceil(totalProducts.length / limit);
+
+    /* ------------------ RESPONSE ------------------ */
+    res.render("user/home", {
+      products,
+      currentPage: Number(page),
+      totalPages,
+      query: req.query
     });
 
-    const finalProducts = products
-      .map(p => {
-        const v = variantMap[p._id.toString()];
-        if (!v) return null;
-
-        return {
-          name: p.productName,
-          category: p.categoryId?.categoryName || "Uncategorized",
-          image: v.coverImage,
-          price: v.price,
-          salePrice: null,
-          rating: 4,
-          isSale: false,
-          isBestSeller: false
-        };
-      })
-      .filter(Boolean);
-
-    console.log("FINAL PRODUCTS:", finalProducts);
-    console.log("PRODUCT IDS:", productIds);
-console.log("VARIANTS FOUND:", variants);
-
-
-    res.render("user/home", { products: finalProducts });
-
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).send("Server Error");
   }
 };

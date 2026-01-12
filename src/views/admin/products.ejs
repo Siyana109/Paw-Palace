@@ -84,8 +84,9 @@
               <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
                 <tr>
                   <th class="px-8 py-5">Product</th>
-                  <th class="px-6 py-5">Category</th>
                   <th class="px-6 py-5">Brand</th>
+                  <th class="px-6 py-5">Category</th>
+                  <th class="px-6 py-5">Pet Type</th>
                   <th class="px-6 py-5">Stock</th>
                   <th class="px-6 py-5">Status</th>
                   <th class="px-8 py-5">Actions</th>
@@ -124,6 +125,11 @@
                       <%= product.categoryId ? product.categoryId.categoryName : '-' %>
                     </td>
 
+                    <!-- Pet Type -->
+                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                      <%= product.petType || '-' %>
+                    </td>
+
                     <!-- STOCK -->
                     <td class="px-6 py-5" data-product-stock="<%= product._id %>">
                       <% if (product.totalStock===0) { %>
@@ -152,7 +158,8 @@
                           data-name="<%= product.productName %>"
                           data-brand="<%= product.brandId ? product.brandId._id : '' %>"
                           data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
-                          data-description="<%= product.description %>" data-status="<%= product.isActive %>"
+                          data-description="<%= product.description %>" 
+                          data-pettype="<%= product.petType %>" data-status="<%= product.isActive %>"
                           class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
                           title="Edit Product">
                           <i class="fa-solid fa-pen-to-square text-sm"></i>
@@ -281,6 +288,18 @@
           </select>
         </div>
 
+        <!-- PET TYPE -->
+<div>
+  <label class="block text-sm font-bold mb-1">Pet Type</label>
+  <select name="petType" required
+    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+    <option value="">Select Pet Type</option>
+    <option value="Dog">Dog</option>
+    <option value="Cat">Cat</option>
+    <option value="Puppy">Puppy</option>
+    <option value="Kitten">Kitten</option>
+  </select>
+</div>
 
         <!-- DESCRIPTION -->
         <div>
@@ -348,6 +367,19 @@
               <% }) %>
           </select>
         </div>
+
+        <!-- PET TYPE -->
+<div>
+  <label class="block text-sm font-bold mb-1">Pet Type</label>
+  <select id="editPetType" name="petType" required
+    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+    <option value="Dog">Dog</option>
+    <option value="Cat">Cat</option>
+    <option value="Puppy">Puppy</option>
+    <option value="Kitten">Kitten</option>
+  </select>
+</div>
+
 
         <!-- STATUS -->
         <div>
@@ -752,6 +784,7 @@
     document.getElementById("editProductName").value = el.dataset.name;
     document.getElementById("editBrandId").value = el.dataset.brand;
     document.getElementById("editCategoryId").value = el.dataset.category;
+    document.getElementById("editPetType").value = el.dataset.pettype;
     document.getElementById("editDescription").value = el.dataset.description;
 
     // ✅ SET STATUS
