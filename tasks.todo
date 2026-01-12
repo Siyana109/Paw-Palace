@@ -44,8 +44,8 @@ User side:
 
     ✔ Product details page @done (1/12/2026, 12:06:25 PM)
     ☐ Zoomable images
-    ☐ Product highlights and related product recommendations
-    ☐ Redirect to listing if product blocked/unavailable (on refresh or actions)
+    ✔ Product highlights and related product recommendations @done (1/12/2026, 3:06:07 PM)
+    ✔ Redirect to listing if product blocked/unavailable (on refresh or actions) @done (1/12/2026, 5:04:37 PM)
     ☐ Breadcrumbs, ratings, price, discounts/coupons, reviews, stock info
     ☐ Error handling for sold out/unavailable/out of stock
 

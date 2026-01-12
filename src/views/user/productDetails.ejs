@@ -8,6 +8,7 @@
         <%= product.productName %> | PawPalace
     </title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -151,27 +152,40 @@
 </p>
 
                         <!-- Add to Cart -->
-                        <form action="/cart/add" method="POST" class="flex-1" id="addToCartForm">
+                        <form class="flex-1" id="addToCartForm">
                             <input type="hidden" name="productId" value="<%= product._id %>">
                             <input type="hidden" name="variantId" id="cartVariantId" value="<%= variants[0]._id %>">
                             <input type="hidden" name="quantity" id="formQuantity" value="1">
 
-                            <button type="submit" id="addToCartBtn"
-                                class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                                <%=variants[0].stock===0 ? 'disabled' : '' %>>
-                                Add to Cart
-                            </button>
+                            <% if (isInCart) { %>
+  <a href="/cart"
+     class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
+            flex items-center justify-center hover:bg-black transition">
+    Go to Cart
+  </a>
+<% } else { %>
+  <button type="submit" id="addToCartBtn"
+    class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm
+           hover:bg-brand-600 transition">
+    Add to Cart
+  </button>
+<% } %>
+
                         </form>
 
                         <!-- Wishlist -->
-                        <form action="/wishlist/add" method="POST">
-                            <input type="hidden" name="productId" value="<%= product._id %>">
-                            <input type="hidden" name="variantId" id="wishlistVariantId" value="<%= variants[0]._id %>">
-                            <button type="submit"
-                                class="w-12 h-12 bg-white border border-gray-200 text-gray-400 rounded-xl font-bold text-lg hover:border-brand-500 hover:text-brand-500 transition-all active:scale-95 flex items-center justify-center">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                        </form>
+                       <button
+  id="wishlistBtn"
+  data-variant="<%= variants[0]._id %>"
+  class="w-12 h-12 bg-white border border-gray-200 rounded-xl
+         text-gray-400 hover:border-brand-500 hover:text-brand-500
+         transition-all active:scale-95 flex items-center justify-center">
+  <i id="wishlistIcon"
+   class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
+</i>
+
+</button>
+
                     </div>
 
                     <!-- Delivery Info -->
@@ -225,33 +239,40 @@
 
             <!-- RELATED PRODUCTS -->
             <section class="mt-24">
-                <h2 class="text-xl font-bold text-accent-navy mb-8">You might also like</h2>
+  <h2 class="text-xl font-bold text-accent-navy mb-8">You might also like</h2>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% relatedProducts.forEach(relProduct=> { %>
-                        <a href="/product/<%= relProduct._id %>"
-                            class="group block bg-white rounded-3xl p-3 shadow-sm hover:shadow-lg transition-all duration-300">
-                            <div class="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden mb-3 relative">
-                                <!-- Placeholder Image -->
-                                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=60"
-                                    class="w-full h-full object-cover">
-                            </div>
-                            <div class="px-1 mb-2">
-                                <h3 class="font-bold text-xs text-brand-500 uppercase tracking-wide mb-1">
-                                    <%= relProduct.petType %>
-                                </h3>
-                                <h3
-                                    class="font-bold text-gray-800 text-sm line-clamp-1 mb-2 group-hover:text-brand-500 transition">
-                                    <%= relProduct.productName %>
-                                </h3>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-sm text-brand-500">₹<%= relProduct.price %></span>
-                                </div>
-                            </div>
-                        </a>
-                        <% }) %>
-                </div>
-            </section>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <% relatedProducts.forEach(item => { %>
+      <% if (item.variant) { %>
+        <a href="/product/<%= item.product._id %>"
+          class="group block bg-white rounded-3xl p-3 shadow-sm hover:shadow-lg transition-all duration-300">
+
+          <div class="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden mb-3">
+            <img src="<%= item.variant.coverImage %>"
+              class="w-full h-full object-cover group-hover:scale-105 transition">
+          </div>
+
+          <div class="px-1">
+            <p class="text-xs uppercase text-brand-500 font-bold mb-1">
+              <%= item.product.petType %>
+            </p>
+
+            <h3 class="font-bold text-gray-800 text-sm line-clamp-1 mb-2
+              group-hover:text-brand-500 transition">
+              <%= item.product.productName %>
+            </h3>
+
+            <span class="font-bold text-sm text-brand-500">
+              ₹<%= item.variant.offerApplied ? item.variant.offerPrice : item.variant.price %>
+            </span>
+          </div>
+
+        </a>
+      <% } %>
+    <% }) %>
+  </div>
+</section>
+
 
         </main>
 
@@ -484,7 +505,168 @@ if (val >= maxStock) {
                 // Init
                 document.addEventListener('DOMContentLoaded', initSelectors);
 
+
+
+        //script
+
+              document.getElementById("wishlistBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("wishlistBtn");
+  const icon = document.getElementById("wishlistIcon");
+
+  const variantId = btn.dataset.variant;
+  const productId = "<%= product._id %>";
+
+  try {
+    const res = await fetch("/wishlist/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ productId, variantId })
+    });
+
+    const data = await res.json();
+
+    // 🔐 Not logged in
+    if (!data.success && data.redirect) {
+      window.location.href = data.redirect;
+      return;
+    }
+
+    // 🤍 → ❤️ Added
+    if (data.added) {
+      icon.classList.remove("fa-regular", "text-gray-400");
+      icon.classList.add("fa-solid", "text-brand-500");
+      btn.classList.add("border-brand-500");
+    }
+
+    // ❤️ → 🤍 Removed
+    if (data.removed) {
+      icon.classList.remove("fa-solid", "text-brand-500");
+      icon.classList.add("fa-regular", "text-gray-400");
+      btn.classList.remove("border-brand-500");
+    }
+
+  } catch (err) {
+    console.error("Wishlist toggle error:", err);
+  }
+});
+
+
+
+
+
+
+//script
+const isLoggedIn = <%=user?'true':'false'%>;
+
+  document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
+    .forEach(form => {
+      form.addEventListener('submit', function (e) {
+        if (!isLoggedIn) {
+          e.preventDefault();
+
+          Swal.fire({
+            icon: 'warning',
+            title: 'Login Required',
+            text: 'Please login to continue',
+            confirmButtonText: 'Login',
+            confirmButtonColor: '#ff4d6d'
+          }).then(() => {
+            window.location.href = '/login';
+          });
+        }
+      });
+    });
+</script>
+
+<script>
+document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const btn = document.getElementById('addToCartBtn');
+
+  // If already converted → go to cart
+  if (btn.dataset.state === 'go') {
+    window.location.href = '/cart';
+    return;
+  }
+
+  const payload = {
+    productId: "<%= product._id %>",
+    variantId: document.getElementById('cartVariantId').value,
+    quantity: document.getElementById('formQuantity').value
+  };
+
+  try {
+    const res = await fetch('/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    // 🔐 Not logged in → redirect
+    if (res.status === 401 && data.redirect) {
+      window.location.href = data.redirect;
+      return;
+    }
+
+    if (!data.success && data.redirect) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'Product Unavailable',
+    text: 'This product is no longer available',
+    confirmButtonColor: '#ff4d6d'
+  }).then(() => {
+    window.location.href = data.redirect;
+  });
+  return;
+}
+
+    // ✅ Success
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Added to Cart',
+        text: 'Item successfully added to your cart',
+        timer: 1600,
+        showConfirmButton: false
+      });
+
+      // 🔁 Change button to "Go to Cart"
+      btn.innerText = 'Go to Cart';
+      btn.innerText = 'Go to Cart';
+
+btn.classList.remove(
+  'bg-brand-500',
+  'hover:bg-brand-600'
+);
+
+btn.classList.add(
+  'bg-[#2dd4bf]',        // teal
+  'hover:bg-[#14b8a6]',  // darker teal
+  'text-white'
+);
+
+btn.dataset.state = 'go';
+    }
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops!',
+      text: 'Something went wrong'
+    });
+  }
+});
+
             </script>
+
+
+
 </body>
 
 </html>
