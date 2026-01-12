@@ -35,14 +35,14 @@ Admin side:
 
 User side:
     ✔ Product listing page @done (1/9/2026, 3:31:35 PM)
-    ☐ Search with cancel/clear button (backend)
+    ✔ Search with cancel/clear button (backend) @done (1/12/2026, 11:44:04 AM)
     ☐ Pagination (backend)
-    ☐ Sorting options (Price low to high, high to low, A-Z, Z-A)
+    ✔ Sorting options (Price low to high, high to low, A-Z, Z-A) @done (1/12/2026, 11:43:58 AM)
     ☐ Filters (Category, Price range, Brand optional)
     ☐ Combined search, sort, filter
     ✔ Hide blocked/unlisted products @done (1/9/2026, 3:32:11 PM)
 
-    ☐ Product details page
+    ✔ Product details page @done (1/12/2026, 12:06:25 PM)
     ☐ Zoomable images
     ☐ Product highlights and related product recommendations
     ☐ Redirect to listing if product blocked/unavailable (on refresh or actions)

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= product.productName %> | PawPalace
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Quicksand', 'sans-serif'] // Using Quicksand for display as well for now
+                    },
+                    colors: {
+                        brand: { 500: '#ff4d6d', 50: '#fff0f3' }, // Slightly pinker red based on image
+                        accent: {
+                            navy: '#0f172a',
+                            cream: '#fffdf9', // Warmer cream
+                            teal: '#99f6e4', // Lighter teal for selection
+                            tealText: '#0d9488'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-accent-cream font-sans text-gray-700 antialiased min-h-screen flex flex-col">
+
+    <%- include('../partials/header') %>
+
+        <!-- BREADCRUMBS -->
+        <nav class="py-6 px-6 md:px-12 max-w-7xl mx-auto w-full">
+            <ol class="flex items-center space-x-2 text-xs md:text-sm text-gray-400 font-medium">
+                <li><a href="/home" class="hover:text-brand-500 transition">Home</a></li>
+                <li>/</li>
+                <li><a href="/home?category=<%= product.categoryId._id %>" class="hover:text-brand-500 transition">
+                        <%= product.categoryId.name %>
+                    </a></li>
+                <li>/</li>
+                <li class="text-brand-500 line-clamp-1">
+                    <%= product.productName %>
+                </li>
+            </ol>
+        </nav>
+
+        <main class="flex-grow max-w-7xl mx-auto px-6 md:px-12 w-full pb-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+
+                <!-- LEFT COLUMN: IMAGES -->
+                <div class="space-y-6 select-none relative">
+                    <!-- Main Image -->
+                    <div class="relative w-full aspect-square bg-gray-100 rounded-[2.5rem] overflow-hidden group">
+                        <!-- Best Seller Badge -->
+                        <div class="absolute top-6 right-6 z-10">
+                            <span class="bg-white text-brand-500 text-xs font-bold px-4 py-2 rounded-full shadow-sm">
+                                Best Seller
+                            </span>
+                        </div>
+
+                        <img id="mainImage" src="<%= variants[0].coverImage %>" alt="<%= product.productName %>"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div class="flex gap-4" id="thumbnailContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: PRODUCT DETAILS -->
+                <div class="flex flex-col pt-4">
+
+                    <!-- Premium Tag -->
+                    <!-- <div class="mb-4">
+                        <span
+                            class="bg-teal-50 text-teal-700 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md">
+                            Premium Comfort
+                        </span>
+                    </div> -->
+
+                    <!-- Title -->
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-accent-navy mb-2 leading-tight">
+                        <%= product.productName %>
+                    </h1>
+
+                    <!-- Price & Rating -->
+                    <div class="flex items-end gap-4 mb-8">
+                        <div class="flex items-baseline gap-3">
+                            <span id="priceDisplay" class="text-3xl font-black text-brand-500">
+                                ₹<%= variants[0].offerApplied ? variants[0].offerPrice : variants[0].price %>
+                            </span>
+                            <span id="originalPriceDisplay"
+                                class="text-lg text-gray-400 line-through decoration-2 <%= variants[0].offerApplied ? '' : 'hidden' %>">
+                                ₹<%= variants[0].price %>
+                            </span>
+                        </div>
+                        <div class="pb-1 text-xs text-gray-400 font-medium">(128 Reviews)</div>
+                    </div>
+
+                    <!-- SELECT: SIZE -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-gray-800 mb-3 ml-1">Select Size</label>
+                        <div class="flex flex-wrap gap-3" id="sizeSelectors">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- SELECT: COLOR -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-gray-800 mb-3 ml-1">Select Color</label>
+                        <div class="flex flex-wrap gap-3" id="colorSelectors">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS ROW -->
+                    <div class="flex items-center gap-4 mb-4">
+                        <!-- Quantity Stepper -->
+                        <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
+                            <button onclick="updateQuantity(-1)"
+                                class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="5"
+                                class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
+                            <button id="qtyPlusBtn" onclick="updateQuantity(1)"
+  class="w-8 h-full flex items-center justify-center font-bold text-lg transition">
+  +
+</button>
+                            </div>
+<p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
+  Only <span id="stockCount"></span> items available
+</p>
+
+                        <!-- Add to Cart -->
+                        <form action="/cart/add" method="POST" class="flex-1" id="addToCartForm">
+                            <input type="hidden" name="productId" value="<%= product._id %>">
+                            <input type="hidden" name="variantId" id="cartVariantId" value="<%= variants[0]._id %>">
+                            <input type="hidden" name="quantity" id="formQuantity" value="1">
+
+                            <button type="submit" id="addToCartBtn"
+                                class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                                <%=variants[0].stock===0 ? 'disabled' : '' %>>
+                                Add to Cart
+                            </button>
+                        </form>
+
+                        <!-- Wishlist -->
+                        <form action="/wishlist/add" method="POST">
+                            <input type="hidden" name="productId" value="<%= product._id %>">
+                            <input type="hidden" name="variantId" id="wishlistVariantId" value="<%= variants[0]._id %>">
+                            <button type="submit"
+                                class="w-12 h-12 bg-white border border-gray-200 text-gray-400 rounded-xl font-bold text-lg hover:border-brand-500 hover:text-brand-500 transition-all active:scale-95 flex items-center justify-center">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Delivery Info -->
+                    <div class="flex items-center gap-12 text-xs text-gray-400 mb-12 ml-1">
+                        <span class="flex items-center gap-2">Free Delivery</span>
+                        <span class="flex items-center gap-2">30-Day Returns</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TABS SECTION -->
+            <div class="mt-8 max-w-4xl mx-auto">
+                <div class="flex justify-center gap-12 mb-8 border-b border-gray-100 relative">
+                    <button onclick="switchTab('description')" id="tab-description"
+                        class="pb-4 text-sm font-bold text-brand-500 border-b-2 border-brand-500 transition-all">
+                        Description
+                    </button>
+                    <button onclick="switchTab('reviews')" id="tab-reviews"
+                        class="pb-4 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-all">
+                        Reviews (128)
+                    </button>
+                </div>
+
+                <!-- Description Content -->
+                <div id="content-description"
+                    class="text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-500 space-y-4 animate-fade-in">
+                    <!-- <p>Designed for the ultimate napper, the <%= product.productName %> provides a safe haven for your
+                            pet. The raised rim creates a sense of security and provides head and neck support, while
+                            the super-soft filling offers joint and muscle pain relief.</p>
+                    <p>Perfect for pets who love to curl up! The deep crevices allow your pet to burrow, and the
+                        synthetic faux fur mimics the comfort of a mother's fur coat.</p> -->
+                    <ul class="list-disc list-inside pt-4 space-y-2 text-gray-400">
+                        <%= product.description %>
+                            <!-- Fallback descriptive bullets if description is short -->
+                            <!-- <li>Machine washable and dryer safe</li>
+                            <li>Water-resistant and dirt-resistant bottom</li>
+                            <li>Available in natural colors to seamlessly blend with decor</li> -->
+                    </ul>
+                </div>
+
+                <!-- Reviews Content (Hidden) -->
+                <div id="content-reviews" class="hidden text-center text-gray-400 py-10">
+                    <div class="flex flex-col items-center gap-4">
+                        <i class="fa-regular fa-comment-dots text-4xl text-gray-200"></i>
+                        <p>Reviews coming soon!</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- RELATED PRODUCTS -->
+            <section class="mt-24">
+                <h2 class="text-xl font-bold text-accent-navy mb-8">You might also like</h2>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <% relatedProducts.forEach(relProduct=> { %>
+                        <a href="/product/<%= relProduct._id %>"
+                            class="group block bg-white rounded-3xl p-3 shadow-sm hover:shadow-lg transition-all duration-300">
+                            <div class="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden mb-3 relative">
+                                <!-- Placeholder Image -->
+                                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=60"
+                                    class="w-full h-full object-cover">
+                            </div>
+                            <div class="px-1 mb-2">
+                                <h3 class="font-bold text-xs text-brand-500 uppercase tracking-wide mb-1">
+                                    <%= relProduct.petType %>
+                                </h3>
+                                <h3
+                                    class="font-bold text-gray-800 text-sm line-clamp-1 mb-2 group-hover:text-brand-500 transition">
+                                    <%= relProduct.productName %>
+                                </h3>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-sm text-brand-500">₹<%= relProduct.price %></span>
+                                </div>
+                            </div>
+                        </a>
+                        <% }) %>
+                </div>
+            </section>
+
+        </main>
+
+        <%- include('../partials/footer') %>
+
+            <!-- CLIENT SIDE LOGIC -->
+            <script>
+                const variants = <%- JSON.stringify(variants) %>;
+                let activeVariant = variants[0];
+
+                // Color Mapping Helper
+                const colorMap = {
+                    'White': '#ffffff',
+                    'Black': '#1a1a1a',
+                    'Red': '#ef4444',
+                    'Blue': '#3b82f6',
+                    'Green': '#22c55e',
+                    'Yellow': '#eab308',
+                    'Grey': '#9ca3af',
+                    'Gray': '#9ca3af',
+                    'Pink': '#f472b6',
+                    'Brown': '#78350f',
+                    'Beige': '#e5e5e5', // Used lighter beige
+                    'Cream': '#fef3c7',
+                    'Purple': '#a855f7',
+                    'Navy': '#1e3a8a'
+                };
+
+                function getHexColor(colorName) {
+                    return colorMap[colorName] || colorName; // Fallback to name if hex not found or is already hex
+                }
+
+                function initSelectors() {
+                    // Group variants by Size and Color to remove duplicates in display
+                    // FOR THIS UI: We assume variants are distinct combinations. 
+                    // The UI in image shows separated Size and Color. 
+                    // Complex logic needed if not all combinations exist. 
+                    // Simplified approach: Show all unique sizes and colors available for this product.
+                    // On click, valid combinations check or just strict filtering.
+
+                    // For now, let's just list the variants as buttons but styled differently.
+                    // Actually, the user wants "Select Size" [S] [M] [L] and "Select Color" (circles).
+                    // This implies a matrix. 
+
+                    const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
+                    const colors = [...new Set(variants.map(v => v.color).filter(Boolean))];
+
+                    renderSizeSelectors(sizes);
+                    renderColorSelectors(colors);
+                    selectVariant(variants[0]._id); // Re-select to apply styles
+                }
+
+                function renderSizeSelectors(sizes) {
+                    const container = document.getElementById('sizeSelectors');
+                    container.innerHTML = sizes.map(size => `
+                <button onclick="filterVariant('size', '${size}')" 
+                    id="size-btn-${size}"
+                    class="px-5 py-2 rounded-xl border font-bold text-xs transition-all shadow-sm
+                           hover:border-teal-400 hover:text-teal-600 bg-white">
+                    ${size}
+                </button>
+            `).join('');
+                }
+
+                function renderColorSelectors(colors) {
+                    const container = document.getElementById('colorSelectors');
+                    container.innerHTML = colors.map(color => `
+                <button onclick="filterVariant('color', '${color}')" 
+                    id="color-btn-${color}"
+                    class="w-8 h-8 rounded-full border border-gray-200 shadow-sm transition-transform hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 relative"
+                    style="background-color: ${getHexColor(color)}"
+                    title="${color}">
+                </button>
+            `).join('');
+                }
+
+                // Logic to find best match or specific variant
+                function filterVariant(type, value) {
+                    // Find a variant that matches the new selection + current state of other selection
+                    // If current active variant has Size M, Color Red. User clicks Size L. 
+                    // We look for Size L, Color Red. If exists, select it. If not, select first variant with Size L.
+
+                    let targetSize = activeVariant.size || '';
+                    let targetColor = activeVariant.color || '';
+
+                    if (type === 'size') targetSize = value;
+                    if (type === 'color') targetColor = value;
+
+                    const match = variants.find(v => (v.size == targetSize || !v.size) && (v.color == targetColor || !v.color));
+
+                    if (match) {
+                        selectVariant(match._id);
+                    } else {
+                        // Fallback: Find any variant with the new property
+                        const fallback = variants.find(v => type === 'size' ? v.size === value : v.color === value);
+                        if (fallback) selectVariant(fallback._id);
+                    }
+                }
+
+                function selectVariant(id) {
+                    activeVariant = variants.find(v => v._id === id);
+
+                    // Update Size Buttons
+                    if (activeVariant.size) {
+                        document.querySelectorAll('#sizeSelectors button').forEach(btn => {
+                            const isSelected = btn.id === `size-btn-${activeVariant.size}`;
+                            btn.className = isSelected
+                                ? 'px-5 py-2 rounded-xl border-2 border-accent-teal text-teal-700 bg-teal-50 font-bold text-xs shadow-none cursor-default'
+                                : 'px-5 py-2 rounded-xl border border-gray-200 text-gray-500 bg-white font-bold text-xs hover:border-gray-300 transition-all shadow-sm';
+                        });
+                    }
+
+                    // Update Color Buttons
+                    if (activeVariant.color) {
+                        document.querySelectorAll('#colorSelectors button').forEach(btn => {
+                            const isSelected = btn.id === `color-btn-${activeVariant.color}`;
+                            // Reset rings
+                            btn.style.boxShadow = isSelected ? '0 0 0 2px white, 0 0 0 4px #e5e7eb' : '';
+                        });
+                    }
+
+                    // Update UI
+                    updatePrice(activeVariant);
+                    updateImages(activeVariant);
+                    updateStock(activeVariant);
+
+                   // Reset quantity based on new variant
+document.getElementById('quantityInput').value = 1;
+document.getElementById('formQuantity').value = 1;
+
+// Hide stock message
+document.getElementById('stockMessage').classList.add('hidden');
+                }
+
+                function updatePrice(variant) {
+                    const priceEl = document.getElementById('priceDisplay');
+                    const origPriceEl = document.getElementById('originalPriceDisplay');
+
+                    if (variant.offerApplied) {
+                        priceEl.innerText = '₹' + variant.offerPrice;
+                        origPriceEl.innerText = '₹' + variant.price;
+                        origPriceEl.classList.remove('hidden');
+                    } else {
+                        priceEl.innerText = '₹' + variant.price;
+                        origPriceEl.classList.add('hidden');
+                    }
+                }
+
+                function updateImages(variant) {
+                    // Update Main
+                    const mainImg = document.getElementById('mainImage');
+                    mainImg.src = variant.coverImage;
+
+                    // Update Thumbnails
+                    const container = document.getElementById('thumbnailContainer');
+                    const images = [variant.coverImage, ...(variant.subImages || [])];
+
+                    container.innerHTML = images.map((src, idx) => `
+                <button onclick="document.getElementById('mainImage').src = '${src}'" 
+                        class="w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all bg-white p-1
+                        ${idx === 0 ? 'border-brand-500' : 'border-transparent hover:border-gray-200'}">
+                    <img src="${src}" class="w-full h-full object-cover rounded-xl">
+                </button>
+            `).join('');
+                }
+
+                function updateStock(variant) {
+                    const btn = document.getElementById('addToCartBtn');
+                    if (variant.stock > 0) {
+                        btn.disabled = false;
+                        btn.innerText = 'Add to Cart';
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'shadow-none');
+                    } else {
+                        btn.disabled = true;
+                        btn.innerHTML = 'Out of Stock';
+                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'shadow-none');
+                    }
+                }
+
+                function updateQuantity(change) {
+  const input = document.getElementById('quantityInput');
+  const formInput = document.getElementById('formQuantity');
+  const stockMsg = document.getElementById('stockMessage');
+  const stockCount = document.getElementById('stockCount');
+
+  let val = parseInt(input.value) + change;
+  const maxStock = activeVariant.stock;
+
+  const plusBtn = document.getElementById('qtyPlusBtn');
+
+if (val >= maxStock) {
+  plusBtn.classList.add('text-gray-300', 'cursor-not-allowed');
+} else {
+  plusBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
+}
+
+
+  if (val < 1) val = 1;
+
+  if (val > maxStock) {
+    val = maxStock;
+
+    // Show stock warning
+    stockCount.innerText = maxStock;
+    stockMsg.classList.remove('hidden');
+  } else {
+    stockMsg.classList.add('hidden');
+  }
+
+  input.value = val;
+  formInput.value = val;
+}
+
+
+                function switchTab(tab) {
+                    // Buttons
+                    document.getElementById('tab-description').className = tab === 'description'
+                        ? 'pb-4 text-sm font-bold text-brand-500 border-b-2 border-brand-500 transition-all'
+                        : 'pb-4 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-all';
+
+                    document.getElementById('tab-reviews').className = tab === 'reviews'
+                        ? 'pb-4 text-sm font-bold text-brand-500 border-b-2 border-brand-500 transition-all'
+                        : 'pb-4 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-all';
+
+                    // Content
+                    document.getElementById('content-description').className = tab === 'description' ? 'text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-500 space-y-4 animate-fade-in' : 'hidden';
+                    document.getElementById('content-reviews').className = tab === 'reviews' ? 'text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-500 space-y-4 animate-fade-in' : 'hidden';
+                }
+
+                // Init
+                document.addEventListener('DOMContentLoaded', initSelectors);
+
+            </script>
+</body>
+
+</html>
