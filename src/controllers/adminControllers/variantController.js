@@ -23,7 +23,7 @@ console.log('error 3')
     // cover image
     const coverImage = req.files?.coverImage?.[0]?.path;
     if (!coverImage) {
-      console.log("❌ Cover image missing");
+      console.log(" Cover image missing");
       return res.redirect("/admin/products");
     }
 console.log('error 4')
@@ -43,11 +43,11 @@ console.log('error 5')
       isActive: true,
     });
 console.log('error 6')
-    console.log("✅ Variant created with Cloudinary images");
+    console.log(" Variant created with Cloudinary images");
     res.redirect("/admin/products");
 console.log('error 7')
   } catch (error) {
-    console.error("❌ Error adding variant:", error);
+    console.error(" Error adding variant:", error);
     res.redirect("/admin/products");
   }
 };
@@ -62,7 +62,7 @@ const getVariantsByProduct = async (req, res) => {
     res.json({ success: true, variants });
 
   } catch (error) {
-    console.error("❌ Error fetching variants:", error);
+    console.error(" Error fetching variants:", error);
     res.status(500).json({ success: false });
   }
 };

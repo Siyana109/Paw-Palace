@@ -172,7 +172,7 @@ if (!variant || !variant.product || !variant.product.isActive) {
   });
 }
 
-    // ❤️ REMOVE FROM WISHLIST
+    // REMOVE FROM WISHLIST
     if (existing) {
       await Wishlist.deleteOne({ _id: existing._id });
 
@@ -182,7 +182,7 @@ if (!variant || !variant.product || !variant.product.isActive) {
       });
     }
 
-    // 🤍 ADD TO WISHLIST
+    // ADD TO WISHLIST
     await Wishlist.create({
       user: userId,
       product: productId,

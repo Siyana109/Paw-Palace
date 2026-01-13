@@ -78,6 +78,8 @@
 
                     <% } %>
 
+                    
+
                         <li class="text-gray-300">/</li>
 
                         <!-- Current Product -->
@@ -296,7 +298,7 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <% - JSON.stringify(variants) %>;
+                const variants = <%- JSON.stringify(variants) %>;
                 let activeVariant = variants[0];
 
                 // Color Mapping Helper
@@ -680,6 +682,8 @@
                 });
 
             </script>
+
+            
 
             <script>
                 const zoomContainer = document.getElementById("zoomContainer");

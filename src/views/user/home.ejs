@@ -84,18 +84,46 @@
 
                 <div class="flex-1">
                     <div class="flex justify-end mb-8">
-                        <form method="GET">
-                            <select name="sort" onchange="this.form.submit()"
-                                class="bg-white px-4 py-2 rounded-xl font-bold text-sm">
+                       <form method="GET">
 
-                                <option value="featured">Featured</option>
-                                <option value="price_asc">Price: Low → High</option>
-                                <option value="price_desc">Price: High → Low</option>
-                                <option value="name_asc">Name A → Z</option>
-                                <option value="name_desc">Name Z → A</option>
+  <!-- Preserve existing query params -->
+  <% Object.keys(query || {}).forEach(key => {
+       if (key !== 'sort') { %>
+    <input type="hidden" name="<%= key %>" value="<%= query[key] %>">
+  <% }}); %>
 
-                            </select>
-                        </form>
+  <select name="sort"
+          onchange="this.form.submit()"
+          class="bg-white px-4 py-2 rounded-xl font-bold text-sm">
+
+    <option value="featured"
+      <%= !query.sort || query.sort === 'featured' ? 'selected' : '' %>>
+      Featured
+    </option>
+
+    <option value="price_asc"
+      <%= query.sort === 'price_asc' ? 'selected' : '' %>>
+      Price: Low → High
+    </option>
+
+    <option value="price_desc"
+      <%= query.sort === 'price_desc' ? 'selected' : '' %>>
+      Price: High → Low
+    </option>
+
+    <option value="name_asc"
+      <%= query.sort === 'name_asc' ? 'selected' : '' %>>
+      Name A → Z
+    </option>
+
+    <option value="name_desc"
+      <%= query.sort === 'name_desc' ? 'selected' : '' %>>
+      Name Z → A
+    </option>
+
+  </select>
+</form>
+
 
                     </div>
 
@@ -136,10 +164,16 @@
                                 <!-- CONTENT -->
                                 <div class="px-2 pb-2 flex flex-col flex-grow justify-between">
                                     <div>
-                                        <p
+                                        <!-- <p
                                             class="text-[10px] font-bold text-accent-teal uppercase tracking-widest mb-1 line-clamp-1">
                                             <%= product.category %>
-                                        </p>
+                                        </p> -->
+
+                                        <div
+                                            class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold mb-2">
+                                            <i class="fa-solid fa-star text-yellow-400"></i>
+                                            4.6
+                                        </div>
 
                                         <a href="/product/<%= product._id %>">
                                             <h3
@@ -161,14 +195,14 @@
 
                 </div>
 
-                <div class="flex justify-center gap-2 mt-10">
+                <!-- <div class="flex justify-center gap-2 mt-10">
                     <% for (let i=1; i <=totalPages; i++) { %>
                         <a href="?page=<%= i %>" class="w-10 h-10 flex items-center justify-center rounded-xl
        <%= currentPage === i ? 'bg-brand-500 text-white' : 'bg-white' %>">
                             <%= i %>
                         </a>
                         <% } %>
-                </div>
+                </div> -->
 
             </div>
             </div>
