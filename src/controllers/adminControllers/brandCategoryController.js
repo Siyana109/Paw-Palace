@@ -93,8 +93,24 @@ const getCategoriesPage = async (req, res) => {
 
         const totalCategories = await Category.countDocuments();
 
+        const sort = req.query.sort || "latest";
+
+        let sortOption = { createdAt: -1 }; // default: recently added
+
+if (sort === "oldest") {
+    sortOption = { createdAt: 1 };
+}
+
+if (sort === "active") {
+    sortOption = { isActive: -1, createdAt: -1 };
+}
+
+if (sort === "inactive") {
+    sortOption = { isActive: 1, createdAt: -1 };
+}
+
         const categories = await Category.find()
-            .sort({ createdAt: -1 })
+            .sort(sortOption)
             .skip(skip)
             .limit(limit)
             .lean();
@@ -120,7 +136,8 @@ const getCategoriesPage = async (req, res) => {
             currentPage: page,
             totalPages,
             totalCategories,
-            limit
+            limit,
+            sort
         });
     } catch (err) {
         console.error(err);

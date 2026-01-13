@@ -70,11 +70,14 @@
                                     class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 text-sm">
                             </div>
                             <select id="sortSelect"
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 focus:outline-none">
-                                <option value="">Sort By</option>
-                                <option value="az">Name A–Z</option>
-                                <option value="za">Name Z–A</option>
-                            </select>
+  class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500">
+  <option value="">Sort By</option>
+  <option value="active">Active first</option>
+  <option value="inactive">Inactive first</option>
+  <option value="latest">Recently added</option>
+  <option value="oldest">Earlier added</option>
+</select>
+
 
                             <button onclick="openAddModal()"
                                 class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
@@ -179,7 +182,7 @@
             <!-- Page Numbers -->
             <% for (let i=1; i <=totalPages; i++) { %>
                 <% if ( i===1 || i===totalPages || (i>= currentPage - 1 && i <= currentPage + 1) ) { %>
-                        <a href="?page=<%= i %>" class="px-3 py-1 rounded-lg
+                        <a href="?page=<%= i %>&sort=<%= sort || '' %>" class="px-3 py-1 rounded-lg
            <%= i === currentPage
               ? 'bg-brand-500 text-white'
               : 'hover:bg-brand-50 text-gray-500' %>">
@@ -351,7 +354,7 @@
             }
         }
     </script>
-    <script>
+    <!-- <script>
         const sortSelect = document.getElementById('sortSelect');
 
         sortSelect.addEventListener('change', () => {
@@ -390,7 +393,20 @@
             // 🔑 re-attach noResults row
             tableBody.appendChild(noResultsRow);
         });
-    </script>
+    </script> -->
+
+    <script>
+  const sortSelect = document.getElementById("sortSelect");
+
+  sortSelect.addEventListener("change", () => {
+    const value = sortSelect.value;
+    const params = new URLSearchParams(window.location.search);
+    params.set("sort", value);
+    params.set("page", 1); // reset page
+    window.location.search = params.toString();
+  });
+</script>
+
 
 
     <script>
@@ -422,7 +438,6 @@
         });
 
     </script>
-
 
 
 </body>
