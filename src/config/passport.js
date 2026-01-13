@@ -11,24 +11,39 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let user = await User.findOne({ googleId: profile.id });
+        const email = profile.emails[0].value;
+
+        let user = await User.findOne({
+          $or: [
+            { googleId: profile.id },
+            { email }
+          ]
+        });
 
         if (!user) {
           user = await User.create({
-            username: profile.displayName,
-            email: profile.emails[0].value,
+            fullName: profile.displayName,
+            email,
             googleId: profile.id,
             emailVerified: true,
+            password: "GOOGLE_AUTH",
           });
+        } else if (!user.googleId) {
+          // link Google account to existing user
+          user.googleId = profile.id;
+          user.emailVerified = true;
+          await user.save();
         }
 
         return done(null, user);
       } catch (err) {
-        return done(err, null);
+        console.error("Google Auth Error:", err);
+        return done(err);
       }
     }
   )
 );
+
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

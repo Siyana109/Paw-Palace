@@ -72,7 +72,7 @@ User
     ✔ After login, put the username in navbar @done (1/3/2026, 4:30:31 PM)
     ☐ Google Login is partially Completed
     ✔ Email Template of User Signup & Password Reset should be different @done (1/3/2026, 4:37:55 PM)
-    ☐ Change Email otp is not working
+    ✔ Change Email otp is not working @done (1/13/2026, 9:52:43 AM)
     ☐ Profile Picture is pending
     ☐ Don't pass the err msgs in url (Block user)
 
