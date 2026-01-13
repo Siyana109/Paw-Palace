@@ -228,12 +228,16 @@ const googleCallback = (req, res) => {
   passport.authenticate("google", {
     failureRedirect: "/login"
   })(req, res, () => {
-    // Passport success → user is authenticated
-    // Session is created → req.user is available
-    // req.session.user = { id: req.user._id };
-    res.redirect("/home");
+
+
+    req.session.user = { id: req.user._id };
+
+    req.session.save(() => {
+      res.redirect("/home");
+    });
   });
-}
+};
+
 
 
 
