@@ -219,6 +219,8 @@ const resendOtp = async (req, res) => {
 const googleSignup = (req, res) => {
   passport.authenticate("google", { scope: ["profile", "email"] })
     (req, res)
+
+    
 }
 
 
@@ -228,7 +230,7 @@ const googleCallback = (req, res) => {
   })(req, res, () => {
     // Passport success → user is authenticated
     // Session is created → req.user is available
-    req.session.user = { id: req.user._id };
+    // req.session.user = { id: req.user._id };
     res.redirect("/home");
   });
 }

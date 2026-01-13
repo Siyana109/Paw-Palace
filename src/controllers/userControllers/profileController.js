@@ -406,18 +406,24 @@ const postChangeEmail = async (req, res) => {
         const otp = generateOTP();
 
         await OTP.findOneAndUpdate(
-            { userId},
-            {
-                userId,
-                email: newEmail,
-                otp,
-                expiresAt: new Date(Date.now() + 60 * 1000)
-            },
-            { upsert: true, new: true }
-        );
+  { email: newEmail },
+  {
+    email: newEmail,
+    otp,
+    expiresAt: new Date(Date.now() + 60 * 1000)
+  },
+  { upsert: true, new: true }
+);
+
         console.log(otp)
 
         await sendOTPEmail(newEmail, otp);
+
+        req.session.emailChange = {
+  newEmail,
+  expiresAt: new Date(Date.now() + 60 * 1000)
+};
+
 
         res.redirect('/verify-email-otp');
         console.log('error 5')
@@ -450,75 +456,98 @@ const getVerifyEmailOtp = (req, res) => {
 
 
 const verifyEmailOtp = async (req, res) => {
-    try {
-        const userId = req.session.user?.id;
-        const { otp } = req.body;
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) return res.redirect('/login');
 
-        const sessionData = req.session.emailChange;
+    const { otp } = req.body;
+    const sessionData = req.session.emailChange;
 
-        if (!sessionData) {
-            return res.redirect('/profile');
-        }
-
-        if (
-            sessionData.otp !== otp ||
-            Date.now() > sessionData.expiresAt
-        ) {
-            return res.render('user/otpEmail', {
-                email: sessionData.newEmail,
-                error: 'Invalid or expired OTP'
-            });
-        }
-
-        /* ---------- Update email ---------- */
-        await User.findByIdAndUpdate(userId, {
-            email: sessionData.newEmail
-        });
-
-        delete req.session.emailChange;
-
-        res.redirect('/profile');
-
-    } catch (error) {
-        console.error('Verify email OTP error:', error);
-
-        const sessionData = req.session.emailChange;
-
-        return res.status(500).render('user/otpEmail', {
-            title: 'Verify Email | PawPalace',
-            email: sessionData?.newEmail,
-            error: 'Something went wrong. Please try again.'
-        });
+    if (!sessionData) {
+      return res.redirect('/profile');
     }
 
+    // 🔐 Fetch OTP from DB
+    const otpDoc = await OTP.findOne({
+      email: sessionData.newEmail
+    });
+
+    if (!otpDoc) {
+      return res.render('user/otpEmail', {
+        email: sessionData.newEmail,
+        error: 'OTP not found or expired'
+      });
+    }
+
+    if (otpDoc.expiresAt < new Date()) {
+      return res.render('user/otpEmail', {
+        email: sessionData.newEmail,
+        error: 'OTP expired'
+      });
+    }
+
+    if (otpDoc.otp !== String(otp).trim()) {
+      return res.render('user/otpEmail', {
+        email: sessionData.newEmail,
+        error: 'Invalid OTP'
+      });
+    }
+
+    /* ---------- Update Email ---------- */
+    await User.findByIdAndUpdate(userId, {
+      email: sessionData.newEmail
+    });
+
+    // cleanup
+    await OTP.deleteOne({ email: sessionData.newEmail });
+    delete req.session.emailChange;
+
+    return res.redirect('/profile');
+
+  } catch (error) {
+    console.error('Verify email OTP error:', error);
+
+    return res.status(500).render('user/otpEmail', {
+      email: req.session.emailChange?.newEmail,
+      error: 'Something went wrong. Please try again.'
+    });
+  }
 };
 
 
 const resendEmailOtp = async (req, res) => {
+  try {
     const sessionData = req.session.emailChange;
     if (!sessionData) return res.redirect('/profile');
 
     const otp = generateOTP();
 
-     await OTP.findOneAndUpdate(
-            { userId},
-            {
-                userId,
-                email: newEmail,
-                otp,
-                expiresAt: new Date(Date.now() + 60 * 1000)
-            },
-            { upsert: true, new: true }
-        );
+    await OTP.findOneAndUpdate(
+      { email: sessionData.newEmail },   // ✅ use email
+      {
+        email: sessionData.newEmail,
+        otp,
+        expiresAt: new Date(Date.now() + 60 * 1000)
+      },
+      { upsert: true, new: true }
+    );
 
     await sendOTPEmail(sessionData.newEmail, otp);
 
-    res.render('user/otpEmail', {
-        email: sessionData.newEmail,
-        success: 'A new OTP has been sent'
+    return res.render('user/otpEmail', {
+      email: sessionData.newEmail,
+      success: 'A new OTP has been sent'
     });
-};
 
+  } catch (error) {
+    console.error('Resend email OTP error:', error);
+
+    return res.render('user/otpEmail', {
+      email: req.session.emailChange?.newEmail,
+      error: 'Failed to resend OTP. Please try again.'
+    });
+  }
+};
 
 
 export default {
