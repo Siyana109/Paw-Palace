@@ -51,26 +51,13 @@ WEEK - 9
 
 
 
-
-TODO :
-    ☐ session handling
-
-    User:
-        ☐ otp resent and submitting attempt limit
-
-    Admin:
-        ☐ view & edit variant images
-        ☐ swal on add/edit products
-
-
-
 WEEK-8 PENDINGS: 
     User
     ✔ Signup : Form Validationd @done (1/3/2026, 10:38:43 AM)
     ✔ Signup OTP expiry is too short @done (1/3/2026, 2:33:38 PM)
     ✔ Give a success msg after registration @done (1/3/2026, 2:33:55 PM)
     ✔ After login, put the username in navbar @done (1/3/2026, 4:30:31 PM)
-    ☐ Google Login is partially Completed
+    ✔ Google Login is partially Completed @done (1/24/2026, 3:15:34 PM)
     ✔ Email Template of User Signup & Password Reset should be different @done (1/3/2026, 4:37:55 PM)
     ✔ Change Email otp is not working @done (1/13/2026, 9:52:43 AM)
     ☐ Profile Picture is pending
@@ -84,28 +71,42 @@ WEEK-8 PENDINGS:
 
 
 WEEK-9 PENDINGS:
-    -dont show option to change email for Google user
--edit profile image
+    ☐ dont show option to change email for Google user
+    ✔ edit profile image @done (1/27/2026, 5:22:00 PM)
+    ☐ add js form validation
+    ☐ show recent added. items  at top
+    ☐ image edit option for product
+    ☐ view product details in admin side
+    ☐ edit varient is not working
+    ✔ category name should be unique @done (1/27/2026, 11:48:58 AM)
+    ☐ show related items
+    ☐ filters need to implement in shop page
+    ☐ sewch sort and filter should interconnected
+    ☐ if a product is out of stock show that in shop page with that message
 
--add js form validation
--show recent added. items  at top
--image edit option for product 
--view product details in admin side 
--edit varient is not working
--category name should be unique 
--
 
 
--show related items 
--filters need to implement in shop page
--sewch sort and filter should interconnected 
--if a product is out of stock show that in shop page with that message 
--
--
 
--------feedback------
--communication is decent
--need to check full task onces again
+
+
+
+
+
+
+TODO :
+    ☐ session handling
+
+    User:
+        ☐ otp resent and submitting attempt limit
+        ☐ confirm logout
+        ☐ edit phone no:
+
+    Admin:
+        ☐ view & edit variant images
+        ☐ swal on add/edit products
+        ☐ user sort by data
+        ☐ sort & search & pagination brand, top brand
+        ☐ search & sort & pagination in products
 
 
 

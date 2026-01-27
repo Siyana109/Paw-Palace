@@ -4,7 +4,8 @@ const categorySchema = new mongoose.Schema({
     categoryName: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     isActive: {
         type: Boolean,

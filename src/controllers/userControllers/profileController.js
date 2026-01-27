@@ -4,13 +4,15 @@ import bcrypt from "bcrypt"
 import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
 import OTP from "../../model/otpModel.js"
+import cloudinary from "../../config/cloudinary.js";
+import { upload } from "../../middlewares/upload.js";
 
 
 const getProfile = async (req, res) => {
     try {
         const userId = req.session.user?.id;
 
-        // 🔐 Safety check
+        //  Safety check
         if (!userId) {
             return res.redirect('/login');
         }
@@ -22,20 +24,20 @@ const getProfile = async (req, res) => {
             return res.redirect('/login');
         }
 
-        // 📍 Fetch addresses
+        //  Fetch addresses
         const addresses = await Address.find({ userId }).lean();
 
-        // ✏️ Edit mode
+        //  Edit mode
         const isEditing = req.query.edit === 'true';
 
-        // 🧩 Render
+        //  Render
         res.render('user/profile', {
             title: 'My Profile | PawPalace',
             user,
             addresses,
             isEditing,
 
-            // 🔽 IMPORTANT: defaults for shared partials
+            //  IMPORTANT: defaults for shared partials
             wishlistCount: 0,
             cartCount: 0,
             currentPath: req.path
@@ -59,110 +61,48 @@ const getProfile = async (req, res) => {
 
 
 
-// export const getProfile = async (req, res) => {
-//     try{
-//     // Dummy user data for UI testing
-//     const user = {
-//         fullName: "John Doe",
-//         email: "john.doe@example.com",
-//         phone: "+1 987 654 3210",
-//         profilePic: "https://picsum.photos/150",
-//         referralCode: "PAW123",
-//         addresses: [
-//             {
-//                 id: 1,
-//                 label: "Home",
-//                 type: "primary",
-//                 street: "123 Paw Street",
-//                 city: "Petville",
-//                 state: "CA",
-//                 zip: "90210",
-//                 phone: "+1 987 654 3210",
-//                 isDefault: true
-//             },
-//             {
-//                 id: 2,
-//                 label: "Office",
-//                 type: "work",
-//                 street: "456 Bone Avenue",
-//                 city: "Dogtown",
-//                 state: "NY",
-//                 zip: "10001",
-//                 phone: "+1 123 456 7890",
-//                 isDefault: false
-//             }
-//         ]
-//     };
-
-//      const isEditing = req.query.edit === 'true'
-
-//     res.render("user/profile", {
-//         user,
-//         isEditing// change to true to test edit mode
-//     });
-// }
-
-//     catch (error) {
-//         console.error('Profile page error:', error);
-//         res.status(500).render('error', {
-//             message: 'Failed to load profile'
-//         });
-//     }
-// };
-
-
 
 const updateProfile = async (req, res) => {
-    try {
-        const userId = req.session.user?.id;
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) return res.redirect('/login');
 
-        if (!userId) {
-            return res.redirect('/login');
-        }
+    const { name, phone } = req.body;
 
-        const { name, phone } = req.body;
+    const user = await User.findById(userId).lean();
+    const addresses = await Address.find({ userId }).lean(); // IMPORTANT
 
-        const user = await User.findById(userId).lean();
-        const addresses = await Address.find({ userId }).lean();
-
-        /* ---------- Validation ---------- */
-        if (!name || name.trim().length < 3) {
-            return res.status(400).render('user/profile', {
-                title: 'My Profile | PawPalace',
-                user: await User.findById(userId).lean(),
-                addresses,
-                isEditing: true,
-                error: 'Name must be at least 3 characters'
-            });
-        }
-
-        if (phone && !/^[0-9]{10}$/.test(phone)) {
-            return res.status(400).render('user/profile', {
-                error: 'Phone number must be 10 digits',
-                addresses,
-                user,
-                isEditing: true
-            });
-        }
-
-        /* ---------- Update ---------- */
-        await User.findByIdAndUpdate(
-            userId,
-            {
-                fullName: name,
-                phone
-            }
-        );
-
-        return res.redirect('/profile');
-
-    } catch (error) {
-        console.error('Profile update error:', error);
-        res.status(500).render('error', {
-            message: 'Failed to update profile'
-        });
+    if (!name || name.trim().length < 3) {
+      return res.render('user/profile', {
+        user,
+        addresses,
+        isEditing: true,
+        error: 'Name must be at least 3 characters'
+      });
     }
+
+    if (phone && !/^\d{10}$/.test(phone)) {
+      return res.render('user/profile', {
+        user,
+        addresses,
+        isEditing: true,
+        error: 'Phone number must be 10 digits'
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      fullName: name.trim(),
+      phone: phone || null
+    });
+
+    res.redirect('/profile');
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.redirect('/profile');
+  }
 };
+
 
 
 
@@ -550,9 +490,48 @@ const resendEmailOtp = async (req, res) => {
 };
 
 
+const updateProfileImage = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) return res.redirect('/login');
+
+    if (!req.file) return res.redirect('/profile');
+
+    // upload buffer to cloudinary
+    const result = cloudinary.uploader.upload_stream(
+      { folder: 'pawpalace/profile' },
+      async (error, uploadResult) => {
+        if (error) throw error;
+
+        await User.findByIdAndUpdate(userId, {
+          profilePic: uploadResult.secure_url
+        });
+
+        res.redirect('/profile');
+      }
+    ).end(req.file.buffer);
+
+  } catch (err) {
+    console.error('Profile image upload error:', err);
+    res.redirect('/profile');
+  }
+};
+
+
+
+const removeProfilePic = async (req, res) => {
+  await User.findByIdAndUpdate(req.session.user.id, {
+    profilePic: null
+  });
+  res.sendStatus(200);
+};
+
+
+
 export default {
     getProfile, updateProfile,
     getAddAddress, getEditAddress, addAddress, updateAddress, deleteAddress,
     getChangePassword, postChangePassword,
-    getChangeEmail, postChangeEmail, getVerifyEmailOtp, verifyEmailOtp, resendEmailOtp
+    getChangeEmail, postChangeEmail, getVerifyEmailOtp, verifyEmailOtp, resendEmailOtp,
+    updateProfileImage, removeProfilePic
 }

@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css" />
+
+    <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -33,13 +37,39 @@
             <div class="lg:col-span-3 space-y-6">
                 <div class="bg-white rounded-[2rem] p-8 text-center shadow-sm">
                     <div class="relative inline-block mb-4">
-                        <img src="<%= user.profilePic || 'https://via.placeholder.com/150' %>" alt="Profile"
-                            class="w-24 h-24 rounded-full object-cover border-4 border-brand-50">
-                        <button
-                            class="absolute bottom-0 right-0 bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center text-xs text-brand-500 border border-gray-100">
-                            <i class="fa-solid fa-camera"></i>
-                        </button>
+                        <img id="profilePreview" src="<%= user.profilePic || 'https://via.placeholder.com/150' %>"
+                            class="w-24 h-24 rounded-full object-cover border-4 border-brand-50" alt="Profile">
+
+                        <!-- ALWAYS visible camera -->
+                        <form action="/profile/image/update" method="POST" enctype="multipart/form-data"
+                            class="absolute bottom-0 right-0">
+                            <!-- <label class="bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center
+             text-xs text-brand-500 border border-gray-100 cursor-pointer
+             hover:bg-brand-50 transition">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" name="profilePic" accept="image/*" hidden
+                                    onchange="this.form.submit()">
+                            </label> -->
+                            <label class="absolute bottom-0 right-0 bg-white shadow-md rounded-full w-8 h-8
+         flex items-center justify-center text-xs text-brand-500 border border-gray-100
+         cursor-pointer hover:bg-brand-50 transition">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" id="profilePicInput" accept="image/*" hidden>
+                            </label>
+                        </form>
+
+                        <!-- REMOVE BUTTON -->
+                        <% if (user.profilePic) { %>
+                            <form action="/profile/image/remove" method="POST"
+                                class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+                                <button type="submit" class="text-[10px] text-red-400 hover:text-red-500 font-bold">
+                                    Remove
+                                </button>
+                            </form>
+                            <% } %>
                     </div>
+
+
                     <h2 class="text-xl font-bold">
                         <%= user.fullName %>
                     </h2>
@@ -76,7 +106,8 @@
             </div>
 
             <div class="lg:col-span-9 space-y-6">
-                <form action="/profile/update" method="POST" class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
+                <form action="/profile/update" method="POST" enctype="multipart/form-data"
+                    class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
 
                     <div class="flex justify-between items-center mb-8">
                         <h3 class="text-2xl font-bold">Personal Information</h3>
@@ -94,52 +125,47 @@
                                 <% } %>
                     </div>
 
-                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
-    <!-- FULL NAME -->
-    <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
-            Full Name
-        </label>
+                        <!-- FULL NAME -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+                                Full Name
+                            </label>
 
-        <div class="relative">
-            <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                            <div class="relative">
+                                <i
+                                    class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
 
-            <input
-                type="text"
-                name="name"
-                value="<%= user.fullName %>"
-                <%= !isEditing ? 'disabled' : '' %>
-                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
-                       focus:border-brand-500 focus:bg-white transition outline-none font-medium
-                       disabled:opacity-60"
-            >
-        </div>
-    </div>
+                                <input type="text" name="name" value="<%= user.fullName %>" <%=!isEditing ? 'disabled'
+                                    : '' %>
+                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
+                                focus:border-brand-500 focus:bg-white transition outline-none font-medium
+                                disabled:opacity-60"
+                                >
+                            </div>
+                        </div>
 
-    <!-- PHONE NUMBER -->
-    <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
-            Phone Number
-        </label>
+                        <!-- PHONE NUMBER -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+                                Phone Number
+                            </label>
 
-        <div class="relative">
-            <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                            <div class="relative">
+                                <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
 
-            <input
-                type="text"
-                name="phone"
-                value="<%= user.phone || '' %>"
-                <%= !isEditing ? 'disabled' : '' %>
-                placeholder="Optional"
-                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
-                       focus:border-brand-500 focus:bg-white transition outline-none font-medium
-                       disabled:opacity-60"
-            >
-        </div>
-    </div>
+                                <input type="text" name="phone" value="<%= user.phone || '' %>" <%=!isEditing
+                                    ? 'disabled' : '' %>
+                                placeholder="Optional"
+                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
+                                focus:border-brand-500 focus:bg-white transition outline-none font-medium
+                                disabled:opacity-60"
+                                >
+                            </div>
+                        </div>
 
-</div>
+                    </div>
 
 
                     <div class="border-t border-gray-50 pt-8">
@@ -325,6 +351,23 @@
             </div>
         </div>
 
+        <div id="cropModal" class="fixed inset-0 z-50 bg-black/60 items-center justify-center hidden">
+
+            <div class="bg-white rounded-2xl p-6 w-[320px]">
+                <img id="cropImage" class="max-w-full">
+
+                <div class="flex gap-3 mt-4">
+                    <button onclick="applyCrop()" class="flex-1 bg-brand-500 text-white py-2 rounded-xl font-bold">
+                        Crop & Upload
+                    </button>
+
+                    <button onclick="closeCrop()" class="flex-1 bg-gray-100 py-2 rounded-xl font-bold">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
 </body>
 <script>
     const deleteModal = document.getElementById('deleteModal');
@@ -411,6 +454,111 @@
 
         // initial check
         updateSaveState();
+    }
+</script>
+
+<script>
+    let cropper;
+    const input = document.getElementById('profilePicInput');
+    const cropModal = document.getElementById('cropModal');
+    const cropImage = document.getElementById('cropImage');
+    const saveButton = cropModal.querySelector('button[onclick="applyCrop()"]');
+    const initialButtonText = saveButton ? saveButton.innerText : 'Crop & Upload';
+
+    input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('Only images allowed');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Destroy existing cropper BEFORE updating the image
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+
+            cropImage.src = reader.result;
+
+            cropModal.classList.remove('hidden');
+            cropModal.classList.add('flex');
+
+            // Initialize new cropper
+            cropper = new Cropper(cropImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+                background: false
+            });
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    function closeCrop() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        cropModal.classList.add('hidden');
+        cropModal.classList.remove('flex');
+        input.value = '';
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.innerText = initialButtonText;
+        }
+    }
+
+    function applyCrop() {
+
+        console.log("applyCrop");
+
+        if (!cropper) return;
+
+        saveButton.disabled = true;
+        saveButton.innerText = "Uploading...";
+
+        cropper.getCroppedCanvas({
+            width: 300,
+            height: 300,
+            fillColor: '#fff',
+        }).toBlob(async (blob) => {
+
+            const formData = new FormData();
+            formData.append("profilePic", blob, "profile.png");
+
+            try {
+                const res = await fetch("/profile/image/update", {
+                    method: "POST",
+                    body: formData,
+                    credentials: "include" // 🔴 VERY IMPORTANT
+                });
+
+                if (!res.ok) throw new Error("Upload failed");
+
+                window.location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to upload profile picture");
+                saveButton.disabled = false;
+                saveButton.innerText = "Crop & Upload";
+            }
+
+        }, "image/png");
     }
 </script>
 

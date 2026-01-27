@@ -214,7 +214,7 @@
                 class="absolute top-0 right-0 w-24 h-24 bg-brand-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
             </div>
             <h3 class="text-2xl font-bold text-accent-navy mb-6">New Category</h3>
-            <form action="/admin/categories/add" method="POST">
+            <form id="addCategoryForm">
                 <div class="space-y-4 mb-8">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Category
@@ -250,7 +250,7 @@
                 class="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
             </div>
             <h3 class="text-2xl font-bold text-accent-navy mb-6">Edit Category</h3>
-            <form id="editForm" method="POST">
+            <form id="editForm">
                 <div class="space-y-4 mb-8">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Category
@@ -354,46 +354,6 @@
             }
         }
     </script>
-    <!-- <script>
-        const sortSelect = document.getElementById('sortSelect');
-
-        sortSelect.addEventListener('change', () => {
-            const value = sortSelect.value;
-
-            const rows = Array.from(
-                tableBody.querySelectorAll('tr:not(#noResultsRow)')
-            );
-
-            rows.sort((a, b) => {
-                const nameA = a.querySelector('td:nth-child(1) p.font-bold').innerText.toLowerCase();
-                const nameB = b.querySelector('td:nth-child(1) p.font-bold').innerText.toLowerCase();
-
-                const statusA = a.querySelector('td:nth-child(3) span').innerText;
-                const statusB = b.querySelector('td:nth-child(3) span').innerText;
-
-                if (value === 'az') return nameA.localeCompare(nameB);
-                if (value === 'za') return nameB.localeCompare(nameA);
-
-                if (value === 'active') {
-                    if (statusA === statusB) return 0;
-                    return statusA === 'Active' ? -1 : 1;
-                }
-
-                if (value === 'inactive') {
-                    if (statusA === statusB) return 0;
-                    return statusA === 'Inactive' ? -1 : 1;
-                }
-
-                return 0;
-            });
-
-            tableBody.innerHTML = '';
-            rows.forEach(row => tableBody.appendChild(row));
-
-            // 🔑 re-attach noResults row
-            tableBody.appendChild(noResultsRow);
-        });
-    </script> -->
 
     <script>
   const sortSelect = document.getElementById("sortSelect");
@@ -437,6 +397,85 @@
             }
         });
 
+    </script>
+
+<script>
+  const addForm = document.getElementById("addCategoryForm");
+
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault(); // 🔑 stop normal submit
+
+    const formData = new FormData(addForm);
+
+    try {
+      const res = await fetch("/admin/categories/add", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: data.message
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: data.message,
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload(); // refresh list
+      });
+
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong"
+      });
+    }
+  });
+</script>
+
+
+    <script>
+        document.getElementById("editForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const res = await fetch(form.action, {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: data.message
+    });
+    return;
+  }
+
+  Swal.fire({
+    icon: "success",
+    title: "Updated",
+    text: data.message,
+    timer: 1500,
+    showConfirmButton: false
+  }).then(() => location.reload());
+});
     </script>
 
 

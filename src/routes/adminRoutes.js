@@ -10,7 +10,7 @@ import brandCategoryController from "../controllers/adminControllers/brandCatego
 import productController from "../controllers/adminControllers/productController.js"
 import variantController from "../controllers/adminControllers/variantController.js"
 
-import variantUpload from "../middlewares/upload.js"
+import { variantUpload } from "../middlewares/upload.js"
 
 
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)

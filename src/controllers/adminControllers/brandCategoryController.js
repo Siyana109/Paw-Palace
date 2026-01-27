@@ -147,60 +147,81 @@ if (sort === "inactive") {
 
 
 const addCategory = async (req, res) => {
-    try {
-        const { name, status } = req.body;
+  try {
+    const { name, status } = req.body;
 
-        if (!name || !name.trim()) {
-            return res.redirect('/admin/categories?error=Invalid category name');
-        }
-
-        await Category.create({
-            categoryName: name.trim(),
-            isActive: status === 'Active'
-        });
-
-        res.redirect('/admin/categories?success=Category added successfully');
-
-    } catch (error) {
-        if (error.code === 11000) {
-            return res.redirect('/admin/categories?error=Category already exists');
-        }
-
-        console.error('Add Category Error:', error);
-        res.redirect('/admin/categories?error=Failed to add category');
+    if (!name || !name.trim()) {
+      return res.json({ success: false, message: "Invalid category name" });
     }
+
+    const exists = await Category.findOne({
+      categoryName: { $regex: `^${name.trim()}$`, $options: "i" }
+    });
+
+    if (exists) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
+    }
+
+    await Category.create({
+      categoryName: name.trim(),
+      isActive: status === "Active"
+    });
+
+    return res.json({
+      success: true,
+      message: "Category added successfully"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.json({
+      success: false,
+      message: "Something went wrong"
+    });
+  }
 };
+
 
 const editCategory = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, status } = req.body;
+  try {
+    const { id } = req.params;
+    const { name, status } = req.body;
 
-        if (!name || !name.trim()) {
-            return res.redirect('/admin/categories?error=Invalid category name');
-        }
+    const exists = await Category.findOne({
+      categoryName: { $regex: `^${name.trim()}$`, $options: "i" },
+      _id: { $ne: id }
+    });
 
-
-        const updated = await Category.findByIdAndUpdate(
-            id,
-            {
-                categoryName: name.trim(),
-                isActive: status === 'Active'
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updated) {
-            return res.redirect('/admin/categories?error=Category not found');
-        }
-
-        res.redirect('/admin/categories?success=Category updated successfully');
-
-    } catch (error) {
-        console.error('Edit Category Error:', error);
-        res.redirect('/admin/categories?error=Failed to update category');
+    if (exists) {
+      return res.json({
+        success: false,
+        message: "Category already exists"
+      });
     }
+
+    await Category.findByIdAndUpdate(id, {
+      categoryName: name.trim(),
+      isActive: status === "Active"
+    });
+
+    return res.json({
+      success: true,
+      message: "Category updated successfully"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.json({
+      success: false,
+      message: "Failed to update category"
+    });
+  }
 };
+
+
 
 const deleteCategory = async (req, res) => {
     try {

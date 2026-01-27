@@ -5,7 +5,7 @@ import userMiddleware from "../middlewares/userMiddleware.js"
 import profileController from "../controllers/userControllers/profileController.js";
 import homeController from "../controllers/userControllers/homeController.js";
 import productController from "../controllers/userControllers/productController.js";
-
+import { upload } from "../middlewares/upload.js"; 
 
 router.get('/',authController.landingPage)
 
@@ -37,6 +37,9 @@ router.post('/address/add', userMiddleware.checkSession, profileController.addAd
 router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
 router.post('/profile/address/:id/edit', userMiddleware.checkSession, profileController.updateAddress);
 router.post('/profile/address/:id/delete',userMiddleware.checkSession, profileController.deleteAddress);
+
+router.post('/profile/image/update',userMiddleware.checkSession, upload.single('profilePic'), profileController.updateProfileImage)
+router.post('/profile/image/remove', userMiddleware.checkSession, profileController.removeProfilePic);
 
 router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);
 router.post('/change-password', userMiddleware.checkSession, profileController.postChangePassword);
