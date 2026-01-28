@@ -158,8 +158,8 @@
                           data-name="<%= product.productName %>"
                           data-brand="<%= product.brandId ? product.brandId._id : '' %>"
                           data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
-                          data-description="<%= product.description %>" 
-                          data-pettype="<%= product.petType %>" data-status="<%= product.isActive %>"
+                          data-description="<%= product.description %>" data-pettype="<%= product.petType %>"
+                          data-status="<%= product.isActive %>"
                           class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
                           title="Edit Product">
                           <i class="fa-solid fa-pen-to-square text-sm"></i>
@@ -167,8 +167,8 @@
 
 
                         <!-- VARIANTS (THIS IS THE KEY ICON) -->
-                        <a onclick="toggleVariantActions('<%= product._id %>')"
-                          class="cursor-pointer hover:text-teal-500 transition">
+                        <a onclick="openVariantsModal('<%= product._id %>')"
+                          class="cursor-pointer hover:text-teal-500 transition" title="View Variants">
                           <i class="fa-solid fa-layer-group text-sm"></i>
                         </a>
 
@@ -181,28 +181,6 @@
                         </a>
 
                       </div>
-                    </td>
-                  </tr>
-
-                  <!-- VARIANT ACTION ROW -->
-                  <tr id="variant-row-<%= product._id %>" class="hidden bg-gray-50">
-                    <td colspan="6" class="px-8 py-6">
-
-                      <div class="flex gap-4">
-                        <button onclick="openAddVariantModal('<%= product._id %>')"
-                          class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold">
-                          ➕ Add Variant
-                        </button>
-
-                        <button onclick="loadVariants('<%= product._id %>')"
-                          class="px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold">
-                          👁 View Variants
-                        </button>
-
-                      </div>
-
-                      <div id="variant-form-<%= product._id %>" class="mt-6 hidden"></div>
-
                     </td>
                   </tr>
 
@@ -289,17 +267,17 @@
         </div>
 
         <!-- PET TYPE -->
-<div>
-  <label class="block text-sm font-bold mb-1">Pet Type</label>
-  <select name="petType" required
-    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-    <option value="">Select Pet Type</option>
-    <option value="Dog">Dog</option>
-    <option value="Cat">Cat</option>
-    <option value="Puppy">Puppy</option>
-    <option value="Kitten">Kitten</option>
-  </select>
-</div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Pet Type</label>
+          <select name="petType" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="">Select Pet Type</option>
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Puppy">Puppy</option>
+            <option value="Kitten">Kitten</option>
+          </select>
+        </div>
 
         <!-- DESCRIPTION -->
         <div>
@@ -369,16 +347,16 @@
         </div>
 
         <!-- PET TYPE -->
-<div>
-  <label class="block text-sm font-bold mb-1">Pet Type</label>
-  <select id="editPetType" name="petType" required
-    class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-    <option value="Dog">Dog</option>
-    <option value="Cat">Cat</option>
-    <option value="Puppy">Puppy</option>
-    <option value="Kitten">Kitten</option>
-  </select>
-</div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Pet Type</label>
+          <select id="editPetType" name="petType" required
+            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Puppy">Puppy</option>
+            <option value="Kitten">Kitten</option>
+          </select>
+        </div>
 
 
         <!-- STATUS -->
@@ -413,7 +391,7 @@
   </div>
 
   <!-- ADD VARIANT MODAL -->
-  <div id="addVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div id="addVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
 
     <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
 
@@ -424,7 +402,7 @@
       <h2 class="text-2xl font-bold mb-6">Add Variant</h2>
 
       <form method="POST" action="/admin/products/add-variant" enctype="multipart/form-data" class="space-y-4"
-        onsubmit="return validateVariantForm()">
+        onsubmit="submitAddVariantForm(event)">
         <input type="hidden" name="productId" id="variantProductId">
 
         <div class="grid grid-cols-2 gap-4">
@@ -458,23 +436,31 @@
           </div>
         </div>
 
+        <!-- Cover Image Add -->
         <div>
           <label class="block text-sm font-bold mb-1">Cover Image</label>
-          <div class="space-y-2">
-            <input type="file" name="coverImage" required accept="image/*"
-              onchange="previewImage(this, 'variantCoverPreview')"
-              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-            <div id="variantCoverPreview"
-              class="hidden w-24 h-24 rounded-lg overflow-hidden border border-dashed border-gray-300"></div>
+          <div class="flex items-start gap-4">
+            <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+              <div id="variantCoverPreview" class="w-full h-full flex items-center justify-center text-gray-300">
+                <i class="fa-regular fa-image text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <input type="file" name="coverImage" required accept="image/*"
+                onchange="previewImage(this, 'variantCoverPreview')"
+                class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
+            </div>
           </div>
         </div>
 
+        <!-- Sub Images Add -->
         <div>
           <label class="block text-sm font-bold mb-1">Sub Images (Min 3 - Max 5)</label>
-          <div class="space-y-2">
+          <div class="space-y-3">
             <input type="file" name="subImages" multiple accept="image/*"
               onchange="previewImages(this, 'variantSubPreview')"
-              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
+
             <div id="variantSubPreview" class="hidden flex flex-wrap gap-2"></div>
             <p id="imageLimitError" class="hidden text-red-500 text-xs font-bold">You can only upload up to 3 images.
             </p>
@@ -496,8 +482,9 @@
 
     </div>
   </div>
+
   <!-- EDIT VARIANT MODAL -->
-  <div id="editVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div id="editVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
 
     <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
 
@@ -507,7 +494,7 @@
 
       <h2 class="text-2xl font-bold mb-6">Edit Variant</h2>
 
-      <form id="editVariantForm" class="space-y-4">
+      <form id="editVariantForm" class="space-y-4" onsubmit="submitEditVariantForm(event)">
 
         <input type="hidden" id="editVariantId">
 
@@ -537,58 +524,45 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-4 pt-4">
-          <button type="button" onclick="closeEditVariantModal()" class="px-6 py-2.5 rounded-xl border font-bold">
-            Cancel
-          </button>
-
-          <button type="submit" class="bg-brand-500 text-white px-6 py-2.5 rounded-xl font-bold">
-            Update Variant
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
-  <!-- EDIT VARIANT MODAL -->
-  <div id="editVariantModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-
-    <div class="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-xl relative">
-
-      <button onclick="closeEditVariantModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-
-      <h2 class="text-2xl font-bold mb-6">Edit Variant</h2>
-
-      <form id="editVariantForm" class="space-y-4">
-
-        <input type="hidden" id="editVariantId">
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-bold mb-1">Price</label>
-            <input id="editVariantPrice" type="number" min="0"
-              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-          </div>
-
-          <div>
-            <label class="block text-sm font-bold mb-1">Stock</label>
-            <input id="editVariantStock" type="number" min="0"
-              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+        <!-- Cover Image Edit -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Cover Image</label>
+          <div class="flex items-start gap-4">
+            <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+              <!-- Default/Current Image -->
+              <div id="editVariantCoverPreviewContainer" class="w-full h-full relative">
+                <img id="editVariantCoverPreviewImg" class="w-full h-full object-cover">
+                <!-- Overlay for new preview if needed, or we just replace src -->
+              </div>
+            </div>
+            <div class="flex-1">
+              <input type="file" id="editVariantCoverInput" name="coverImage" accept="image/*"
+                onchange="previewImage(this, 'editVariantCoverPreviewContainer')"
+                class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
+              <p class="text-[10px] text-gray-400 mt-1">Leave empty to keep current image</p>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-bold mb-1">Size</label>
-            <input id="editVariantSize" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-          </div>
+        <!-- Sub Images Edit -->
+        <div>
+          <label class="block text-sm font-bold mb-1">Sub Images (Min 3)</label>
+          <div class="space-y-3">
+            <!-- Existing Sub Images -->
+            <div class="mb-2">
+              <p class="text-xs font-bold text-gray-400 mb-1">Current Images:</p>
+              <div id="editVariantExistingSubImages" class="flex flex-wrap gap-2"></div>
+            </div>
 
-          <div>
-            <label class="block text-sm font-bold mb-1">Color</label>
-            <input id="editVariantColor" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
+            <!-- New Upload -->
+            <div class="border-t border-dashed border-gray-200 pt-2">
+              <p class="text-xs font-bold text-gray-400 mb-1">Upload New (Replaces All):</p>
+              <input type="file" id="editVariantSubInput" name="subImages" multiple accept="image/*"
+                onchange="previewImages(this, 'editVariantNewSubPreview')"
+                class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
+
+              <div id="editVariantNewSubPreview" class="hidden flex flex-wrap gap-2 mt-2"></div>
+            </div>
           </div>
         </div>
 
@@ -657,7 +631,7 @@
     </div>
   </div>
 
-  <!-- CROPPER MODAL -->
+  <!-- CROPPER MODAL (Existing) -->
   <div id="cropperModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[70]">
     <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl h-[80vh] flex flex-col">
       <h3 class="text-lg font-bold mb-4">Crop Image</h3>
@@ -673,6 +647,44 @@
     </div>
   </div>
 
+  <!-- NEW VIEW VARIANTS MODAL -->
+  <div id="viewVariantsModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-4xl h-[80vh] rounded-[2.5rem] p-8 shadow-2xl relative flex flex-col">
+
+      <!-- Close Button -->
+      <button onclick="closeVariantsModal()" class="absolute top-8 right-8 text-gray-400 hover:text-black transition">
+        <i class="fa-solid fa-xmark text-2xl"></i>
+      </button>
+
+      <!-- HEADER -->
+      <div class="mb-6 shrink-0">
+        <div class="flex items-center gap-4">
+          <button id="backToVariantsBtn" onclick="showVariantsList()"
+            class="hidden text-gray-400 hover:text-brand-500 transition">
+            <i class="fa-solid fa-arrow-left text-xl"></i>
+          </button>
+          <div>
+            <h2 id="variantsModalTitle" class="text-3xl font-bold text-accent-navy">Product Variants</h2>
+            <p id="variantsModalSubtitle" class="text-sm text-gray-400 font-medium mt-1">Manage variants for this
+              product</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT AREA -->
+      <div id="variantsModalContent" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        <!-- DYNAMIC CONTENT GOES HERE -->
+      </div>
+
+      <!-- LOADING STATE -->
+      <div id="variantsLoading"
+        class="hidden absolute inset-0 bg-white/80 items-center justify-center z-10 rounded-[2.5rem]">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 <script>
   async function confirmDelete() {
@@ -681,9 +693,13 @@
     if (deleteType === "product") {
       try {
         const res = await fetch(`/admin/products/delete/${deleteId}`, {
-          method: "POST"
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          }
         });
-
         const data = await res.json();
 
         if (!data.success) {
@@ -712,8 +728,14 @@
     if (deleteType === "variant") {
       try {
         const res = await fetch(`/admin/products/variants/delete/${deleteId}`, {
-          method: "POST"
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          }
         });
+
 
         const data = await res.json();
 
@@ -749,135 +771,7 @@
 </script>
 
 
-<script>
-  function toggleVariantActions(productId) {
-    document.querySelectorAll("[id^='variant-row-']").forEach(row => {
-      if (row.id !== `variant-row-${productId}`) {
-        row.classList.add("hidden");
-      }
-    });
 
-    const row = document.getElementById(`variant-row-${productId}`);
-    const container = document.getElementById(`variant-form-${productId}`);
-
-    const isOpening = row.classList.contains("hidden");
-
-    row.classList.toggle("hidden");
-
-    // If closing → also close variants
-    if (!isOpening) {
-      container.classList.add("hidden");
-      container.innerHTML = "";
-    }
-  }
-
-</script>
-
-<script>
-  function openEditProductModal(el) {
-    const modal = document.getElementById("editProductModal");
-    const form = document.getElementById("editProductForm");
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-
-    document.getElementById("editProductName").value = el.dataset.name;
-    document.getElementById("editBrandId").value = el.dataset.brand;
-    document.getElementById("editCategoryId").value = el.dataset.category;
-    document.getElementById("editPetType").value = el.dataset.pettype;
-    document.getElementById("editDescription").value = el.dataset.description;
-
-    // ✅ SET STATUS
-    document.getElementById("editIsActive").value = el.dataset.status;
-
-    form.action = `/admin/products/edit/${el.dataset.id}`;
-  }
-
-</script>
-
-<script>
-  async function loadVariants(productId) {
-    const container = document.getElementById(`variant-form-${productId}`);
-
-    // Toggle close
-    if (!container.classList.contains("hidden")) {
-      closeVariants(productId);
-      return;
-    }
-
-    const res = await fetch(`/admin/products/${productId}/variants/json`);
-    const data = await res.json();
-
-    if (!data.success || data.variants.length === 0) {
-      container.innerHTML = `
-      <p class="text-sm text-gray-400">No variants added yet</p>
-      <button onclick="closeVariants('${productId}')"
-        class="mt-4 text-xs text-gray-500 underline">
-        Close Variants
-      </button>
-    `;
-      container.classList.remove("hidden");
-      return;
-    }
-
-    let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
-
-    data.variants.forEach(v => {
-      html += `
-<div 
-  class="bg-white rounded-xl border p-4 flex justify-between items-center"
-  data-variant-id="${v._id}">
-        <div>
-          <p class="text-sm font-bold">₹ ${v.price}</p>
-          <p class="text-xs text-gray-500">
-            Size: ${v.size || '-'} | Color: ${v.color || '-'}
-          </p>
-          <p class="text-xs text-gray-500">Stock: ${v.stock}</p>
-        </div>
-        <div class="flex gap-3">
-  <!-- EDIT -->
-  <button
-    onclick="openEditVariantModal('${v._id}', '${v.price}', '${v.stock}', '${v.size}', '${v.color}')"
-    class="text-blue-500 hover:text-blue-600">
-    <i class="fa-solid fa-pen"></i>
-  </button>
-
-  <!-- DELETE -->
-  <button
-    onclick="openDeleteModal('variant', '${v._id}')"
-    class="text-red-500 hover:text-red-600">
-    <i class="fa-solid fa-trash"></i>
-  </button>
-</div>
-
-      </div>
-    `;
-    });
-
-    html += `
-    </div>
-    <button onclick="closeVariants('${productId}')"
-      class="mt-4 text-xs text-gray-500 underline">
-      Close Variants
-    </button>
-  `;
-
-    container.innerHTML = html;
-    container.classList.remove("hidden");
-  }
-
-</script>
-
-<script>
-  function closeVariants(productId) {
-    const container = document.getElementById(`variant-form-${productId}`);
-    const viewBtn = document.getElementById(`view-btn-${productId}`);
-
-    container.classList.add("hidden");
-    container.innerHTML = "";
-    viewBtn.innerText = "👁 View Variants";
-  }
-</script>
 
 <script>
   function closeEditProductModal() {
@@ -1010,6 +904,8 @@
         // Preview
         const preview = document.getElementById(previewId);
         preview.innerHTML = '';
+        preview.classList.remove("text-gray-300"); // Remove placeholder text color
+
         const img = document.createElement('img');
         img.src = URL.createObjectURL(blob);
         img.className = 'w-full h-full object-cover';
@@ -1116,12 +1012,36 @@
 </script>
 
 <script>
-  function openEditVariantModal(id, price, stock, size, color) {
+  function openEditVariantModal(id, price, stock, size, color, coverImage, subImagesStr) {
+    selectedVariantSubImages = []; // Reset for new edit
+    document.getElementById("editVariantSubInput").value = ""; // Clear input
+    document.getElementById("editVariantNewSubPreview").innerHTML = "";
+    document.getElementById("editVariantNewSubPreview").classList.add("hidden");
+
     document.getElementById("editVariantId").value = id;
     document.getElementById("editVariantPrice").value = price;
     document.getElementById("editVariantStock").value = stock;
     document.getElementById("editVariantSize").value = size || '';
     document.getElementById("editVariantColor").value = color || '';
+
+    // Cover Preview
+    document.getElementById("editVariantCoverPreviewImg").src = coverImage || '';
+
+    // Sub Images Preview
+    const container = document.getElementById("editVariantExistingSubImages");
+    container.innerHTML = '';
+
+    if (subImagesStr) {
+      try {
+        const images = JSON.parse(subImagesStr);
+        images.forEach(img => {
+          const div = document.createElement("div");
+          div.className = "w-12 h-12 rounded-lg overflow-hidden border border-gray-200";
+          div.innerHTML = `<img src="${img}" class="w-full h-full object-cover">`;
+          container.appendChild(div);
+        });
+      } catch (e) { console.error("Error parsing sub images", e); }
+    }
 
     const modal = document.getElementById("editVariantModal");
     modal.classList.remove("hidden");
@@ -1139,5 +1059,406 @@
 
 
 
+
+
+<!-- SCRIPTS -->
+<script>
+  let currentProductId = null;
+  let currentVariants = [];
+
+  // --- MODAL UTILS ---
+  function openVariantsModal(productId) {
+    currentProductId = productId;
+    const modal = document.getElementById("viewVariantsModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    // Load initial list
+    loadVariants(productId);
+  }
+
+  function closeVariantsModal() {
+    const modal = document.getElementById("viewVariantsModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    currentProductId = null;
+    currentVariants = [];
+  }
+
+  // --- FETCH & RENDER LIST ---
+  async function loadVariants(productId) {
+    const loading = document.getElementById("variantsLoading");
+    const content = document.getElementById("variantsModalContent");
+    const backBtn = document.getElementById("backToVariantsBtn");
+    const title = document.getElementById("variantsModalTitle");
+    const subTitle = document.getElementById("variantsModalSubtitle");
+
+    // Reset View State
+    loading.classList.remove("hidden");
+    loading.classList.add("flex");
+    content.innerHTML = "";
+    backBtn.classList.add("hidden");
+    title.innerText = "Product Variants";
+    subTitle.innerText = "Manage variants for this product";
+
+    try {
+      const res = await fetch(
+        `/admin/products/${productId}/variants/json`,
+        {
+          credentials: "same-origin",
+          headers: {
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Server return non-JSON:", text);
+        throw new Error("Invalid server response");
+      }
+
+      if (data.success) {
+        currentVariants = data.variants;
+        renderVariantsList(data.variants);
+      } else {
+        console.error("API returned error:", data);
+        content.innerHTML = `
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-bold text-red-500 mb-2">Error Loading Variants</h3>
+                <p class="text-gray-500">${data.message || 'Unknown error occurred on server'}</p>
+                <div class="mt-4 p-4 bg-gray-100 rounded-xl text-left text-xs font-mono text-gray-600 overflow-x-auto">
+                    ${JSON.stringify(data, null, 2)}
+                </div>
+            </div>
+        `;
+      }
+
+    } catch (err) {
+      console.error("Load Variants Error:", err);
+      content.innerHTML = `
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-bold text-red-500 mb-2">Client Error</h3>
+                <p class="text-gray-500">Failed to fetch variants.</p>
+                <div class="mt-4 p-4 bg-gray-100 rounded-xl text-left text-xs font-mono text-gray-600 overflow-x-auto">
+                    ${err.toString()}
+                </div>
+            </div>
+      `;
+    } finally {
+      loading.classList.add("hidden");
+      loading.classList.remove("flex");
+    }
+  }
+
+  function renderVariantsList(variants) {
+    const content = document.getElementById("variantsModalContent");
+
+    // Add "Add Variant" Button at the top
+    let html = `
+            <div class="mb-6 flex justify-end">
+                <button onclick="openAddVariantModal('${currentProductId}')" 
+                    class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-brand-500/20 hover:scale-105 transition">
+                    + Add New Variant
+                </button>
+            </div>
+        `;
+
+    if (variants.length === 0) {
+      html += `
+                <div class="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mb-4">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <p class="text-gray-500 font-bold">No variants found</p>
+                    <p class="text-xs text-gray-400 mt-1">Add a variant to get started</p>
+                </div>
+            `;
+    } else {
+      html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">`;
+
+      variants.forEach(v => {
+        html += `
+                    <div onclick="showVariantDetails('${v._id}')" 
+                        class="bg-white border-2 border-gray-50 hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/10 rounded-[2rem] p-4 cursor-pointer transition-all group relative overflow-hidden">
+                        
+                        <!-- Image -->
+                        <div class="aspect-square rounded-2xl bg-gray-100 overflow-hidden mb-4 relative">
+                            <img src="${v.coverImage}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"></div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="px-2">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="text-lg font-bold text-accent-navy">₹${v.price}</p>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Price</p>
+                                </div>
+                                <div class="text-right">
+                                     <span class="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold ${v.stock < 5 ? 'text-red-500 bg-red-50' : 'text-gray-600'}">
+                                        ${v.stock} Stock
+                                     </span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mt-4 pt-4 border-t border-gray-50">
+                                <span class="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold text-gray-500">
+                                    Size: <span class="text-accent-navy">${v.size || 'N/A'}</span>
+                                </span>
+                                <span class="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold text-gray-500">
+                                    Color: <span class="text-accent-navy">${v.color || 'N/A'}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+      });
+
+      html += `</div>`;
+    }
+
+    content.innerHTML = html;
+  }
+
+  // --- VARIANT DETAILS VIEW ---
+  function showVariantDetails(variantId) {
+    const variant = currentVariants.find(v => v._id === variantId);
+    if (!variant) return;
+
+    const content = document.getElementById("variantsModalContent");
+    const backBtn = document.getElementById("backToVariantsBtn");
+    const title = document.getElementById("variantsModalTitle");
+    const subTitle = document.getElementById("variantsModalSubtitle");
+
+    backBtn.classList.remove("hidden"); // Show Back Button
+    title.innerText = "Variant Details";
+    subTitle.innerText = `${variant.size} - ${variant.color}`;
+
+    // Render Details HTML
+    content.innerHTML = `
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+                
+                <!-- LEFT: IMAGES -->
+                <div class="space-y-4">
+                    <div class="aspect-square rounded-[2rem] bg-gray-100 overflow-hidden shadow-sm border border-gray-100">
+                         <img src="${variant.coverImage}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-2">
+                        ${variant.subImages.map(img => `
+                            <div class="aspect-square rounded-xl bg-gray-50 overflow-hidden border border-gray-100">
+                                <img src="${img}" class="w-full h-full object-cover">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- RIGHT: INFO & ACTIONS -->
+                <div class="space-y-8">
+                    
+                    <div class="bg-gray-50 rounded-[2rem] p-8">
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Price</p>
+                                <p class="text-3xl font-bold text-accent-navy">₹${variant.price}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Stock Status</p>
+                                <p class="text-xl font-bold ${variant.stock > 0 ? 'text-green-500' : 'text-red-500'}">
+                                    ${variant.stock} Units
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                             <div class="bg-white p-4 rounded-2xl border border-gray-100">
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Size</p>
+                                <p class="font-bold text-accent-navy">${variant.size}</p>
+                             </div>
+                             <div class="bg-white p-4 rounded-2xl border border-gray-100">
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Color</p>
+                                <p class="font-bold text-accent-navy">${variant.color}</p>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="flex flex-col gap-3">
+                        <button onclick="openEditVariantModal('${variant._id}', '${variant.price}', '${variant.stock}', '${variant.size}', '${variant.color}', '${variant.coverImage}', '${JSON.stringify(variant.subImages)}')" 
+                            class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:scale-[1.02] transition">
+                            <i class="fa-solid fa-pen mr-2"></i> Edit Variant Details
+                        </button>
+
+                        <button onclick="openDeleteModal('variant', '${variant._id}')" 
+                            class="w-full py-4 bg-red-50 text-red-500 rounded-2xl font-bold hover:bg-red-100 transition">
+                            <i class="fa-solid fa-trash mr-2"></i> Delete Variant
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+  }
+
+  function showVariantsList() {
+    const backBtn = document.getElementById("backToVariantsBtn");
+    const title = document.getElementById("variantsModalTitle");
+    const subTitle = document.getElementById("variantsModalSubtitle");
+
+    backBtn.classList.add("hidden");
+    title.innerText = "Product Variants";
+    subTitle.innerText = "Manage variants for this product";
+
+    // Re-render list from cache
+    renderVariantsList(currentVariants);
+  }
+
+</script>
+
+<script>
+  async function submitAddVariantForm(event) {
+    event.preventDefault();
+    if (!validateVariantForm()) return;
+
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Saving...";
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        credentials: "same-origin",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        closeAddVariantModal();
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Variant Added',
+          showConfirmButton: false,
+          timer: 3000
+        });
+
+        // Refresh list
+        if (currentProductId) {
+          loadVariants(currentProductId);
+        }
+      } else {
+        Swal.fire("Error", data.message || "Failed to add variant", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Something went wrong", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
+    }
+  }
+
+  // --- AJAX for Edit Variant --
+  async function submitEditVariantForm(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const variantId = document.getElementById("editVariantId").value;
+    const originalText = submitBtn.innerText;
+
+    if (!variantId) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Updating...";
+
+    const data = {
+      price: document.getElementById("editVariantPrice").value,
+      stock: document.getElementById("editVariantStock").value,
+      size: document.getElementById("editVariantSize").value,
+      color: document.getElementById("editVariantColor").value
+    };
+
+    const formData = new FormData();
+    formData.append("price", data.price);
+    formData.append("stock", data.stock);
+    formData.append("size", data.size);
+    formData.append("color", data.color);
+
+    const coverInput = document.getElementById("editVariantCoverInput");
+    if (coverInput.files.length > 0) {
+      formData.append("coverImage", coverInput.files[0]);
+    }
+
+    const subInput = document.getElementById("editVariantSubInput");
+    if (subInput.files.length > 0) {
+      for (let i = 0; i < subInput.files.length; i++) {
+        formData.append("subImages", subInput.files[i]);
+      }
+    }
+
+    try {
+      const res = await fetch(`/admin/products/variants/edit/${variantId}`, {
+        method: 'POST',
+        credentials: "same-origin",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+          // "Content-Type": "multipart/form-data" // Fetch auto-sets this with FormData
+        },
+        body: formData
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        closeEditVariantModal();
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Variant Updated',
+          showConfirmButton: false,
+          timer: 3000
+        });
+
+        // Refresh list if modal is open
+        if (currentProductId) {
+          loadVariants(currentProductId);
+        }
+      } else {
+        Swal.fire("Error", result.message || "Failed to update variant", "error");
+      }
+
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Something went wrong", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
+    }
+  }
+</script>
+</body>
 
 </html>

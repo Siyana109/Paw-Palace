@@ -5,33 +5,28 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const postAddVariant = async (req, res) => {
   try {
-    console.log('error 1')
     const { productId, price, stock, size, color } = req.body;
-    console.log(req.files);
-
 
     if (!productId || !price || !stock) {
-      return res.redirect("/admin/products");
+      return res.json({ success: false, message: "Missing required fields" });
     }
-console.log('error 2')
+
     const product = await Product.findById(productId);
     if (!product) {
-      return res.redirect("/admin/products");
+      return res.json({ success: false, message: "Product not found" });
     }
-console.log('error 3')
-    /* ---------- Cloudinary Files ---------- */
-    // cover image
+
     const coverImage = req.files?.coverImage?.[0]?.path;
     if (!coverImage) {
-      console.log(" Cover image missing");
-      return res.redirect("/admin/products");
+      return res.json({ success: false, message: "Cover image required" });
     }
-console.log('error 4')
-    // sub images
-    const subImages =
-      req.files?.subImages?.map(file => file.path) || [];
-console.log('error 5')
-    /* ---------- Create Variant ---------- */
+
+    const subImages = req.files?.subImages?.map(f => f.path) || [];
+
+    if (subImages.length < 3) {
+      return res.json({ success: false, message: "Minimum 3 images required" });
+    }
+
     await Variant.create({
       product: productId,
       price: Number(price),
@@ -40,15 +35,20 @@ console.log('error 5')
       color: color || null,
       coverImage,
       subImages,
-      isActive: true,
+      isActive: true
     });
-console.log('error 6')
-    console.log(" Variant created with Cloudinary images");
-    res.redirect("/admin/products");
-console.log('error 7')
+
+    // 🔥 Update product stock
+    const variants = await Variant.find({ product: productId });
+    const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
+
+    await Product.findByIdAndUpdate(productId, { totalStock });
+
+    return res.json({ success: true });
+
   } catch (error) {
-    console.error(" Error adding variant:", error);
-    res.redirect("/admin/products");
+    console.error("Add variant error:", error);
+    return res.json({ success: false, message: "Server error" });
   }
 };
 
@@ -109,4 +109,53 @@ const deleteVariant = async (req, res) => {
 
 
 
-export default { deleteVariant, postAddVariant, getVariantsByProduct }
+// UPDATE VARIANT
+const updateVariant = async (req, res) => {
+  try {
+    const { variantId } = req.params;
+    const { price, stock, size, color } = req.body;
+
+    const variant = await Variant.findById(variantId);
+    if (!variant) {
+      return res.json({ success: false, message: "Variant not found" });
+    }
+
+    // Update fields
+    variant.price = Number(price);
+    variant.stock = Number(stock);
+    variant.size = size || null;
+    variant.color = color || null;
+
+    // Handle Image Updates
+    if (req.files?.coverImage?.[0]) {
+      variant.coverImage = req.files.coverImage[0].path;
+    }
+
+    if (req.files?.subImages && req.files.subImages.length > 0) {
+      // Replacing all sub-images if new ones are uploaded
+      // In a real app you might want to append or delete specific ones, but for now we replace
+      if (req.files.subImages.length < 3) {
+        return res.json({ success: false, message: "Minimum 3 images required if updating sub-images" });
+      }
+      variant.subImages = req.files.subImages.map(f => f.path);
+    }
+
+    await variant.save();
+
+    // Recalculate Product Total Stock
+    const productId = variant.product;
+    const variants = await Variant.find({ product: productId });
+    const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
+
+    await Product.findByIdAndUpdate(productId, { totalStock });
+
+    res.json({ success: true, message: "Variant updated successfully", totalStock });
+
+  } catch (error) {
+    console.error("Update variant error:", error);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
+
+export default { deleteVariant, postAddVariant, getVariantsByProduct, updateVariant }

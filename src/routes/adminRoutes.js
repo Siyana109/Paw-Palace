@@ -21,13 +21,13 @@ router.post('/users/:userId/block', adminMiddleware.adminSession, userController
 router.post('/users/:userId/unblock', adminMiddleware.adminSession, userController.unblockUser);
 router.get("/users/list", adminMiddleware.adminSession, userController.listUsers);
 
-router.get('/brands',adminMiddleware.adminSession, brandCategoryController.getBrandsPage)
+router.get('/brands', adminMiddleware.adminSession, brandCategoryController.getBrandsPage)
 router.post('/brands/edit/:brandId', adminMiddleware.adminSession, brandCategoryController.editBrand)
 router.post('/brands/delete/:brandId', adminMiddleware.adminSession, brandCategoryController.deleteBrand)
 router.post('/brands/add', adminMiddleware.adminSession, brandCategoryController.addBrand)
 
-router.get('/categories',adminMiddleware.adminSession, brandCategoryController.getCategoriesPage)
-router.post('/categories/add',adminMiddleware.adminSession, brandCategoryController.addCategory);
+router.get('/categories', adminMiddleware.adminSession, brandCategoryController.getCategoriesPage)
+router.post('/categories/add', adminMiddleware.adminSession, brandCategoryController.addCategory);
 router.post('/categories/edit/:id', adminMiddleware.adminSession, brandCategoryController.editCategory);
 router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategoryController.deleteCategory);
 
@@ -44,11 +44,16 @@ router.post("/products/delete/:productId", adminMiddleware.adminSession, product
 
 router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
 
-router.post("/products/add-variant", variantUpload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "subImages", maxCount: 5 }
-  ]),variantController.postAddVariant);
+router.post("/products/add-variant", adminMiddleware.adminSession, variantUpload.fields([
+  { name: "coverImage", maxCount: 1 },
+  { name: "subImages", maxCount: 5 }
+]), variantController.postAddVariant);
+
 
 router.post("/products/variants/delete/:variantId", variantController.deleteVariant);
+router.post("/products/variants/edit/:variantId", adminMiddleware.adminSession, variantUpload.fields([
+  { name: "coverImage", maxCount: 1 },
+  { name: "subImages", maxCount: 5 }
+]), variantController.updateVariant);
 
 export default router
