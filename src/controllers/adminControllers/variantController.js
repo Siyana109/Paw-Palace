@@ -131,14 +131,45 @@ const updateVariant = async (req, res) => {
       variant.coverImage = req.files.coverImage[0].path;
     }
 
-    if (req.files?.subImages && req.files.subImages.length > 0) {
-      // Replacing all sub-images if new ones are uploaded
-      // In a real app you might want to append or delete specific ones, but for now we replace
-      if (req.files.subImages.length < 3) {
-        return res.json({ success: false, message: "Minimum 3 images required if updating sub-images" });
+    // Handle Sub Images
+    let finalSubImages = [];
+
+    // 1. Add kept images
+    if (req.body.keptSubImages) {
+      try {
+        const kept = JSON.parse(req.body.keptSubImages);
+        if (Array.isArray(kept)) finalSubImages = [...kept];
+      } catch (e) {
+        console.error("Error parsing kept sub images", e);
       }
-      variant.subImages = req.files.subImages.map(f => f.path);
     }
+
+    // 2. Add new images
+    if (req.files?.subImages && req.files.subImages.length > 0) {
+      const newPaths = req.files.subImages.map(f => f.path);
+      finalSubImages = [...finalSubImages, ...newPaths];
+    }
+
+    // 3. Validation
+    // If no changes (no new files and kept all old), finalSubImages will be equal to old. 
+    // If user deleted all, finalSubImages empty.
+    // If user provided nothing but we had images before? 
+    // The frontend sends `keptSubImages` as the current state.
+    // If keptSubImages is missing BUT we have files, we assume replace? 
+    // No, frontend always sends keptSubImages. If it's missing, it effectively means 'keep none' (unless we fallback, but secure to assume empty).
+
+    // However, if the user didn't touch images at all, frontend sends the list.
+    // So finalSubImages is the source of truth.
+
+    if (finalSubImages.length < 3) {
+      return res.json({ success: false, message: "Variant must have at least 3 sub-images (Existing + New)" });
+    }
+
+    if (finalSubImages.length > 5) {
+      return res.json({ success: false, message: "Variant can have at most 5 sub-images" });
+    }
+
+    variant.subImages = finalSubImages;
 
     await variant.save();
 

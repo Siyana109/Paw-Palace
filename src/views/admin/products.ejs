@@ -546,22 +546,23 @@
 
         <!-- Sub Images Edit -->
         <div>
-          <label class="block text-sm font-bold mb-1">Sub Images (Min 3)</label>
+          <label class="block text-sm font-bold mb-1">Sub Images (Min 3 - Max 5)</label>
           <div class="space-y-3">
-            <!-- Existing Sub Images -->
+            <!-- Existing Sub Images + New Preview Container -->
             <div class="mb-2">
-              <p class="text-xs font-bold text-gray-400 mb-1">Current Images:</p>
+              <p class="text-xs font-bold text-gray-400 mb-1">Images (Kept + New):</p>
               <div id="editVariantExistingSubImages" class="flex flex-wrap gap-2"></div>
+              <p id="editVariantLimitMsg" class="text-xs font-bold text-gray-400 mt-1"></p>
             </div>
 
             <!-- New Upload -->
             <div class="border-t border-dashed border-gray-200 pt-2">
-              <p class="text-xs font-bold text-gray-400 mb-1">Upload New (Replaces All):</p>
+              <p class="text-xs font-bold text-gray-400 mb-1">Add New Images:</p>
               <input type="file" id="editVariantSubInput" name="subImages" multiple accept="image/*"
-                onchange="previewImages(this, 'editVariantNewSubPreview')"
+                onchange="handleEditVariantNewFiles(this)"
                 class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
 
-              <div id="editVariantNewSubPreview" class="hidden flex flex-wrap gap-2 mt-2"></div>
+              <div id="editVariantNewSubPreview" class="hidden"></div>
             </div>
           </div>
         </div>
@@ -1012,36 +1013,118 @@
 </script>
 
 <script>
-  function openEditVariantModal(id, price, stock, size, color, coverImage, subImagesStr) {
-    selectedVariantSubImages = []; // Reset for new edit
-    document.getElementById("editVariantSubInput").value = ""; // Clear input
-    document.getElementById("editVariantNewSubPreview").innerHTML = "";
-    document.getElementById("editVariantNewSubPreview").classList.add("hidden");
+  // --- Edit Product Modal Logic ---
+  function openEditProductModal(btn) {
+    const id = btn.getAttribute('data-id');
+    const name = btn.getAttribute('data-name');
+    const brand = btn.getAttribute('data-brand');
+    const category = btn.getAttribute('data-category');
+    const description = btn.getAttribute('data-description');
+    const pettype = btn.getAttribute('data-pettype');
+    const status = btn.getAttribute('data-status');
 
-    document.getElementById("editVariantId").value = id;
-    document.getElementById("editVariantPrice").value = price;
-    document.getElementById("editVariantStock").value = stock;
-    document.getElementById("editVariantSize").value = size || '';
-    document.getElementById("editVariantColor").value = color || '';
+    document.getElementById('editProductForm').action = `/admin/products/edit/${id}`;
+    document.getElementById('editProductName').value = name;
+    document.getElementById('editBrandId').value = brand;
+    document.getElementById('editCategoryId').value = category;
+    document.getElementById('editPetType').value = pettype;
+    document.getElementById('editIsActive').value = status;
+    document.getElementById('editDescription').value = description;
 
-    // Cover Preview
-    document.getElementById("editVariantCoverPreviewImg").src = coverImage || '';
+    const modal = document.getElementById("editProductModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
 
-    // Sub Images Preview
+  // --- Edit Variant Logic ---
+  let editVariantKeptImages = [];
+  let editVariantNewFiles = [];
+
+  function renderEditVariantSubImages() {
     const container = document.getElementById("editVariantExistingSubImages");
     container.innerHTML = '';
 
-    if (subImagesStr) {
-      try {
-        const images = JSON.parse(subImagesStr);
-        images.forEach(img => {
-          const div = document.createElement("div");
-          div.className = "w-12 h-12 rounded-lg overflow-hidden border border-gray-200";
-          div.innerHTML = `<img src="${img}" class="w-full h-full object-cover">`;
-          container.appendChild(div);
-        });
-      } catch (e) { console.error("Error parsing sub images", e); }
+    // 1. Render Kept Images
+    editVariantKeptImages.forEach((imgUrl, index) => {
+      const div = document.createElement("div");
+      div.className = "w-16 h-16 rounded-lg overflow-hidden border border-gray-200 relative group";
+
+      div.innerHTML = `
+             <img src="${imgUrl}" class="w-full h-full object-cover">
+             <button type="button" onclick="removeKeptSubImage(${index})" 
+                class="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+             </button>
+           `;
+      container.appendChild(div);
+    });
+
+    // 2. Render New Files
+    editVariantNewFiles.forEach((file, index) => {
+      const div = document.createElement("div");
+      div.className = "w-16 h-16 rounded-lg overflow-hidden border border-dashed border-brand-300 relative group";
+
+      div.innerHTML = `
+             <img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover">
+             <div class="absolute bottom-0 left-0 right-0 bg-brand-500 text-white text-[8px] font-bold text-center">NEW</div>
+             <button type="button" onclick="removeNewSubImage(${index})" 
+                class="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 text-[10px] flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+             </button>
+           `;
+      container.appendChild(div);
+    });
+  }
+
+  function removeKeptSubImage(index) {
+    editVariantKeptImages.splice(index, 1);
+    renderEditVariantSubImages();
+  }
+
+  function removeNewSubImage(index) {
+    editVariantNewFiles.splice(index, 1);
+    renderEditVariantSubImages();
+  }
+
+  // Handle new file selection
+  function handleEditVariantNewFiles(input) {
+    if (input.files) {
+      Array.from(input.files).forEach(file => {
+        editVariantNewFiles.push(file);
+      });
+      renderEditVariantSubImages();
+      input.value = '';
     }
+  }
+
+  function openEditVariantModal(variantId) {
+    const variant = currentVariants.find(v => v._id === variantId);
+    if (!variant) return;
+
+    editVariantKeptImages = [];
+    editVariantNewFiles = [];
+
+    document.getElementById("editVariantSubInput").value = "";
+
+    // Clear old simple preview if exists
+    const oldPreview = document.getElementById("editVariantNewSubPreview");
+    if (oldPreview) { oldPreview.innerHTML = ""; oldPreview.classList.add("hidden"); }
+
+    document.getElementById("editVariantId").value = variant._id;
+    document.getElementById("editVariantPrice").value = variant.price;
+    document.getElementById("editVariantStock").value = variant.stock;
+    document.getElementById("editVariantSize").value = variant.size || '';
+    document.getElementById("editVariantColor").value = variant.color || '';
+
+    // Cover Preview
+    document.getElementById("editVariantCoverPreviewImg").src = variant.coverImage || '';
+
+    // Sub Images Parsing
+    if (Array.isArray(variant.subImages)) {
+      editVariantKeptImages = [...variant.subImages];
+    }
+
+    renderEditVariantSubImages();
 
     const modal = document.getElementById("editVariantModal");
     modal.classList.remove("hidden");
@@ -1296,7 +1379,7 @@
 
                     <!-- ACTIONS -->
                     <div class="flex flex-col gap-3">
-                        <button onclick="openEditVariantModal('${variant._id}', '${variant.price}', '${variant.stock}', '${variant.size}', '${variant.color}', '${variant.coverImage}', '${JSON.stringify(variant.subImages)}')" 
+                        <button onclick="openEditVariantModal('${variant._id}')" 
                             class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:scale-[1.02] transition">
                             <i class="fa-solid fa-pen mr-2"></i> Edit Variant Details
                         </button>
@@ -1391,33 +1474,39 @@
 
     if (!variantId) return;
 
+    // Validation
+    const totalImages = editVariantKeptImages.length + editVariantNewFiles.length;
+    if (totalImages < 3) {
+      Swal.fire("Error", `You need at least 3 sub-images. Current: ${totalImages}`, "error");
+      return;
+    }
+    if (totalImages > 5) {
+      Swal.fire("Error", `You can have at most 5 sub-images. Current: ${totalImages}`, "error");
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.innerText = "Updating...";
 
-    const data = {
-      price: document.getElementById("editVariantPrice").value,
-      stock: document.getElementById("editVariantStock").value,
-      size: document.getElementById("editVariantSize").value,
-      color: document.getElementById("editVariantColor").value
-    };
-
     const formData = new FormData();
-    formData.append("price", data.price);
-    formData.append("stock", data.stock);
-    formData.append("size", data.size);
-    formData.append("color", data.color);
+    formData.append("price", document.getElementById("editVariantPrice").value);
+    formData.append("stock", document.getElementById("editVariantStock").value);
+    formData.append("size", document.getElementById("editVariantSize").value);
+    formData.append("color", document.getElementById("editVariantColor").value);
 
+    // Kept Images
+    formData.append("keptSubImages", JSON.stringify(editVariantKeptImages));
+
+    // Cover Image
     const coverInput = document.getElementById("editVariantCoverInput");
     if (coverInput.files.length > 0) {
       formData.append("coverImage", coverInput.files[0]);
     }
 
-    const subInput = document.getElementById("editVariantSubInput");
-    if (subInput.files.length > 0) {
-      for (let i = 0; i < subInput.files.length; i++) {
-        formData.append("subImages", subInput.files[i]);
-      }
-    }
+    // New Sub Images
+    editVariantNewFiles.forEach(file => {
+      formData.append("subImages", file);
+    });
 
     try {
       const res = await fetch(`/admin/products/variants/edit/${variantId}`, {
@@ -1425,7 +1514,6 @@
         credentials: "same-origin",
         headers: {
           "X-Requested-With": "XMLHttpRequest"
-          // "Content-Type": "multipart/form-data" // Fetch auto-sets this with FormData
         },
         body: formData
       });
