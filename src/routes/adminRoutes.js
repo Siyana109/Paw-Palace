@@ -10,6 +10,8 @@ import brandCategoryController from "../controllers/adminControllers/brandCatego
 import productController from "../controllers/adminControllers/productController.js"
 import variantController from "../controllers/adminControllers/variantController.js"
 
+import couponController from "../controllers/adminControllers/couponController.js"
+
 import { variantUpload } from "../middlewares/upload.js"
 
 
@@ -39,9 +41,6 @@ router.post("/products/add", adminMiddleware.adminSession, productController.pos
 router.post("/products/edit/:id", adminMiddleware.adminSession, productController.updateProduct);
 router.post("/products/delete/:productId", adminMiddleware.adminSession, productController.deleteProduct);
 
-
-
-
 router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
 
 router.post("/products/add-variant", adminMiddleware.adminSession, variantUpload.fields([
@@ -49,11 +48,18 @@ router.post("/products/add-variant", adminMiddleware.adminSession, variantUpload
   { name: "subImages", maxCount: 5 }
 ]), variantController.postAddVariant);
 
-
 router.post("/products/variants/delete/:variantId", variantController.deleteVariant);
 router.post("/products/variants/edit/:variantId", adminMiddleware.adminSession, variantUpload.fields([
   { name: "coverImage", maxCount: 1 },
   { name: "subImages", maxCount: 5 }
 ]), variantController.updateVariant);
+
+
+
+router.get('/coupons',adminMiddleware.adminSession, couponController.loadCoupons)
+router.post('/coupons/add', adminMiddleware.adminSession, couponController.addCoupon)
+router.post("/coupons/edit/:id", adminMiddleware.adminSession, couponController.editCoupon);
+router.post("/coupons/delete/:id", adminMiddleware.adminSession, couponController.deleteCoupon);
+
 
 export default router

@@ -168,38 +168,35 @@
                 <div class="flex-1">
                     <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
 
-  <!-- 🔍 SEARCH (LEFT SIDE) -->
-  <form method="GET" action="/home" class="relative w-full max-w-md">
-    
-    <input
-      type="text"
-      name="search"
-      value="<%= query.search || '' %>"
-      placeholder="Search products..."
-      class="w-full pl-12 pr-10 py-3 rounded-2xl bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-    />
+                        <!-- 🔍 SEARCH (LEFT SIDE) -->
+                        <form method="GET" action="/home" class="relative w-full max-w-md">
 
-    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="search" value="<%= query.search || '' %>"
+                                placeholder="Search products..."
+                                class="w-full pl-12 pr-10 py-3 rounded-2xl bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
 
-    <% if (query.search) { %>
-      <a href="/home"
-         class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-        ✕
-      </a>
-    <% } %>
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 
-    <!-- Preserve filters -->
-    <% Object.keys(query || {}).forEach(key => {
-      if (key !== 'search' && key !== 'page') {
-        if (Array.isArray(query[key])) {
-          query[key].forEach(val => { %>
-            <input type="hidden" name="<%= key %>" value="<%= val %>">
-    <% }) } else { %>
-            <input type="hidden" name="<%= key %>" value="<%= query[key] %>">
-    <% } } }); %>
+                            <% if (query.search) { %>
+                                <a href="/home"
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    ✕
+                                </a>
+                                <% } %>
 
-  </form>
-                        
+                                    <!-- Preserve filters -->
+                                    <% Object.keys(query || {}).forEach(key=> {
+                                        if (key !== 'search' && key !== 'page') {
+                                        if (Array.isArray(query[key])) {
+                                        query[key].forEach(val => { %>
+                                        <input type="hidden" name="<%= key %>" value="<%= val %>">
+                                        <% }) } else { %>
+                                            <input type="hidden" name="<%= key %>" value="<%= query[key] %>">
+                                            <% } } }); %>
+
+                        </form>
+
                         <!-- SORT FORM -->
                         <form method="GET" action="/home">
                             <% Object.keys(query || {}).forEach(key=> {

@@ -8,72 +8,70 @@ const couponSchema = new mongoose.Schema({
         uppercase: true,
         trim: true
     },
-    description: {
+
+    description: String,
+
+    discountType: {
         type: String,
+        enum: ["price", "percentage"],
+        required: true
     },
-    couponType: {
-        enum: ['price','percentage']
-    },
-    discountPrice: {
+
+    discountValue: {
         type: Number,
         required: true,
-        min: 0,
-        max: 100
+        min: 0
     },
-    discountPercentage: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 100
-    },
+
     minimumPurchase: {
         type: Number,
         default: 0
     },
+
     maximumDiscount: {
         type: Number,
         default: null
     },
+
     startDate: {
         type: Date,
-        required: true
+        default: Date.now
     },
+
     expiryDate: {
         type: Date,
         required: true
     },
+
     isActive: {
         type: Boolean,
         default: true
     },
-    totalCoupon: {
-        type: Number,
-        default: null
-    },
-    usedCouponCount: {
+
+    usageCount: {
         type: Number,
         default: 0
     },
-    userUsageLimit: {
+
+    usageLimit: {
         type: Number,
-        default: 1
+        default: null // null = unlimited
     },
+
     usedBy: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'users'
+            ref: "users"
+        },
+        orderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Order"
         },
         usedAt: {
             type: Date,
             default: Date.now
-        },
-        orderId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Order'
         }
     }]
-}, {
-    timestamps: true
-});
+}, { timestamps: true });
 
-export default mongoose.model('Coupon', couponSchema);
+export default mongoose.model("Coupon", couponSchema);

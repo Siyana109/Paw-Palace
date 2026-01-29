@@ -75,13 +75,13 @@ WEEK-9 PENDINGS:
     ✔ edit profile image @done (1/27/2026, 5:22:00 PM)
     ☐ add js form validation
     ☐ show recent added. items  at top
-    ☐ image edit option for product
-    ☐ view product details in admin side
-    ☐ edit varient is not working
+    ✔ image edit option for product @done (1/29/2026, 8:23:57 PM)
+    ✔ view product details in admin side @done (1/29/2026, 8:24:00 PM)
+    ✔ edit varient is not working @done (1/29/2026, 8:24:02 PM)
     ✔ category name should be unique @done (1/27/2026, 11:48:58 AM)
     ☐ show related items
-    ☐ filters need to implement in shop page
-    ☐ sewch sort and filter should interconnected
+    ✔ filters need to implement in shop page @done (1/29/2026, 8:24:07 PM)
+    ✔ sewch sort and filter should interconnected @done (1/29/2026, 8:24:09 PM)
     ☐ if a product is out of stock show that in shop page with that message
 
 
