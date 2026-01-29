@@ -33,7 +33,7 @@ router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategor
 
 
 
-router.get("/products", productController.listProducts);
+router.get("/products", adminMiddleware.adminSession, productController.listProducts);
 router.post("/products/add", adminMiddleware.adminSession, productController.postAddProduct);
 
 router.post("/products/edit/:id", adminMiddleware.adminSession, productController.updateProduct);

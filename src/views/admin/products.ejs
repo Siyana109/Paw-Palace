@@ -52,7 +52,7 @@
           <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
             <div class="relative w-full max-w-lg">
               <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input type="text" placeholder="Search products..."
+              <input id="searchInput" type="text" placeholder="Search products..." onkeyup="fetchProducts(1)"
                 class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
             </div>
             <div class="flex items-center gap-3">
@@ -92,7 +92,7 @@
                   <th class="px-8 py-5">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-50">
+              <tbody id="productTableBody" class="divide-y divide-gray-50">
                 <% products.forEach(product=> { %>
 
                   <tr class="hover:bg-gray-50/50 transition" data-product-row="<%= product._id %>">
@@ -115,27 +115,32 @@
                     </td>
 
                     <!-- BRAND -->
-                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                    <td class="px-6 py-5 text-sm font-semibold text-gray-600">
                       <%= product.brandId ? product.brandId.brandName : '-' %>
                     </td>
 
 
                     <!-- CATEGORY -->
-                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                    <td class="px-6 py-5 text-sm font-semibold text-gray-600">
                       <%= product.categoryId ? product.categoryId.categoryName : '-' %>
                     </td>
 
                     <!-- Pet Type -->
-                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
-                      <%= product.petType || '-' %>
+                    <td class="px-6 py-5 text-sm font-semibold text-gray-600">
+                      <% if(Array.isArray(product.petType)) { %>
+                        <%= product.petType.join(', ') %>
+                      <% } else { %>
+                        <%= product.petType || ' -' %>
+                          <% } %>
                     </td>
 
                     <!-- STOCK -->
                     <td class="px-6 py-5" data-product-stock="<%= product._id %>">
                       <% if (product.totalStock===0) { %>
-                        <span class="text-xs font-bold text-red-500">Out of Stock</span>
+                        <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">Out of
+                          Stock</span>
                         <% } else { %>
-                          <span class="text-sm font-medium text-gray-500">
+                          <span class="text-sm font-bold text-gray-600">
                             <%= product.totalStock %>
                           </span>
                           <% } %>
@@ -151,34 +156,32 @@
 
                     <!-- ACTIONS -->
                     <td class="px-8 py-5">
-                      <div class="flex items-center gap-4 text-gray-300">
+                      <div class="flex items-center gap-4 text-gray-400">
 
                         <!-- EDIT (MODAL) -->
-                        <a onclick="openEditProductModal(this)" data-id="<%= product._id %>"
-                          data-name="<%= product.productName %>"
-                          data-brand="<%= product.brandId ? product.brandId._id : '' %>"
-                          data-category="<%= product.categoryId ? product.categoryId._id : '' %>"
-                          data-description="<%= product.description %>" data-pettype="<%= product.petType %>"
-                          data-status="<%= product.isActive %>"
-                          class="cursor-pointer text-gray-400 hover:text-brand-500 transition-colors duration-200"
-                          title="Edit Product">
-                          <i class="fa-solid fa-pen-to-square text-sm"></i>
-                        </a>
+                        <button onclick="openEditProductModal(this)" data-id="<%= product._id %>"
+                          data-name="<%= product.productName %>" data-brand="<%= product.brandId?._id || '' %>"
+                          data-category="<%= product.categoryId?._id || '' %>"
+                          data-description="<%= product.description %>"
+                          data-pettype='<%= JSON.stringify(product.petType || []).replace(/' /g, "&apos;" ) %>'
+                          data-status="<%= product.isActive %>" class="hover:text-brand-500 hover:scale-110 transition"
+                            title="Edit Product">
+                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        </button>
 
 
                         <!-- VARIANTS (THIS IS THE KEY ICON) -->
-                        <a onclick="openVariantsModal('<%= product._id %>')"
-                          class="cursor-pointer hover:text-teal-500 transition" title="View Variants">
+                        <button onclick="openVariantsModal('<%= product._id %>')"
+                          class="hover:text-teal-500 hover:scale-110 transition" title="View Variants">
                           <i class="fa-solid fa-layer-group text-sm"></i>
-                        </a>
+                        </button>
 
 
                         <!-- DELETE (TRASH) -->
-                        <a onclick="openDeleteModal('product', '<%= product._id %>')"
-                          class="cursor-pointer text-gray-400 hover:text-red-500 transition-colors duration-200"
-                          title="Delete Product">
+                        <button onclick="openDeleteModal('product', '<%= product._id %>')"
+                          class="hover:text-red-500 hover:scale-110 transition" title="Delete Product">
                           <i class="fa-solid fa-trash text-sm"></i>
-                        </a>
+                        </button>
 
                       </div>
                     </td>
@@ -269,15 +272,29 @@
 
         <!-- PET TYPE -->
         <div>
-          <label class="block text-sm font-bold mb-1">Pet Type</label>
-          <select name="petType" required
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-            <option value="">Select Pet Type</option>
-            <option value="Dog">Dog</option>
-            <option value="Cat">Cat</option>
-            <option value="Puppy">Puppy</option>
-            <option value="Kitten">Kitten</option>
-          </select>
+          <label class="block text-sm font-bold mb-2">Pet Types</label>
+          <div class="flex gap-4 flex-wrap bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Dogs"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Dogs</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Cats"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Cats</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Puppies"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Puppies</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Kittens"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Kittens</span>
+            </label>
+          </div>
         </div>
 
         <!-- DESCRIPTION -->
@@ -349,14 +366,29 @@
 
         <!-- PET TYPE -->
         <div>
-          <label class="block text-sm font-bold mb-1">Pet Type</label>
-          <select id="editPetType" name="petType" required
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-            <option value="Dog">Dog</option>
-            <option value="Cat">Cat</option>
-            <option value="Puppy">Puppy</option>
-            <option value="Kitten">Kitten</option>
-          </select>
+          <label class="block text-sm font-bold mb-2">Pet Types</label>
+          <div class="flex gap-4 flex-wrap bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Dogs" id="editPetTypeDogs"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Dogs</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Cats" id="editPetTypeCats"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Cats</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Puppies" id="editPetTypePuppies"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Puppies</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="petType" value="Kittens" id="editPetTypeKittens"
+                class="w-4 h-4 text-brand-500 rounded focus:ring-brand-500">
+              <span class="text-sm font-semibold text-gray-600">Kittens</span>
+            </label>
+          </div>
         </div>
 
 
@@ -757,8 +789,8 @@
         if (stockCell) {
           stockCell.innerHTML =
             data.totalStock === 0
-              ? `<span class="text-xs font-bold text-red-500">Out of Stock</span>`
-              : `<span class="text-sm font-medium text-gray-500">${data.totalStock}</span>`;
+              ? `<span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">Out of Stock</span>`
+              : `<span class="text-sm font-bold text-gray-600">${data.totalStock}</span>`;
         }
 
         closeDeleteModal();
@@ -796,8 +828,8 @@
 
     // Clear file inputs and previews
     document.getElementById("addVariantModal").querySelector("form").reset();
-    document.getElementById("variantCoverPreview").innerHTML = '';
-    document.getElementById("variantCoverPreview").classList.add("hidden");
+    document.getElementById("variantCoverPreview").innerHTML = '<i class="fa-regular fa-image text-2xl"></i>';
+    document.getElementById("variantCoverPreview").classList.remove("hidden"); // Ensure it's visible for placeholder
     document.getElementById("variantSubPreview").innerHTML = '';
     document.getElementById("variantSubPreview").classList.add("hidden");
     selectedVariantSubImages = []; // Reset the file array
@@ -1021,14 +1053,53 @@
     const brand = btn.getAttribute('data-brand');
     const category = btn.getAttribute('data-category');
     const description = btn.getAttribute('data-description');
-    const pettype = btn.getAttribute('data-pettype');
+
+    // Parse pet type (it's JSON string now)
+    let petTypes = [];
+    try {
+      const raw = btn.getAttribute('data-pettype');
+      if (raw) petTypes = JSON.parse(raw);
+      if (!Array.isArray(petTypes)) petTypes = [petTypes]; // Fallback for old strings
+    } catch (e) {
+      console.error("Error parsing pet types", e);
+      // Fallback to treating it as a single string if JSON parsing fails
+      const raw = btn.getAttribute('data-pettype');
+      if (raw) {
+        petTypes = raw.split(',').map(item => item.trim());
+      } else {
+        petTypes = [];
+      }
+    }
+
     const status = btn.getAttribute('data-status');
 
     document.getElementById('editProductForm').action = `/admin/products/edit/${id}`;
     document.getElementById('editProductName').value = name;
     document.getElementById('editBrandId').value = brand;
     document.getElementById('editCategoryId').value = category;
-    document.getElementById('editPetType').value = pettype;
+
+    // Uncheck all Edit checkboxes first
+    document.querySelectorAll('#editProductModal input[name="petType"]').forEach(cb => {
+      cb.checked = false;
+    });
+
+    // Check matches
+    petTypes.forEach(type => {
+      // Map singular to plural if needed, or just iterate.
+      // My Enum has strict values, so it should match.
+      const el = document.getElementById(`editPetType${type}`);
+      if (el) el.checked = true;
+
+      // Fallback mapping if DB has "Dog" but checkbox is "Dogs"
+      // Actually I added singular to Schema enum but checkboxes use Plural values.
+      // I should handle map.
+      if (type === 'Dog' && document.getElementById('editPetTypeDogs')) document.getElementById('editPetTypeDogs').checked = true;
+      if (type === 'Cat' && document.getElementById('editPetTypeCats')) document.getElementById('editPetTypeCats').checked = true;
+      if (type === 'Puppy' && document.getElementById('editPetTypePuppies')) document.getElementById('editPetTypePuppies').checked = true;
+      if (type === 'Kitten' && document.getElementById('editPetTypeKittens')) document.getElementById('editPetTypeKittens').checked = true;
+    });
+
+
     document.getElementById('editIsActive').value = status;
     document.getElementById('editDescription').value = description;
 
@@ -1548,6 +1619,126 @@
     }
   }
 </script>
+
+<script>
+  let searchTimer = null;
+  let currentPage = 1;
+  let currentSort = "newest";
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      fetchProducts(1, e.target.value, currentSort);
+    }, 400); // debounce
+  });
+
+  function fetchProducts(page = 1, search = "", sort = "newest") {
+    currentPage = page;
+    currentSort = sort;
+
+    fetch(`/admin/products?page=${page}&search=${search}&sort=${sort}`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) return;
+        renderTable(data.products);
+        renderPagination(data.pagination);
+      });
+  }
+</script>
+
+<script>
+  function renderTable(products) {
+    const tbody = document.getElementById("productTableBody");
+    tbody.innerHTML = "";
+
+    products.forEach(p => {
+      const petTypes = Array.isArray(p.petType) ? p.petType.join(', ') : (p.petType || '-');
+      const petTypeJson = JSON.stringify(p.petType || []);
+      const safePetType = petTypeJson.replace(/'/g, "&apos;");
+
+      tbody.innerHTML += `
+      <tr data-product-row="${p._id}" class="hover:bg-gray-50/50 transition">
+
+        <td class="px-8 py-5">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl overflow-hidden bg-gray-100">
+              <img src="${p.coverImage || '/images/placeholder.png'}" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <p class="font-bold text-sm text-accent-navy">${p.productName}</p>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${p._id}</p>
+            </div>
+          </div>
+        </td>
+
+        <td class="px-6 py-5 text-sm font-semibold text-gray-600">${p.brandId?.brandName || '-'}</td>
+        <td class="px-6 py-5 text-sm font-semibold text-gray-600">${p.categoryId?.categoryName || '-'}</td>
+        <td class="px-6 py-5 text-sm font-semibold text-gray-600">${petTypes}</td>
+
+        <td class="px-6 py-5" data-product-stock="${p._id}">
+          ${p.totalStock === 0
+          ? `<span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">Out of Stock</span>`
+          : `<span class="text-sm font-bold text-gray-600">${p.totalStock}</span>`
+        }
+        </td>
+
+        <td class="px-6 py-5">
+          <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+            ${p.isActive ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}">
+            ${p.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+
+        <td class="px-8 py-5">
+          <div class="flex items-center gap-4 text-gray-400">
+             <button onclick="openEditProductModal(this)" 
+                data-id="${p._id}"
+                data-name="${p.productName}" 
+                data-brand="${p.brandId?._id || ''}"
+                data-category="${p.categoryId?._id || ''}" 
+                data-description="${p.description}"
+                data-pettype='${safePetType}' 
+                data-status="${p.isActive}"
+                class="hover:text-brand-500 hover:scale-110 transition"
+                title="Edit Product">
+                <i class="fa-solid fa-pen-to-square text-sm"></i>
+              </button>
+            <button onclick="openVariantsModal('${p._id}')" class="hover:text-teal-500 hover:scale-110 transition" title="View Variants">
+               <i class="fa-solid fa-layer-group text-sm"></i>
+            </button>
+            <button onclick="openDeleteModal('product', '${p._id}')" class="hover:text-red-500 hover:scale-110 transition" title="Delete Product">
+              <i class="fa-solid fa-trash text-sm"></i>
+            </button>
+          </div>
+        </td>
+
+      </tr>
+    `;
+    });
+  }
+</script>
+
+<!-- <script>
+let currentPage = 1;
+let currentSort = "newest";
+
+function fetchProducts(page = 1) {
+  const search = document.getElementById("searchInput")?.value || "";
+
+  fetch(`/admin/products?page=${page}&search=${search}&sort=${currentSort}`, {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+    .then(res => res.json())
+    .then(data => {
+      renderTable(data.products);
+    });
+}
+</script> -->
+
+
+
 </body>
 
 </html>

@@ -27,8 +27,8 @@ const productSchema = new mongoose.Schema({
         maxLength: 250
     },
     petType: {
-         type: String,
-        enum: ['Dog', 'Cat', 'Puppy', 'Kitten'],
+        type: [String],
+        enum: ['Dogs', 'Cats', 'Puppies', 'Kittens'], // Added singular for backward compat just in case, but new inputs will use array
         required: true
     },
 }, { timestamps: true });
