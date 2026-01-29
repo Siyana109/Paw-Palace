@@ -25,11 +25,11 @@ WEEK - 9
     Admin side:
     ✔ Category management @done (1/7/2026, 3:19:03 PM)
     ✔ Add, Edit, Delete (soft delete) @done (1/7/2026, 3:19:50 PM)
-    ✔ Search with cancel/clear button (backend) @done (1/7/2026, 3:19:59 PM)
+    ☐ Search with cancel/clear button (backend)
     ☐ Pagination (backend)
     ✔ Sort the category table in descending order @done (1/7/2026, 3:20:12 PM)
-    ☐ Product management (1/7/2026, 3:19:07 PM)
-    ☐ Add, Edit, Delete (soft delete)
+    ✔ Product management (1/7/2026, 3:19:07 PM) @done (1/28/2026, 8:30:16 PM)
+    ✔ Add, Edit, Delete (soft delete) @done (1/28/2026, 8:30:11 PM)
     ✔ Multiple images upload (minimum 3) @done (1/9/2026, 12:58:08 PM)
     ✔ Image cropping and resizing before upload @done (1/9/2026, 12:58:06 PM)
 
@@ -100,9 +100,10 @@ TODO :
         ☐ otp resent and submitting attempt limit
         ☐ confirm logout
         ☐ edit phone no:
+        ☐ product detailing page
 
     Admin:
-        ☐ view & edit variant images
+        ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
         ☐ swal on add/edit products
         ☐ user sort by data
         ☐ sort & search & pagination brand, top brand
