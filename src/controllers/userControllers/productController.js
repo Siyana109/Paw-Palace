@@ -8,6 +8,7 @@ const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
 
+    // 1️⃣ Fetch product
     const product = await Product.findById(productId)
       .populate("brandId")
       .populate("categoryId");
@@ -16,6 +17,7 @@ const getProductDetails = async (req, res) => {
       return res.redirect("/home");
     }
 
+    // 2️⃣ Fetch variants (only in-stock)
     const variants = await Variant.find({
       product: productId,
       stock: { $gt: 0 }
@@ -25,6 +27,7 @@ const getProductDetails = async (req, res) => {
       return res.redirect("/home");
     }
 
+    // 3️⃣ Wishlist & Cart status
     let inWishlist = false;
     let isInCart = false;
 
@@ -32,19 +35,57 @@ const getProductDetails = async (req, res) => {
       const userId = req.session.user.id;
       const variantId = variants[0]._id;
 
-      inWishlist = !!await Wishlist.findOne({ user: userId, variant: variantId });
+      inWishlist = !!await Wishlist.findOne({
+        user: userId,
+        variant: variantId
+      });
+
       isInCart = !!await Cart.findOne({
         user: userId,
         "items.variant": variantId
       });
     }
 
-    const relatedProducts = await Product.find({
+    // 4️⃣ Normalize petType
+    const petTypes = Array.isArray(product.petType)
+      ? product.petType
+      : [product.petType];
+
+    // 5️⃣ Find related base products (same category + petType)
+    let relatedBaseProducts = await Product.find({
       isActive: true,
+      _id: { $ne: productId },
       categoryId: product.categoryId,
-      _id: { $ne: productId }
+      petType: { $in: petTypes }
     }).limit(4);
 
+    // 6️⃣ Fallback: only petType
+    if (!relatedBaseProducts.length) {
+      relatedBaseProducts = await Product.find({
+        isActive: true,
+        _id: { $ne: productId },
+        petType: { $in: petTypes }
+      }).limit(4);
+    }
+
+    // 7️⃣ Attach ONE in-stock variant per product
+    const relatedProducts = [];
+
+    for (const prod of relatedBaseProducts) {
+      const variant = await Variant.findOne({
+        product: prod._id,
+        stock: { $gt: 0 }
+      });
+
+      if (variant) {
+        relatedProducts.push({
+          product: prod,
+          variant
+        });
+      }
+    }
+
+    // 8️⃣ Render page
     res.render("user/productDetails", {
       product,
       variants,
@@ -54,10 +95,11 @@ const getProductDetails = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Product details error:", err);
     res.redirect("/home");
   }
 };
+
 
 
 const addToCart = async (req, res) => {
