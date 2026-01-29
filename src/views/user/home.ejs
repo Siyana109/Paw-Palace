@@ -142,6 +142,45 @@
                                                         <% } %>
                                         </div>
                                     </div>
+                                    <!-- PRICE RANGE FILTER -->
+                                    <div class="mt-8">
+                                        <h3 class="font-bold mb-4 flex justify-between items-center">
+                                            Price Range
+                                            <i class="fa-solid fa-chevron-up text-[10px]"></i>
+                                        </h3>
+
+                                        <div class="flex gap-2 items-center mb-3">
+                                            <input type="number" name="minPrice" placeholder="Min ₹"
+                                                value="<%= query.minPrice || '' %>"
+                                                class="w-24 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm" />
+
+                                            <input type="number" name="maxPrice" placeholder="Max ₹"
+                                                value="<%= query.maxPrice || '' %>"
+                                                class="w-24 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm" />
+                                        </div>
+
+                                        <div class="flex gap-2">
+                                            <button type="submit"
+                                                class="flex-1 bg-brand-500 text-white py-2 rounded-xl text-sm font-bold hover:bg-brand-600 transition">
+                                                Apply
+                                            </button>
+
+                                            <% if (query.minPrice || query.maxPrice) { %>
+                                                <a href="/home?<%= Object.keys(query)
+          .filter(k => k !== 'minPrice' && k !== 'maxPrice')
+          .map(k => {
+            const v = query[k];
+            if (Array.isArray(v)) {
+              return v.map(val => `${k}=${encodeURIComponent(val)}`).join('&');
+            }
+            return `${k}=${encodeURIComponent(v)}`;
+          })
+          .join('&') %>" class="flex-1 text-center py-2 rounded-xl text-sm font-bold border border-gray-300 hover:bg-gray-50">
+                                                    Clear
+                                                </a>
+                                                <% } %>
+                                        </div>
+                                    </div>
                     </form>
 
                 </aside>
@@ -150,7 +189,7 @@
                 <div class="flex-1">
                     <div class="flex justify-end mb-8 gap-4 flex-wrap">
                         <!-- PRICE FILTER FORM (Inline) -->
-                        <form method="GET" action="/home" class="flex gap-2 items-center">
+                        <!-- <form method="GET" action="/home" class="flex gap-2 items-center">
                             <% Object.keys(query || {}).forEach(key=> {
                                 if (key !== 'minPrice' && key !== 'maxPrice' && key !== 'page') {
                                 if (Array.isArray(query[key])) {
@@ -168,7 +207,7 @@
                                             class="w-24 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm">
                                         <button type="submit"
                                             class="bg-white px-3 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 border border-gray-200">Go</button>
-                        </form>
+                        </form> -->
 
                         <!-- SORT FORM -->
                         <form method="GET" action="/home">
