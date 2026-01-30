@@ -171,18 +171,23 @@
                     </div>
 
                     <!-- ACTIONS ROW -->
-                    <div class="flex items-center gap-4 mb-4">
-                        <!-- Quantity Stepper -->
-                        <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
-                            <button onclick="updateQuantity(-1)"
-                                class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
-                            <input type="number" id="quantityInput" value="1" min="1" max="5"
-                                class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
-                            <button id="qtyPlusBtn" onclick="updateQuantity(1)"
-                                class="w-8 h-full flex items-center justify-center font-bold text-lg transition">
-                                +
-                            </button>
-                        </div>
+                    <!-- Quantity Wrapper -->
+<div id="quantityWrapper" class="flex items-center gap-2">
+
+  <!-- Quantity Stepper -->
+  <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
+    <button onclick="updateQuantity(-1)"
+      class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
+
+    <input type="number" id="quantityInput" value="1" min="1"
+      class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
+
+    <button id="qtyPlusBtn" onclick="updateQuantity(1)"
+      class="w-8 h-full flex items-center justify-center font-bold text-lg transition">+</button>
+  </div>
+
+</div>
+
                         <p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
                             Only <span id="stockCount"></span> items available
                         </p>
@@ -474,28 +479,29 @@
             `).join('');
                 }
 
-                function updateStock(variant) {
-                    const btn = document.getElementById('addToCartBtn');
-                    const qtyInput = document.getElementById('quantityInput');
-                    const stockMsg = document.getElementById('stockMessage');
-                    const stockCount = document.getElementById('stockCount');
+function updateStock(variant) {
+  const btn = document.getElementById('addToCartBtn');
+  const qtyWrapper = document.getElementById('quantityWrapper');
+  const stockMsg = document.getElementById('stockMessage');
 
-                    if (variant.stock > 0) {
-                        btn.disabled = false;
-                        btn.innerText = 'Add to Cart';
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        qtyInput.max = variant.stock;
-                        stockMsg.classList.add('hidden');
-                    } 
-                    else {
-                        btn.disabled = true;
-                        btn.innerText = 'Out of Stock';
-                        btn.classList.add('opacity-50', 'cursor-not-allowed');
-                        qtyInput.value = 1;
-                        stockCount.innerText = 0;
-                        stockMsg.classList.remove('hidden');
-                    }
-                }
+  if (variant.stock > 0) {
+    // ✅ In stock
+    qtyWrapper.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerText = 'Add to Cart';
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    stockMsg.classList.add('hidden');
+  } 
+  else {
+    // ❌ Out of stock
+    qtyWrapper.classList.add('hidden');
+    btn.disabled = true;
+    btn.innerText = 'Out of Stock';
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    stockMsg.classList.add('hidden');
+  }
+}
+
                 function updateQuantity(change) {
 
                     if (activeVariant.stock === 0) return;
