@@ -1777,40 +1777,23 @@
   }
 
   // Initialize Pagination with server-side data
+  // Initialize Pagination with server-side data
   document.addEventListener("DOMContentLoaded", () => {
     try {
       const initialPagination = {
-        page: <%= (typeof page !== 'undefined') ? page : 1 %>,
-        totalPages: <%= (typeof totalPages !== 'undefined') ? totalPages : 1 %>,
-    totalProducts: <%= (typeof totalProducts !== 'undefined') ? totalProducts : 0 %>
-        };
+        page: Number('<%= (typeof page !== "undefined") ? page : 1 %>'),
+        totalPages: Number('<%= (typeof totalPages !== "undefined") ? totalPages : 1 %>'),
+        totalProducts: Number('<%= (typeof totalProducts !== "undefined") ? totalProducts : 0 %>')
+      };
 
-  if (typeof renderPagination === 'function') {
-    renderPagination(initialPagination);
-  }
+      if (typeof renderPagination === 'function' && !isNaN(initialPagination.page)) {
+        renderPagination(initialPagination);
+      }
     } catch (err) {
-    console.error("Pagination init error:", err);
-  }
+      console.error("Pagination init error:", err);
+    }
   });
 </script>
-
-<!-- <script>
-let currentPage = 1;
-let currentSort = "newest";
-
-function fetchProducts(page = 1) {
-  const search = document.getElementById("searchInput")?.value || "";
-
-  fetch(`/admin/products?page=${page}&search=${search}&sort=${currentSort}`, {
-    headers: { "X-Requested-With": "XMLHttpRequest" }
-  })
-    .then(res => res.json())
-    .then(data => {
-      renderTable(data.products);
-    });
-}
-</script> -->
-
 
 
 </body>
