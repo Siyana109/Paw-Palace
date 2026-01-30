@@ -37,7 +37,7 @@ const getBrandsPage = async (req, res) => {
     const brandsWithCount = await Promise.all(
       brands.map(async (brand) => {
         const productCount = await Product.countDocuments({
-          brand: brand._id
+          brandId: brand._id
         });
 
         return {
@@ -82,118 +82,118 @@ const getBrandsPage = async (req, res) => {
 
 
 const editBrand = async (req, res) => {
-    try {
-        const { brandId } = req.params;
-        const { name, status } = req.body;
+  try {
+    const { brandId } = req.params;
+    const { name, status } = req.body;
 
-        await Brand.findByIdAndUpdate(brandId, {
-            brandName: name.trim(),
-            isActive: status === "Active"
-        });
+    await Brand.findByIdAndUpdate(brandId, {
+      brandName: name.trim(),
+      isActive: status === "Active"
+    });
 
-        res.redirect('/admin/brands?success=Brand updated successfully');
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/brands?error=Failed to update brand');
-    }
+    res.redirect('/admin/brands?success=Brand updated successfully');
+  } catch (err) {
+    console.error(err);
+    res.redirect('/admin/brands?error=Failed to update brand');
+  }
 };
 
 
 const deleteBrand = async (req, res) => {
-    try {
-        const { brandId } = req.params;
+  try {
+    const { brandId } = req.params;
 
-        await Brand.findByIdAndDelete(brandId);
+    await Brand.findByIdAndDelete(brandId);
 
-        res.redirect('/admin/brands?success=Brand deleted successfully');
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/brands?error=Failed to delete brand');
-    }
+    res.redirect('/admin/brands?success=Brand deleted successfully');
+  } catch (err) {
+    console.error(err);
+    res.redirect('/admin/brands?error=Failed to delete brand');
+  }
 };
 
 
 const addBrand = async (req, res) => {
-    try {
-        const { name, status } = req.body;
+  try {
+    const { name, status } = req.body;
 
-        if (!name || !name.trim()) {
-            return res.redirect('/admin/brands?error=Invalid brand name');
-        }
-
-        await Brand.create({
-            brandName: name.trim(),
-            isActive: status === "Active"
-        });
-
-        res.redirect('/admin/brands?success=Brand added successfully');
-    } catch (err) {
-        console.error("Add Brand Error:", err.message);
-        res.redirect('/admin/brands?error=Brand already exists');
+    if (!name || !name.trim()) {
+      return res.redirect('/admin/brands?error=Invalid brand name');
     }
+
+    await Brand.create({
+      brandName: name.trim(),
+      isActive: status === "Active"
+    });
+
+    res.redirect('/admin/brands?success=Brand added successfully');
+  } catch (err) {
+    console.error("Add Brand Error:", err.message);
+    res.redirect('/admin/brands?error=Brand already exists');
+  }
 };
 
 
 
 
 const getCategoriesPage = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 8;
-        const skip = (page - 1) * limit;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 8;
+    const skip = (page - 1) * limit;
 
-        const totalCategories = await Category.countDocuments();
+    const totalCategories = await Category.countDocuments();
 
-        const sort = req.query.sort || "latest";
+    const sort = req.query.sort || "latest";
 
-        let sortOption = { createdAt: -1 }; // default: recently added
+    let sortOption = { createdAt: -1 }; // default: recently added
 
-if (sort === "oldest") {
-    sortOption = { createdAt: 1 };
-}
-
-if (sort === "active") {
-    sortOption = { isActive: -1, createdAt: -1 };
-}
-
-if (sort === "inactive") {
-    sortOption = { isActive: 1, createdAt: -1 };
-}
-
-        const categories = await Category.find()
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit)
-            .lean();
-
-        const categoriesWithCount = await Promise.all(
-            categories.map(async (cat) => {
-                const count = await Product.countDocuments({ categoryId: cat._id });
-                return {
-                    _id: cat._id,
-                    name: cat.categoryName,   // ✅ map here
-                    isActive: cat.isActive,
-                    status: cat.isActive ? "Active" : "Inactive",
-                    itemCount: count
-
-                };
-            })
-        );
-
-        const totalPages = Math.ceil(totalCategories / limit);
-
-        res.render("admin/categories", {
-            categories: categoriesWithCount,
-            currentPage: page,
-            totalPages,
-            totalCategories,
-            limit,
-            sort
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect("/admin/dashboard");
+    if (sort === "oldest") {
+      sortOption = { createdAt: 1 };
     }
+
+    if (sort === "active") {
+      sortOption = { isActive: -1, createdAt: -1 };
+    }
+
+    if (sort === "inactive") {
+      sortOption = { isActive: 1, createdAt: -1 };
+    }
+
+    const categories = await Category.find()
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (cat) => {
+        const count = await Product.countDocuments({ categoryId: cat._id });
+        return {
+          _id: cat._id,
+          name: cat.categoryName,   // ✅ map here
+          isActive: cat.isActive,
+          status: cat.isActive ? "Active" : "Inactive",
+          itemCount: count
+
+        };
+      })
+    );
+
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    res.render("admin/categories", {
+      categories: categoriesWithCount,
+      currentPage: page,
+      totalPages,
+      totalCategories,
+      limit,
+      sort
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admin/dashboard");
+  }
 };
 
 
@@ -275,30 +275,30 @@ const editCategory = async (req, res) => {
 
 
 const deleteCategory = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        const categoryExists = await Category.findById(id);
-        if (!categoryExists) {
-            return res.redirect('/admin/categories?error=Category not found');
-        }
-
-        // Optional safety: prevent delete if products exist
-        const productCount = await Product.countDocuments({ categoryId: id });
-        if (productCount > 0) {
-            return res.redirect(
-                '/admin/categories?error=Cannot delete category with products'
-            );
-        }
-
-        await Category.findByIdAndDelete(id);
-
-        res.redirect('/admin/categories?success=Category deleted successfully');
-
-    } catch (error) {
-        console.error('Delete Category Error:', error);
-        res.redirect('/admin/categories?error=Failed to delete category');
+    const categoryExists = await Category.findById(id);
+    if (!categoryExists) {
+      return res.redirect('/admin/categories?error=Category not found');
     }
+
+    // Optional safety: prevent delete if products exist
+    const productCount = await Product.countDocuments({ categoryId: id });
+    if (productCount > 0) {
+      return res.redirect(
+        '/admin/categories?error=Cannot delete category with products'
+      );
+    }
+
+    await Category.findByIdAndDelete(id);
+
+    res.redirect('/admin/categories?success=Category deleted successfully');
+
+  } catch (error) {
+    console.error('Delete Category Error:', error);
+    res.redirect('/admin/categories?error=Failed to delete category');
+  }
 };
 
 
