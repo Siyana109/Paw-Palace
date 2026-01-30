@@ -25,8 +25,8 @@ WEEK - 9
     Admin side:
     ✔ Category management @done (1/7/2026, 3:19:03 PM)
     ✔ Add, Edit, Delete (soft delete) @done (1/7/2026, 3:19:50 PM)
-    ☐ Search with cancel/clear button (backend)
-    ☐ Pagination (backend)
+    ✔ Search with cancel/clear button (backend) @done (1/30/2026, 3:15:52 PM)
+    ✔ Pagination (backend) @done (1/30/2026, 4:22:19 PM)
     ✔ Sort the category table in descending order @done (1/7/2026, 3:20:12 PM)
     ✔ Product management (1/7/2026, 3:19:07 PM) @done (1/28/2026, 8:30:16 PM)
     ✔ Add, Edit, Delete (soft delete) @done (1/28/2026, 8:30:11 PM)
@@ -46,8 +46,13 @@ WEEK - 9
     ✔ Zoomable images @done (1/12/2026, 5:22:24 PM)
     ✔ Product highlights and related product recommendations @done (1/12/2026, 3:06:07 PM)
     ✔ Redirect to listing if product blocked/unavailable (on refresh or actions) @done (1/12/2026, 5:04:37 PM)
-    ☐ Breadcrumbs, ratings, price, discounts/coupons, reviews, stock info
-    ☐ Error handling for sold out/unavailable/out of stock
+    ✔ Breadcrumbs, @done (1/30/2026, 4:22:47 PM)
+    ✔ ratings, @done (1/30/2026, 9:00:27 PM)
+    ✔ price, @done (1/30/2026, 4:23:26 PM)
+    ☐ discounts/coupons, 
+    ✔ reviews, @done (1/30/2026, 4:23:21 PM)
+    ☐ stock info
+    ✔ Error handling for sold out/unavailable/out of stock @done (1/30/2026, 3:26:55 PM)
 
 
 
@@ -74,7 +79,7 @@ WEEK-9 PENDINGS:
     ✔ dont show option to change email for Google user @done (1/30/2026, 1:16:19 PM)
     ✔ edit profile image @done (1/27/2026, 5:22:00 PM)
     ☐ add js form validation
-    ☐ show recent added. items  at top
+    ✔ show recent added. items  at top @done (1/30/2026, 3:26:29 PM)
     ✔ image edit option for product @done (1/29/2026, 8:23:57 PM)
     ✔ view product details in admin side @done (1/29/2026, 8:24:00 PM)
     ✔ edit varient is not working @done (1/29/2026, 8:24:02 PM)
@@ -105,7 +110,7 @@ TODO :
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
         ☐ swal on add/edit products
-        ☐ sort & search & pagination brand, top brand
+        ✔ sort & search & pagination brand, top brand @done (1/30/2026, 4:38:51 PM)
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
 
 

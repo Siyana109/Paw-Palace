@@ -94,147 +94,190 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
 
                 <!-- LEFT COLUMN: IMAGES -->
-                <div class="space-y-6 select-none relative">
+                <div class="space-y-6 select-none relative animate-fade-in-up">
                     <!-- Main Image -->
                     <div id="zoomContainer"
-                        class="relative w-full aspect-square bg-gray-100 rounded-[2.5rem] overflow-hidden group cursor-zoom-in">
+                        class="relative w-full aspect-square bg-white rounded-[2rem] overflow-hidden group cursor-zoom-in shadow-xl shadow-gray-200/50 border border-gray-100">
+                        <img id="mainImage" src="<%= defaultVariant.coverImage %>" alt="<%= product.productName %>"
+                            class="w-full h-full object-cover transition-transform duration-300" />
 
-                        <img id="mainImage" src="<%= variants[0].coverImage %>" alt="<%= product.productName %>"
-                            class="w-full h-full object-cover transition-transform duration-200" />
-
+                        <!-- Zoom Hint -->
+                        <div
+                            class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-gray-500 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Hover to Zoom
+                        </div>
                     </div>
 
 
                     <!-- Thumbnails -->
-                    <div class="flex gap-4" id="thumbnailContainer">
+                    <div class="flex gap-4 justify-center md:justify-start" id="thumbnailContainer">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- RIGHT COLUMN: PRODUCT DETAILS -->
-                <div class="flex flex-col pt-4">
+                <div class="flex flex-col pt-4 animate-fade-in-up delay-75">
 
-                    <!-- Premium Tag -->
-                    <!-- <div class="mb-4">
-                        <span
-                            class="bg-teal-50 text-teal-700 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md">
-                            Premium Comfort
-                        </span>
-                    </div> -->
+                    <!-- Breadcrumb/Category Tag -->
+                    <div class="mb-4">
+                        <% if (product.categoryId) { %>
+                            <a href="/home?category=<%= product.categoryId._id %>"
+                                class="inline-block px-4 py-1.5 rounded-full bg-brand-50 text-brand-500 text-[11px] font-bold uppercase tracking-wider hover:bg-brand-100 transition">
+                                <%= product.categoryId.categoryName || product.categoryId.name %>
+                            </a>
+                            <% } %>
+                    </div>
 
                     <!-- Title -->
-                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-accent-navy mb-2 leading-tight">
+                    <h1 class="text-3xl md:text-5xl font-bold text-accent-navy mb-4 leading-tight tracking-tight">
                         <%= product.productName %>
                     </h1>
 
                     <!-- Price & Rating -->
-                    <div class="flex items-end gap-4 mb-8">
+                    <div class="flex items-center gap-6 mb-8 border-b border-gray-100 pb-8">
                         <div class="flex items-baseline gap-3">
-                            <span id="priceDisplay" class="text-3xl font-black text-brand-500">
-                                ₹<%= variants[0].offerApplied ? variants[0].offerPrice : variants[0].price %>
+                            <span id="priceDisplay" class="text-4xl font-black text-accent-navy">
+                                ₹<%= defaultVariant.offerApplied ? defaultVariant.offerPrice : defaultVariant.price %>
                             </span>
                             <span id="originalPriceDisplay"
-                                class="text-lg text-gray-400 line-through decoration-2 <%= variants[0].offerApplied ? '' : 'hidden' %>">
-                                ₹<%= variants[0].price %>
+                                class="text-xl text-gray-400 line-through decoration-2 font-medium <%= defaultVariant.offerApplied ? '' : 'hidden' %>">
+                                ₹<%= defaultVariant.price %>
                             </span>
                         </div>
-                        <div class="pb-1 text-xs text-gray-400 font-medium">(128 Reviews)</div>
-                    </div>
 
-                    <!-- STOCK INFO -->
-                    <div class="mb-4">
-                        <% if (hasStock) { %>
-                            <p class="text-sm font-semibold text-green-600">
-                                In Stock
-                            </p>
-                            <% } else { %>
-                                <p class="text-sm font-semibold text-red-600">
-                                    Out of Stock
-                                </p>
-                                <% } %>
-                    </div>
-
-                    <!-- SELECT: SIZE -->
-                    <div class="mb-6">
-                        <label class="block text-xs font-bold text-gray-800 mb-3 ml-1">Select Size</label>
-                        <div class="flex flex-wrap gap-3" id="sizeSelectors">
-                            <!-- Populated by JS -->
+                        <!-- Rating placeholder -->
+                        <div
+                            class="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
+                            <div class="flex text-yellow-500 text-xs">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                            <span class="text-xs font-bold text-yellow-700">4.8 (128)</span>
                         </div>
                     </div>
 
-                    <!-- SELECT: COLOR -->
-                    <div class="mb-8">
-                        <label class="block text-xs font-bold text-gray-800 mb-3 ml-1">Select Color</label>
-                        <div class="flex flex-wrap gap-3" id="colorSelectors">
-                            <!-- Populated by JS -->
+                    <!-- STOCK MESSAGE -->
+                    <p id="stockMessage"
+                        class="hidden mb-4 text-xs font-bold text-red-500 bg-red-50 inline-block px-3 py-1 rounded-lg self-start">
+                        Only <span id="stockCount"></span> items left!
+                    </p>
+
+
+                    <!-- SELECTORS GRID -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <!-- SIZE -->
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-sm font-bold text-gray-900">Select Size</label>
+                            </div>
+                            <div class="flex flex-wrap gap-3" id="sizeSelectors">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- COLOR -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-900 mb-3">Select Color</label>
+                            <div class="flex flex-wrap gap-3" id="colorSelectors">
+                                <!-- Populated by JS -->
+                            </div>
                         </div>
                     </div>
 
                     <!-- ACTIONS ROW -->
-                    <!-- Quantity Wrapper -->
-                    <div id="quantityWrapper" class="flex items-center gap-2">
+                    <div
+                        class="mt-auto bg-white border border-gray-100 rounded-[1.5rem] p-4 shadow-xl shadow-gray-100/50">
+                        <form id="addToCartForm" class="flex flex-col md:flex-row gap-4">
+                            <input type="hidden" name="productId" value="<%= product._id %>">
+                            <input type="hidden" name="variantId" id="cartVariantId" value="<%= defaultVariant._id %>">
+                            <input type="hidden" name="quantity" id="formQuantity" value="1">
 
-                        <!-- Quantity Stepper -->
-                        <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
-                            <button onclick="updateQuantity(-1)"
-                                class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
+                            <!-- QUANTITY -->
+                            <div id="quantityWrapper"
+                                class="flex items-center justify-between bg-gray-50 rounded-xl px-4 h-14 w-full md:w-40 border border-gray-200">
+                                <button type="button" onclick="updateQuantity(-1)"
+                                    class="text-gray-400 hover:text-accent-navy transition font-black text-lg p-2">-</button>
+                                <input type="number" id="quantityInput" value="1" min="1"
+                                    class="w-12 text-center font-bold text-accent-navy bg-transparent outline-none"
+                                    readonly>
+                                <button type="button" id="qtyPlusBtn" onclick="updateQuantity(1)"
+                                    class="text-gray-400 hover:text-accent-navy transition font-black text-lg p-2">+</button>
+                            </div>
 
-                            <input type="number" id="quantityInput" value="1" min="1"
-                                class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
+                            <!-- ADD TO CART -->
+                            <!-- <% if (isInCart) { %>
+                                <a href="/cart"
+                                    class="flex-1 h-14 bg-accent-navy text-white rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center hover:bg-black transition shadow-lg shadow-accent-navy/20 gap-2">
+                                    <i class="fa-solid fa-cart-shopping"></i> Go to Cart
+                                </a>
+                                <% } else { %>
+                                    <button id="addToCartBtn"
+                                        class="flex-1 h-14 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center transition shadow-lg gap-2
+                                    <%= !hasStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'bg-brand-500 text-white hover:bg-brand-600 shadow-brand-500/30' %>"
+                                        <%=!hasStock ? 'disabled' : '' %>>
+                                        <i class="fa-solid fa-bag-shopping"></i>
+                                        <%= !hasStock ? 'Out of Stock' : 'Add to Cart' %>
+                                    </button>
+                                    <% } %> -->
 
-                            <button id="qtyPlusBtn" onclick="updateQuantity(1)"
-                                class="w-8 h-full flex items-center justify-center font-bold text-lg transition">+</button>
-                        </div>
+                            <% if (!hasStock) { %>
+                                <button disabled
+                                    class="w-full h-12 bg-gray-300 text-gray-500 rounded-xl font-bold cursor-not-allowed">
+                                    Out of Stock
+                                </button>
+                                <% } else if (isInCart) { %>
+                                    <a href="/cart"
+                                        class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center">
+                                        Go to Cart
+                                    </a>
+                                    <% } else { %>
+                                        <button type="submit" id="addToCartBtn"
+                                            class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600">
+                                            Add to Cart
+                                        </button>
+                                        <% } %>
 
+
+                                            <!-- WISHLIST -->
+                                            <button type="button" id="wishlistBtn"
+                                                data-variant="<%= defaultVariant._id %>"
+                                                class="h-14 w-14 rounded-xl border-2 flex items-center justify-center transition
+                                <%= inWishlist ? 'border-red-100 bg-red-50 text-brand-500' : 'border-gray-100 hover:border-gray-200 text-gray-400 hover:text-gray-600' %>">
+                                                <i id="wishlistIcon"
+                                                    class="<%= inWishlist ? 'fa-solid' : 'fa-regular' %> fa-heart text-xl"></i>
+                                            </button>
+
+                        </form>
                     </div>
 
-                    <p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
-                        Only <span id="stockCount"></span> items available
-                    </p>
-
-                    <!-- Add to Cart -->
-                    <form class="flex-1" id="addToCartForm">
-                        <input type="hidden" name="productId" value="<%= product._id %>">
-                        <input type="hidden" name="variantId" id="cartVariantId" value="<%= variants[0]._id %>">
-                        <input type="hidden" name="quantity" id="formQuantity" value="1">
-
-                        <% if (isInCart) { %>
-                            <a href="/cart" class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
-            flex items-center justify-center hover:bg-black transition">
-                                Go to Cart
-                            </a>
-                            <% } else { %>
-                                <button id="addToCartBtn" class="px-6 py-3 rounded-xl font-bold
-  <%= !hasStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-brand-500 text-white' %>" <%=!hasStock ? 'disabled' : '' %>>
-                                    Add to Cart
-                                </button>
-                                <% } %>
-                                    <!-- <% if (!hasStock) { %>
-                                            <p class="text-red-600 font-bold mt-3">
-                                                Out of Stock
-                                            </p>
-                                            <% } %> -->
-                    </form>
-
-                    <!-- Wishlist -->
-                    <button id="wishlistBtn" data-variant="<%= variants[0]._id %>" class="w-12 h-12 bg-white border border-gray-200 rounded-xl
-         text-gray-400 hover:border-brand-500 hover:text-brand-500
-         transition-all active:scale-95 flex items-center justify-center">
-                        <i id="wishlistIcon"
-                            class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
-                        </i>
-
-                    </button>
+                    <!-- Delivery Promises -->
+                    <div class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-gray-100">
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-500">
+                            <div
+                                class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <div>
+                                <p class="text-accent-navy font-bold">Free Delivery</p>
+                                <p class="text-[10px] text-gray-400">On orders over ₹999</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-500">
+                            <div
+                                class="w-10 h-10 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </div>
+                            <div>
+                                <p class="text-accent-navy font-bold">Easy Returns</p>
+                                <p class="text-[10px] text-gray-400">10-day replacement policy</p>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
-
-                <!-- Delivery Info -->
-                <div class="flex items-center gap-12 text-xs text-gray-400 mb-12 ml-1">
-                    <span class="flex items-center gap-2">Free Delivery</span>
-                    <span class="flex items-center gap-2">30-Day Returns</span>
-                </div>
-
-            </div>
             </div>
 
             <!-- TABS SECTION -->
@@ -246,7 +289,7 @@
                     </button>
                     <button onclick="switchTab('reviews')" id="tab-reviews"
                         class="pb-4 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-all">
-                        Reviews (128)
+                        Reviews
                     </button>
                 </div>
 
@@ -267,12 +310,15 @@
                     </ul>
                 </div>
 
-                <!-- Reviews Content (Hidden) -->
-                <div id="content-reviews" class="hidden text-center text-gray-400 py-10">
-                    <div class="flex flex-col items-center gap-4">
-                        <i class="fa-regular fa-comment-dots text-4xl text-gray-200"></i>
-                        <p>Reviews coming soon!</p>
-                    </div>
+            </div>
+
+
+            <!-- Reviews Content (Hidden) -->
+            <div id="content-reviews"
+                class="hidden text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-500 space-y-4 animate-fade-in py-10">
+                <div class="flex flex-col items-center gap-4">
+                    <i class="fa-regular fa-comment-dots text-4xl text-gray-200"></i>
+                    <p>No reviews yet. Be the first to share your thoughts!</p>
                 </div>
             </div>
 
@@ -320,8 +366,8 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <% - JSON.stringify(variants) %>;
-                let activeVariant = variants[0];
+                const variants = <%- JSON.stringify(variants) %>;
+                let activeVariant = <%- JSON.stringify(defaultVariant) %>;
 
                 // Color Mapping Helper
                 const colorMap = {
@@ -357,21 +403,26 @@
                     // Actually, the user wants "Select Size" [S] [M] [L] and "Select Color" (circles).
                     // This implies a matrix. 
 
+                    if (!variants.length || !activeVariant) return;
+
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
-                    selectVariant(variants[0]._id); // Re-select to apply styles
+
+                    // 🔥 INITIAL RENDER
+                    selectVariant(activeVariant._id);
                 }
+
 
                 function renderSizeSelectors(sizes) {
                     const container = document.getElementById('sizeSelectors');
                     container.innerHTML = sizes.map(size => `
                 <button onclick="filterVariant('size', '${size}')" 
                     id="size-btn-${size}"
-                    class="px-5 py-2 rounded-xl border font-bold text-xs transition-all shadow-sm
-                           hover:border-teal-400 hover:text-teal-600 bg-white">
+                    class="h-10 px-6 rounded-lg border font-bold text-sm transition-all shadow-sm
+                           bg-white text-gray-500 border-gray-200 hover:border-gray-300">
                     ${size}
                 </button>
             `).join('');
@@ -382,19 +433,17 @@
                     container.innerHTML = colors.map(color => `
                 <button onclick="filterVariant('color', '${color}')" 
                     id="color-btn-${color}"
-                    class="w-8 h-8 rounded-full border border-gray-200 shadow-sm transition-transform hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 relative"
+                    class="w-10 h-10 rounded-full border border-gray-100 shadow-sm transition-transform hover:scale-110 focus:ring-4 focus:ring-gray-100 relative items-center justify-center flex"
                     style="background-color: ${getHexColor(color)}"
                     title="${color}">
+                    <!-- Checkmark for active state (hidden by default) -->
+                    <i class="fa-solid fa-check text-white text-xs drop-shadow-md hidden" id="color-icon-${color}"></i>
                 </button>
             `).join('');
                 }
 
                 // Logic to find best match or specific variant
                 function filterVariant(type, value) {
-                    // Find a variant that matches the new selection + current state of other selection
-                    // If current active variant has Size M, Color Red. User clicks Size L. 
-                    // We look for Size L, Color Red. If exists, select it. If not, select first variant with Size L.
-
                     let targetSize = activeVariant.size || '';
                     let targetColor = activeVariant.color || '';
 
@@ -406,7 +455,7 @@
                     if (match) {
                         selectVariant(match._id);
                     } else {
-                        // Fallback: Find any variant with the new property
+                        // Fallback
                         const fallback = variants.find(v => type === 'size' ? v.size === value : v.color === value);
                         if (fallback) selectVariant(fallback._id);
                     }
@@ -414,37 +463,21 @@
 
                 function selectVariant(id) {
                     activeVariant = variants.find(v => v._id === id);
+                    if (!activeVariant) return;
 
-                    // Update Size Buttons
-                    if (activeVariant.size) {
-                        document.querySelectorAll('#sizeSelectors button').forEach(btn => {
-                            const isSelected = btn.id === `size-btn-${activeVariant.size}`;
-                            btn.className = isSelected
-                                ? 'px-5 py-2 rounded-xl border-2 border-accent-teal text-teal-700 bg-teal-50 font-bold text-xs shadow-none cursor-default'
-                                : 'px-5 py-2 rounded-xl border border-gray-200 text-gray-500 bg-white font-bold text-xs hover:border-gray-300 transition-all shadow-sm';
-                        });
-                    }
+                    document.getElementById('cartVariantId').value = activeVariant._id;
+                    document.getElementById('wishlistBtn').dataset.variant = activeVariant._id;
 
-                    // Update Color Buttons
-                    if (activeVariant.color) {
-                        document.querySelectorAll('#colorSelectors button').forEach(btn => {
-                            const isSelected = btn.id === `color-btn-${activeVariant.color}`;
-                            // Reset rings
-                            btn.style.boxShadow = isSelected ? '0 0 0 2px white, 0 0 0 4px #e5e7eb' : '';
-                        });
-                    }
-
-                    // Update UI
+                    // THEN UI updates
                     updatePrice(activeVariant);
                     updateImages(activeVariant);
                     updateStock(activeVariant);
 
-                    // Reset quantity based on new variant
-                    document.getElementById('quantityInput').value = 1;
-                    document.getElementById('formQuantity').value = 1;
+                    const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
 
-                    // Hide stock message
-                    document.getElementById('stockMessage').classList.add('hidden');
+                    renderSizeSelectors(sizes);
+                    renderColorSelectors(colors);
                 }
 
                 function updatePrice(variant) {
@@ -464,40 +497,74 @@
                 function updateImages(variant) {
                     // Update Main
                     const mainImg = document.getElementById('mainImage');
-                    mainImg.src = variant.coverImage;
+
+                    // Fade out effect properly
+                    mainImg.style.opacity = '0.5';
+                    setTimeout(() => {
+                        mainImg.src = variant.coverImage;
+                        mainImg.style.opacity = '1';
+                    }, 200);
 
                     // Update Thumbnails
                     const container = document.getElementById('thumbnailContainer');
                     const images = [variant.coverImage, ...(variant.subImages || [])];
 
                     container.innerHTML = images.map((src, idx) => `
-                <button onclick="document.getElementById('mainImage').src = '${src}'" 
-                        class="w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all bg-white p-1
-                        ${idx === 0 ? 'border-brand-500' : 'border-transparent hover:border-gray-200'}">
-                    <img src="${src}" class="w-full h-full object-cover rounded-xl">
+                <button onclick="changeMainImage('${src}', this)" 
+                        class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all p-0.5
+                        ${idx === 0 ? 'border-brand-500 shadow-md scale-105' : 'border-gray-100 hover:border-gray-300 bg-white'}">
+                    <img src="${src}" class="w-full h-full object-cover rounded-lg">
                 </button>
             `).join('');
+                }
+
+                function changeMainImage(src, btn) {
+                    const main = document.getElementById('mainImage');
+                    main.style.opacity = '0.8';
+                    main.src = src;
+                    main.onload = () => main.style.opacity = '1';
+
+                    // Update Active Thumb Border
+                    document.querySelectorAll('#thumbnailContainer button').forEach(b => {
+                        b.className = 'w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all p-0.5 border-gray-100 hover:border-gray-300 bg-white';
+                    });
+                    btn.className = 'w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all p-0.5 border-brand-500 shadow-md scale-105';
                 }
 
                 function updateStock(variant) {
                     const btn = document.getElementById('addToCartBtn');
                     const qtyWrapper = document.getElementById('quantityWrapper');
                     const stockMsg = document.getElementById('stockMessage');
+                    const stockCount = document.getElementById('stockCount');
 
                     if (variant.stock > 0) {
                         // ✅ In stock
-                        qtyWrapper.classList.remove('hidden');
-                        btn.disabled = false;
-                        btn.innerText = 'Add to Cart';
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        qtyWrapper.classList.remove('opacity-50', 'pointer-events-none');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Add to Cart';
+                            btn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed', 'shadow-none');
+                            btn.classList.add('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+                        }
                         stockMsg.classList.add('hidden');
                     }
                     else {
                         // ❌ Out of stock
-                        qtyWrapper.classList.add('hidden');
-                        btn.disabled = true;
-                        btn.innerText = 'Out of Stock';
-                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        qtyWrapper.classList.add('opacity-50', 'pointer-events-none');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = 'Out of Stock';
+                            btn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed', 'shadow-none');
+                            btn.classList.remove('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+                        }
+                        stockMsg.classList.add('hidden'); // Or show "Out of Stock" text
+                    }
+
+                    // Low Stock Warning
+                    if (variant.stock > 0 && variant.stock < 5) {
+                        stockMsg.classList.remove('hidden');
+                        stockCount.innerText = variant.stock;
+                    } else {
                         stockMsg.classList.add('hidden');
                     }
                 }

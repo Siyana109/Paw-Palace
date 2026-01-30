@@ -8,7 +8,7 @@ const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
 
-    // 1️⃣ Fetch product
+    /* 1️⃣ Fetch Product */
     const product = await Product.findById(productId)
       .populate("brandId")
       .populate("categoryId");
@@ -17,79 +17,75 @@ const getProductDetails = async (req, res) => {
       return res.redirect("/home");
     }
 
-    // 2️⃣ Fetch variants (only in-stock)
-    const variants = await Variant.find({
-      product: productId
-    });
+    /* 2️⃣ Fetch ALL Variants */
+    const variants = await Variant.find({ product: productId });
 
-    const hasStock = variants.some(v => v.stock > 0);
+    if (!variants.length) {
+      // product exists but no variants → admin issue
+      return res.redirect("/home");
+    }
 
-    // 3️⃣ Wishlist & Cart status
+    /* 3️⃣ Stock Computation */
+    const sellableVariants = variants.filter(v => v.stock > 0);
+    const hasStock = sellableVariants.length > 0;
+
+    /* 4️⃣ Default Variant (SAFE) */
+    const defaultVariant = hasStock ? sellableVariants[0] : variants[0];
+
+    /* 5️⃣ Wishlist & Cart Status */
     let inWishlist = false;
     let isInCart = false;
 
-    if (req.session.user) {
+    if (req.session.user && defaultVariant) {
       const userId = req.session.user.id;
-      const variantId = variants[0]._id;
 
       inWishlist = !!await Wishlist.findOne({
         user: userId,
-        variant: variantId
+        variant: defaultVariant._id
       });
 
       isInCart = !!await Cart.findOne({
         user: userId,
-        "items.variant": variantId
+        "items.variant": defaultVariant._id
       });
     }
 
-    // 4️⃣ Normalize petType
+    /* 6️⃣ Normalize petType */
     const petTypes = Array.isArray(product.petType)
       ? product.petType
       : [product.petType];
 
-    // 5️⃣ Find related base products (same category + petType)
-    let relatedBaseProducts = await Product.find({
-      isActive: true,
+    /* 7️⃣ Related Products (ONLY IN-STOCK VARIANTS) */
+    const relatedBaseProducts = await Product.find({
       _id: { $ne: productId },
-      categoryId: product.categoryId,
+      isActive: true,
       petType: { $in: petTypes }
-    }).limit(4);
+    }).limit(6);
 
-    // 6️⃣ Fallback: only petType
-    if (!relatedBaseProducts.length) {
-      relatedBaseProducts = await Product.find({
-        isActive: true,
-        _id: { $ne: productId },
-        petType: { $in: petTypes }
-      }).limit(4);
-    }
-
-    // 7️⃣ Attach ONE in-stock variant per product
     const relatedProducts = [];
 
-    for (const prod of relatedBaseProducts) {
+    for (const p of relatedBaseProducts) {
       const variant = await Variant.findOne({
-        product: prod._id,
+        product: p._id,
         stock: { $gt: 0 }
       });
 
       if (variant) {
-        relatedProducts.push({
-          product: prod,
-          variant
-        });
+        relatedProducts.push({ product: p, variant });
       }
     }
 
-    // 8️⃣ Render page
+  
+
+    /* 8️⃣ Render */
     res.render("user/productDetails", {
       product,
       variants,
-      relatedProducts,
+      defaultVariant,
+      hasStock,
       inWishlist,
       isInCart,
-      hasStock
+      relatedProducts
     });
 
   } catch (err) {
