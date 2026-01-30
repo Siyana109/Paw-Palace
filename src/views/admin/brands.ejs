@@ -90,14 +90,16 @@
                         <div class="relative w-full max-w-lg">
                             <i
                                 class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" placeholder="Search brands..."
+                            <input id="searchInput" type="text" placeholder="Search brands..."
                                 class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
                         </div>
                         <div class="flex items-center gap-3">
-                            <button
-                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
-                                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
-                            </button>
+                            <select id="sortFilter" onchange="fetchBrands(1)"
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition">
+                                <option value="newest">Sort: Newest</option>
+                                <option value="name_asc">Sort: Name (A-Z)</option>
+                                <option value="name_desc">Sort: Name (Z-A)</option>
+                            </select>
                             <button onclick="openAddBrandModal()"
                                 class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
                                 <i class="fa-solid fa-plus"></i> Add Brand
@@ -155,18 +157,17 @@
                                         </td>
                                         <td class="px-8 py-5">
                                             <div class="flex items-center gap-3">
-                                                <button
-                                                    onclick="openEditModal(
+                                                <button onclick="openEditModal(
                                                     '<%= brand._id %>',
                                                         '<%= brand.brandName %>',
-                                                            '<%= brand.isActive ? "Active" : "Inactive" %>'
-                                                                )"
+                                                            '<%= brand.isActive ? " Active" : "Inactive" %>'
+                                                    )"
 
-                                                                class="flex items-center gap-2 bg-teal-50
-                                                                text-accent-teal px-4 py-1.5 rounded-lg text-[10px]
-                                                                font-bold hover:bg-accent-teal hover:text-white
-                                                                transition">
-                                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                    class="flex items-center gap-2 bg-teal-50
+                                                    text-accent-teal px-4 py-1.5 rounded-lg text-[10px]
+                                                    font-bold hover:bg-accent-teal hover:text-white
+                                                    transition">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </button>
                                                 <button
                                                     onclick="openDeleteModal('<%= brand._id %>', '<%= brand.brandName %>')"
@@ -179,6 +180,10 @@
                                     <% }) %>
                             </tbody>
                         </table>
+                    </div>
+                    <div id="paginationContainer"
+                        class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
+                        <!-- Pagination will be rendered here -->
                     </div>
                 </div>
             </main>
@@ -380,6 +385,143 @@
     </script>
 
 
+    <script>
+        let searchTimer = null;
+        let currentPage = 1;
+        let currentSort = "newest";
+
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                fetchBrands(1);
+            }, 400);
+        });
+
+        function fetchBrands(page = 1) {
+            currentPage = page;
+            const search = document.getElementById("searchInput").value;
+            const sort = document.getElementById("sortFilter").value;
+            currentSort = sort;
+
+            fetch(`/admin/brands?page=${page}&search=${search}&sort=${sort}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderTable(data.brands);
+                        renderPagination(data.pagination);
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        function renderTable(brands) {
+            const tbody = document.querySelector("tbody");
+            tbody.innerHTML = "";
+
+            if (brands.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">No brands found</td></tr>`;
+                return;
+            }
+
+            brands.forEach(brand => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">
+                                    <i class="fa-solid fa-paw text-brand-500 opacity-20"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-accent-navy">${brand.brandName}</p>
+                                    <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest"></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center gap-3 w-40">
+                                <div class="flex-1 bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-brand-500 h-full rounded-full" style="width: 60%"></div>
+                                </div>
+                                <span class="text-xs font-bold text-gray-500">${brand.productCount || 0}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+                                ${brand.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}">
+                                ${brand.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <button onclick="openEditModal('${brand._id}', '${brand.brandName}', '${brand.isActive ? 'Active' : 'Inactive'}')"
+                                    class="flex items-center gap-2 bg-teal-50 text-accent-teal px-4 py-1.5 rounded-lg text-[10px] font-bold hover:bg-accent-teal hover:text-white transition">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button onclick="openDeleteModal('${brand._id}', '${brand.brandName}')"
+                                    class="w-8 h-8 flex items-center justify-center bg-red-50 text-brand-500 rounded-lg text-xs hover:bg-brand-500 hover:text-white transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderPagination(pagination) {
+            const container = document.getElementById("paginationContainer");
+            const { page, totalPages, totalBrands } = pagination;
+
+            if (totalBrands === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let links = '';
+
+            // Prev
+            if (page > 1) {
+                links += `<button onclick="fetchBrands(${page - 1})" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
+            }
+
+            // Pages
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+                    if (i === page) {
+                        links += `<button class="w-10 h-10 rounded-xl bg-brand-500 text-white">${i}</button>`;
+                    } else {
+                        links += `<button onclick="fetchBrands(${i})" class="w-10 h-10 rounded-xl hover:bg-gray-50">${i}</button>`;
+                    }
+                } else if (i === page - 2 || i === page + 2) {
+                    links += `<span class="px-2">...</span>`;
+                }
+            }
+
+            // Next
+            if (page < totalPages) {
+                links += `<button onclick="fetchBrands(${page + 1})" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
+            }
+
+            container.innerHTML = `
+                <p>Showing ${(page - 1) * 10 + 1}-${Math.min(page * 10, totalBrands)} of ${totalBrands} brands</p>
+                <div class="flex items-center gap-2">
+                    ${links}
+                </div>
+            `;
+        }
+
+        // Initialize Pagination on Load
+        document.addEventListener("DOMContentLoaded", () => {
+            const startData = {
+                page: <%= (typeof currentPage !== 'undefined') ? currentPage : 1 %>,
+                totalPages: <%= (typeof totalPages !== 'undefined') ? totalPages : 1 %>,
+            totalBrands: <%= (typeof totalBrands !== 'undefined') ? totalBrands : 0 %>
+            };
+        renderPagination(startData);
+        });
+    </script>
 </body>
 
 </html>

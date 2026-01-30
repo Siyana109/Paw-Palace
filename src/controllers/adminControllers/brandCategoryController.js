@@ -3,32 +3,83 @@ import Category from '../../model/categoryModel.js';
 import Product from '../../model/productModel.js'
 
 const getBrandsPage = async (req, res) => {
-    try {
-        const brands = await Brand.find().sort({ createdAt: -1 }).lean();
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
 
-        const totalBrands = await Brand.countDocuments()
-        const totalProducts = await Product.countDocuments();
+    const search = req.query.search || "";
+    const sort = req.query.sort || "newest";
 
-        const brandsWithCount = await Promise.all(
-            brands.map(async (brand) => {
-                const count = await Product.countDocuments({ brandId: brand._id });
-                return {
-                    ...brand,
-                    productCount: count
-                };
-            })
-        );
+    /* ------------------ FILTER ------------------ */
+    const filter = {};
 
-        res.render('admin/brands', {
-            brands: brandsWithCount,
-            totalBrands,
-            totalProducts
-        });
-    } catch (err) {
-        console.error(err)
-        res.status(500).redirect('/admin/dashboard');
+    if (search) {
+      filter.brandName = { $regex: search, $options: "i" };
     }
+
+    /* ------------------ SORT ------------------ */
+    let sortOption = { createdAt: -1 }; // newest (default)
+
+    if (sort === "name_asc") sortOption = { brandName: 1 };
+    if (sort === "name_desc") sortOption = { brandName: -1 };
+
+    /* ------------------ QUERY ------------------ */
+    const totalBrands = await Brand.countDocuments(filter);
+
+    const brands = await Brand.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    /* ------------------ PRODUCT COUNT ------------------ */
+    const brandsWithCount = await Promise.all(
+      brands.map(async (brand) => {
+        const productCount = await Product.countDocuments({
+          brand: brand._id
+        });
+
+        return {
+          ...brand,
+          productCount
+        };
+      })
+    );
+
+    const totalPages = Math.ceil(totalBrands / limit);
+
+    /* ------------------ AJAX RESPONSE ------------------ */
+    if (req.headers["x-requested-with"] === "XMLHttpRequest") {
+      return res.json({
+        success: true,
+        brands: brandsWithCount,
+        pagination: {
+          page,
+          totalPages,
+          totalBrands,
+          limit
+        }
+      });
+    }
+
+    /* ------------------ NORMAL PAGE LOAD ------------------ */
+    const totalProducts = await Product.countDocuments();
+
+    res.render("admin/brands", {
+      brands: brandsWithCount,
+      totalBrands,
+      totalProducts,
+      currentPage: page,
+      totalPages
+    });
+
+  } catch (error) {
+    console.error("Get Brands Error:", error);
+    res.status(500).send("Server Error");
+  }
 };
+
 
 const editBrand = async (req, res) => {
     try {
