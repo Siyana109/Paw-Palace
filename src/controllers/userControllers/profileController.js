@@ -63,44 +63,44 @@ const getProfile = async (req, res) => {
 
 
 const updateProfile = async (req, res) => {
-  try {
-    const userId = req.session.user?.id;
-    if (!userId) return res.redirect('/login');
+    try {
+        const userId = req.session.user?.id;
+        if (!userId) return res.redirect('/login');
 
-    const { name, phone } = req.body;
+        const { name, phone } = req.body;
 
-    const user = await User.findById(userId).lean();
-    const addresses = await Address.find({ userId }).lean(); // IMPORTANT
+        const user = await User.findById(userId).lean();
+        const addresses = await Address.find({ userId }).lean(); // IMPORTANT
 
-    if (!name || name.trim().length < 3) {
-      return res.render('user/profile', {
-        user,
-        addresses,
-        isEditing: true,
-        error: 'Name must be at least 3 characters'
-      });
+        if (!name || name.trim().length < 3) {
+            return res.render('user/profile', {
+                user,
+                addresses,
+                isEditing: true,
+                error: 'Name must be at least 3 characters'
+            });
+        }
+
+        if (phone && !/^\d{10}$/.test(phone)) {
+            return res.render('user/profile', {
+                user,
+                addresses,
+                isEditing: true,
+                error: 'Phone number must be 10 digits'
+            });
+        }
+
+        await User.findByIdAndUpdate(userId, {
+            fullName: name.trim(),
+            phone: phone || null
+        });
+
+        res.redirect('/profile');
+
+    } catch (error) {
+        console.error('Profile update error:', error);
+        res.redirect('/profile');
     }
-
-    if (phone && !/^\d{10}$/.test(phone)) {
-      return res.render('user/profile', {
-        user,
-        addresses,
-        isEditing: true,
-        error: 'Phone number must be 10 digits'
-      });
-    }
-
-    await User.findByIdAndUpdate(userId, {
-      fullName: name.trim(),
-      phone: phone || null
-    });
-
-    res.redirect('/profile');
-
-  } catch (error) {
-    console.error('Profile update error:', error);
-    res.redirect('/profile');
-  }
 };
 
 
@@ -299,6 +299,10 @@ const getChangeEmail = async (req, res) => {
 
     const user = await User.findById(userId).lean();
 
+    if (user.googleId) {
+        return res.redirect('/profile');
+    }
+
     res.render('user/changeEmail', {
         title: 'Change Email | PawPalace',
         user
@@ -314,6 +318,11 @@ const postChangeEmail = async (req, res) => {
         const { newEmail, password } = req.body;
 
         const user = await User.findById(userId);
+
+        if (user.googleId) {
+            return res.redirect('/profile');
+        }
+
         if (!user) return res.redirect('/login');
 
         /* ---------- Password check ---------- */
@@ -346,23 +355,23 @@ const postChangeEmail = async (req, res) => {
         const otp = generateOTP();
 
         await OTP.findOneAndUpdate(
-  { email: newEmail },
-  {
-    email: newEmail,
-    otp,
-    expiresAt: new Date(Date.now() + 60 * 1000)
-  },
-  { upsert: true, new: true }
-);
+            { email: newEmail },
+            {
+                email: newEmail,
+                otp,
+                expiresAt: new Date(Date.now() + 60 * 1000)
+            },
+            { upsert: true, new: true }
+        );
 
         console.log(otp)
 
         await sendOTPEmail(newEmail, otp);
 
         req.session.emailChange = {
-  newEmail,
-  expiresAt: new Date(Date.now() + 60 * 1000)
-};
+            newEmail,
+            expiresAt: new Date(Date.now() + 60 * 1000)
+        };
 
 
         res.redirect('/verify-email-otp');
@@ -396,134 +405,134 @@ const getVerifyEmailOtp = (req, res) => {
 
 
 const verifyEmailOtp = async (req, res) => {
-  try {
-    const userId = req.session.user?.id;
-    if (!userId) return res.redirect('/login');
+    try {
+        const userId = req.session.user?.id;
+        if (!userId) return res.redirect('/login');
 
-    const { otp } = req.body;
-    const sessionData = req.session.emailChange;
+        const { otp } = req.body;
+        const sessionData = req.session.emailChange;
 
-    if (!sessionData) {
-      return res.redirect('/profile');
+        if (!sessionData) {
+            return res.redirect('/profile');
+        }
+
+        // 🔐 Fetch OTP from DB
+        const otpDoc = await OTP.findOne({
+            email: sessionData.newEmail
+        });
+
+        if (!otpDoc) {
+            return res.render('user/otpEmail', {
+                email: sessionData.newEmail,
+                error: 'OTP not found or expired'
+            });
+        }
+
+        if (otpDoc.expiresAt < new Date()) {
+            return res.render('user/otpEmail', {
+                email: sessionData.newEmail,
+                error: 'OTP expired'
+            });
+        }
+
+        if (otpDoc.otp !== String(otp).trim()) {
+            return res.render('user/otpEmail', {
+                email: sessionData.newEmail,
+                error: 'Invalid OTP'
+            });
+        }
+
+        /* ---------- Update Email ---------- */
+        await User.findByIdAndUpdate(userId, {
+            email: sessionData.newEmail
+        });
+
+        // cleanup
+        await OTP.deleteOne({ email: sessionData.newEmail });
+        delete req.session.emailChange;
+
+        return res.redirect('/profile');
+
+    } catch (error) {
+        console.error('Verify email OTP error:', error);
+
+        return res.status(500).render('user/otpEmail', {
+            email: req.session.emailChange?.newEmail,
+            error: 'Something went wrong. Please try again.'
+        });
     }
-
-    // 🔐 Fetch OTP from DB
-    const otpDoc = await OTP.findOne({
-      email: sessionData.newEmail
-    });
-
-    if (!otpDoc) {
-      return res.render('user/otpEmail', {
-        email: sessionData.newEmail,
-        error: 'OTP not found or expired'
-      });
-    }
-
-    if (otpDoc.expiresAt < new Date()) {
-      return res.render('user/otpEmail', {
-        email: sessionData.newEmail,
-        error: 'OTP expired'
-      });
-    }
-
-    if (otpDoc.otp !== String(otp).trim()) {
-      return res.render('user/otpEmail', {
-        email: sessionData.newEmail,
-        error: 'Invalid OTP'
-      });
-    }
-
-    /* ---------- Update Email ---------- */
-    await User.findByIdAndUpdate(userId, {
-      email: sessionData.newEmail
-    });
-
-    // cleanup
-    await OTP.deleteOne({ email: sessionData.newEmail });
-    delete req.session.emailChange;
-
-    return res.redirect('/profile');
-
-  } catch (error) {
-    console.error('Verify email OTP error:', error);
-
-    return res.status(500).render('user/otpEmail', {
-      email: req.session.emailChange?.newEmail,
-      error: 'Something went wrong. Please try again.'
-    });
-  }
 };
 
 
 const resendEmailOtp = async (req, res) => {
-  try {
-    const sessionData = req.session.emailChange;
-    if (!sessionData) return res.redirect('/profile');
+    try {
+        const sessionData = req.session.emailChange;
+        if (!sessionData) return res.redirect('/profile');
 
-    const otp = generateOTP();
+        const otp = generateOTP();
 
-    await OTP.findOneAndUpdate(
-      { email: sessionData.newEmail },   // ✅ use email
-      {
-        email: sessionData.newEmail,
-        otp,
-        expiresAt: new Date(Date.now() + 60 * 1000)
-      },
-      { upsert: true, new: true }
-    );
+        await OTP.findOneAndUpdate(
+            { email: sessionData.newEmail },   // ✅ use email
+            {
+                email: sessionData.newEmail,
+                otp,
+                expiresAt: new Date(Date.now() + 60 * 1000)
+            },
+            { upsert: true, new: true }
+        );
 
-    await sendOTPEmail(sessionData.newEmail, otp);
+        await sendOTPEmail(sessionData.newEmail, otp);
 
-    return res.render('user/otpEmail', {
-      email: sessionData.newEmail,
-      success: 'A new OTP has been sent'
-    });
+        return res.render('user/otpEmail', {
+            email: sessionData.newEmail,
+            success: 'A new OTP has been sent'
+        });
 
-  } catch (error) {
-    console.error('Resend email OTP error:', error);
+    } catch (error) {
+        console.error('Resend email OTP error:', error);
 
-    return res.render('user/otpEmail', {
-      email: req.session.emailChange?.newEmail,
-      error: 'Failed to resend OTP. Please try again.'
-    });
-  }
+        return res.render('user/otpEmail', {
+            email: req.session.emailChange?.newEmail,
+            error: 'Failed to resend OTP. Please try again.'
+        });
+    }
 };
 
 
 const updateProfileImage = async (req, res) => {
-  try {
-    const userId = req.session.user?.id;
-    if (!userId) return res.redirect('/login');
+    try {
+        const userId = req.session.user?.id;
+        if (!userId) return res.redirect('/login');
 
-    if (!req.file) return res.redirect('/profile');
+        if (!req.file) return res.redirect('/profile');
 
-    // upload buffer to cloudinary
-    const result = cloudinary.uploader.upload_stream(
-      { folder: 'pawpalace/profile' },
-      async (error, uploadResult) => {
-        if (error) throw error;
+        // upload buffer to cloudinary
+        const result = cloudinary.uploader.upload_stream(
+            { folder: 'pawpalace/profile' },
+            async (error, uploadResult) => {
+                if (error) throw error;
 
-        await User.findByIdAndUpdate(userId, {
-          profilePic: uploadResult.secure_url
-        });
+                await User.findByIdAndUpdate(userId, {
+                    profilePic: uploadResult.secure_url
+                });
 
+                res.redirect('/profile');
+            }
+        ).end(req.file.buffer);
+
+    } catch (err) {
+        console.error('Profile image upload error:', err);
         res.redirect('/profile');
-      }
-    ).end(req.file.buffer);
-
-  } catch (err) {
-    console.error('Profile image upload error:', err);
-    res.redirect('/profile');
-  }
+    }
 };
 
 
 
 const removeProfilePic = async (req, res) => {
-  await User.findByIdAndUpdate(req.session.user.id, {
-    profilePic: null
-  });
-  res.sendStatus(200);
+    await User.findByIdAndUpdate(req.session.user.id, {
+        profilePic: null
+    });
+    res.sendStatus(200);
 };
 
 

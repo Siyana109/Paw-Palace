@@ -268,18 +268,25 @@
                         </div>
 
                         <p class="text-gray-400 text-sm mb-4">
-                            Current email: <span class="font-medium text-accent-navy">
+                            Current email:
+                            <span class="font-medium text-accent-navy">
                                 <%= user.email %>
                             </span>
                         </p>
 
-                        <a href="/change-email"
-                            class="block text-center w-full border-2 border-gray-100 py-3 rounded-xl font-bold hover:bg-gray-50 transition">
-                            Change Email
-                        </a>
+                        <% if (!user.googleId) { %>
+                            <!-- NORMAL USER -->
+                            <a href="/change-email"
+                                class="block text-center w-full border-2 border-gray-100 py-3 rounded-xl font-bold hover:bg-gray-50 transition">
+                                Change Email
+                            </a>
+                            <% } else { %>
+                                <!-- GOOGLE USER -->
+                                <p class="text-xs text-gray-400 text-center italic">
+                                    
+                                </p>
+                                <% } %>
                     </div>
-
-
                     <div class="bg-white rounded-[2rem] p-8 shadow-sm">
                         <div class="flex items-center gap-3 mb-4">
                             <div
