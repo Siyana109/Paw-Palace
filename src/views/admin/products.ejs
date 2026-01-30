@@ -52,7 +52,7 @@
           <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
             <div class="relative w-full max-w-lg">
               <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input id="searchInput" type="text" placeholder="Search products..." onkeyup="fetchProducts(1)"
+              <input id="searchInput" type="text" placeholder="Search products..."
                 class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
             </div>
             <div class="flex items-center gap-3">
@@ -62,16 +62,14 @@
               </select>
               <select
                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                <option>Brand</option>
-              </select>
-              <select
-                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
                 <option>Status</option>
               </select>
-              <button
-                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 flex items-center gap-2">
-                <i class="fa-solid fa-arrow-up-z-a"></i> Sort By
-              </button>
+              <select onchange="fetchProducts(1, document.getElementById('searchInput').value, this.value)"
+                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition">
+                <option value="newest">Sort: Newest</option>
+                <option value="name_asc">Sort: Name (A-Z)</option>
+                <option value="name_desc">Sort: Name (Z-A)</option>
+              </select>
               <button onclick="openAddProductModal()"
                 class="bg-brand-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
                 <i class="fa-solid fa-plus"></i> Add Product
@@ -193,7 +191,7 @@
             </table>
           </div>
 
-          <div class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
+          <div id="paginationContainer" class="p-8 flex justify-between items-center text-xs font-bold text-gray-400">
             <p>Showing 1-8 of <%= totalProducts %> products</p>
             <div class="flex items-center gap-2">
               <button class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i
@@ -1653,6 +1651,11 @@
     const tbody = document.getElementById("productTableBody");
     tbody.innerHTML = "";
 
+    if (products.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">No products found</td></tr>`;
+      return;
+    }
+
     products.forEach(p => {
       const petTypes = Array.isArray(p.petType) ? p.petType.join(', ') : (p.petType || '-');
       const petTypeJson = JSON.stringify(p.petType || []);
@@ -1717,6 +1720,51 @@
       </tr>
     `;
     });
+  }
+
+  function renderPagination(pagination) {
+    const container = document.getElementById("paginationContainer");
+    const { page, totalPages, totalProducts } = pagination;
+
+    if (totalProducts === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let links = '';
+
+    // Prev
+    if (page > 1) {
+      links += `<button onclick="fetchProducts(${page - 1}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
+    }
+
+    // Pages (Simple logic: Show all if few, or simpler range. For now let's just show 1..totalPages with max limit logic if needed, but to keep it simple and consistent with previous UI:)
+    // The previous UI had 1 2 3 ... 161. Let's do a simple window.
+
+    for (let i = 1; i <= totalPages; i++) {
+      // Show current, first, last, and neighbours
+      if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+        if (i === page) {
+          links += `<button class="w-10 h-10 rounded-xl bg-brand-500 text-white">${i}</button>`;
+        } else {
+          links += `<button onclick="fetchProducts(${i}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="w-10 h-10 rounded-xl hover:bg-gray-50">${i}</button>`;
+        }
+      } else if (i === page - 2 || i === page + 2) {
+        links += `<span class="px-2">...</span>`;
+      }
+    }
+
+    // Next
+    if (page < totalPages) {
+      links += `<button onclick="fetchProducts(${page + 1}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
+    }
+
+    container.innerHTML = `
+        <p>Showing ${(page - 1) * 8 + 1}-${Math.min(page * 8, totalProducts)} of ${totalProducts} products</p>
+        <div class="flex items-center gap-2">
+            ${links}
+        </div>
+    `;
   }
 </script>
 

@@ -71,7 +71,7 @@ WEEK-8 PENDINGS:
 
 
 WEEK-9 PENDINGS:
-    ☐ dont show option to change email for Google user
+    ✔ dont show option to change email for Google user @done (1/30/2026, 1:16:19 PM)
     ✔ edit profile image @done (1/27/2026, 5:22:00 PM)
     ☐ add js form validation
     ☐ show recent added. items  at top
@@ -82,7 +82,7 @@ WEEK-9 PENDINGS:
     ✔ show related items @done (1/30/2026, 1:52:09 AM)
     ✔ filters need to implement in shop page @done (1/29/2026, 8:24:07 PM)
     ✔ sewch sort and filter should interconnected @done (1/29/2026, 8:24:09 PM)
-    ☐ if a product is out of stock show that in shop page with that message
+    ✔ if a product is out of stock show that in shop page with that message @done (1/30/2026, 12:09:04 PM)
 
 
 
@@ -105,9 +105,8 @@ TODO :
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
         ☐ swal on add/edit products
-        ☐ user sort by data
         ☐ sort & search & pagination brand, top brand
-        ☐ search & sort & pagination in products
+        ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
 
 
 
