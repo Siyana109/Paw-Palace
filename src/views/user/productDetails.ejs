@@ -78,7 +78,7 @@
 
                     <% } %>
 
-                    
+
 
                         <li class="text-gray-300">/</li>
 
@@ -141,6 +141,19 @@
                         <div class="pb-1 text-xs text-gray-400 font-medium">(128 Reviews)</div>
                     </div>
 
+                    <!-- STOCK INFO -->
+                    <div class="mb-4">
+                        <% if (hasStock) { %>
+                            <p class="text-sm font-semibold text-green-600">
+                                In Stock
+                            </p>
+                            <% } else { %>
+                                <p class="text-sm font-semibold text-red-600">
+                                    Out of Stock
+                                </p>
+                                <% } %>
+                    </div>
+
                     <!-- SELECT: SIZE -->
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-gray-800 mb-3 ml-1">Select Size</label>
@@ -186,12 +199,16 @@
                                     Go to Cart
                                 </a>
                                 <% } else { %>
-                                    <button type="submit" id="addToCartBtn" class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold text-sm
-           hover:bg-brand-600 transition">
+                                    <button id="addToCartBtn" class="px-6 py-3 rounded-xl font-bold
+  <%= !hasStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-brand-500 text-white' %>" <%=!hasStock ? 'disabled' : '' %>>
                                         Add to Cart
                                     </button>
                                     <% } %>
-
+                                        <!-- <% if (!hasStock) { %>
+                                            <p class="text-red-600 font-bold mt-3">
+                                                Out of Stock
+                                            </p>
+                                            <% } %> -->
                         </form>
 
                         <!-- Wishlist -->
@@ -459,18 +476,30 @@
 
                 function updateStock(variant) {
                     const btn = document.getElementById('addToCartBtn');
+                    const qtyInput = document.getElementById('quantityInput');
+                    const stockMsg = document.getElementById('stockMessage');
+                    const stockCount = document.getElementById('stockCount');
+
                     if (variant.stock > 0) {
                         btn.disabled = false;
                         btn.innerText = 'Add to Cart';
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'shadow-none');
-                    } else {
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        qtyInput.max = variant.stock;
+                        stockMsg.classList.add('hidden');
+                    } 
+                    else {
                         btn.disabled = true;
-                        btn.innerHTML = 'Out of Stock';
-                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'shadow-none');
+                        btn.innerText = 'Out of Stock';
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        qtyInput.value = 1;
+                        stockCount.innerText = 0;
+                        stockMsg.classList.remove('hidden');
                     }
                 }
-
                 function updateQuantity(change) {
+
+                    if (activeVariant.stock === 0) return;
+
                     const input = document.getElementById('quantityInput');
                     const formInput = document.getElementById('formQuantity');
                     const stockMsg = document.getElementById('stockMessage');
@@ -683,7 +712,7 @@
 
             </script>
 
-            
+
 
             <script>
                 const zoomContainer = document.getElementById("zoomContainer");

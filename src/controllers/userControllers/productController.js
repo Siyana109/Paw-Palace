@@ -19,13 +19,10 @@ const getProductDetails = async (req, res) => {
 
     // 2️⃣ Fetch variants (only in-stock)
     const variants = await Variant.find({
-      product: productId,
-      stock: { $gt: 0 }
+      product: productId
     });
 
-    if (!variants.length) {
-      return res.redirect("/home");
-    }
+    const hasStock = variants.some(v => v.stock > 0);
 
     // 3️⃣ Wishlist & Cart status
     let inWishlist = false;
@@ -91,7 +88,8 @@ const getProductDetails = async (req, res) => {
       variants,
       relatedProducts,
       inWishlist,
-      isInCart
+      isInCart,
+      hasStock
     });
 
   } catch (err) {
