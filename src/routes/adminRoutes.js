@@ -12,7 +12,7 @@ import variantController from "../controllers/adminControllers/variantController
 
 import couponController from "../controllers/adminControllers/couponController.js"
 
-import { variantUpload } from "../middlewares/upload.js"
+import { variantUpload, upload} from "../middlewares/upload.js"
 
 
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)
@@ -36,9 +36,8 @@ router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategor
 
 
 router.get("/products", adminMiddleware.adminSession, productController.listProducts);
-router.post("/products/add", adminMiddleware.adminSession, productController.postAddProduct);
-
-router.post("/products/edit/:id", adminMiddleware.adminSession, productController.updateProduct);
+router.post("/products/add", adminMiddleware.adminSession, upload.none(), productController.postAddProduct);
+router.post("/products/edit/:id", adminMiddleware.adminSession, upload.none(), productController.updateProduct);
 router.post("/products/delete/:productId", adminMiddleware.adminSession, productController.deleteProduct);
 
 router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);

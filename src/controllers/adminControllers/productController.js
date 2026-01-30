@@ -112,48 +112,110 @@ const listProducts = async (req, res) => {
 
 
 
+const validateProductInput = ({
+  productName,
+  brandId,
+  categoryId,
+  description,
+  petType
+}) => {
+  if (!productName || productName.trim().length < 3) {
+    return "Product name must be at least 3 characters";
+  }
+
+  if (!brandId) {
+    return "Brand is required";
+  }
+
+  if (!categoryId) {
+    return "Category is required";
+  }
+
+  if (!Array.isArray(petType) || petType.length === 0) {
+  return "At least one pet type is required";
+}
+
+  if (!description || description.trim().length < 10 || description.length > 250) {
+    return "Description must be between 10 and 250 characters";
+  }
+
+  return null;
+};
+
+
+
+
 const postAddProduct = async (req, res) => {
   try {
-    const { productName, brandId, categoryId, description, isActive, petType } = req.body;
+    let petType = req.body.petType;
 
-    // basic validation
-    if (!productName || !brandId || !categoryId || !description || !petType) {
-      // Create flash message or handle error better in real app
-      console.log("Missing fields", req.body);
-      return res.redirect("/admin/products");
+    if (typeof petType === "string") {
+      petType = [petType];
+    }
+
+    const error = validateProductInput({
+      ...req.body,
+      petType
+    });
+
+    if (error) {
+      return res.status(400).json({ success: false, message: error });
     }
 
     await Product.create({
-      productName,
-      brandId,
-      categoryId,
-      description,
+      productName: req.body.productName.trim(),
+      brandId: req.body.brandId,
+      categoryId: req.body.categoryId,
+      description: req.body.description.trim(),
       petType,
-      isActive: isActive === "true"
+      isActive: req.body.isActive === "true"
     });
 
-    res.redirect("/admin/products");
-  } catch (error) {
-    console.error(error);
-    res.redirect("/admin/products");
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error("Add product error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 
+
+
 const updateProduct = async (req, res) => {
-  const { productName, brandId, categoryId, description, isActive, petType } = req.body;
+  try {
+    let petType = req.body.petType;
 
-  await Product.findByIdAndUpdate(req.params.id, {
-    productName,
-    brandId,
-    categoryId,
-    description,
-    petType,
-    isActive: isActive === "true"
-  });
+    if (typeof petType === "string") {
+      petType = [petType];
+    }
 
-  res.redirect("/admin/products");
+    const error = validateProductInput({
+      ...req.body,
+      petType
+    });
+
+    if (error) {
+      return res.status(400).json({ success: false, message: error });
+    }
+
+    await Product.findByIdAndUpdate(req.params.id, {
+      productName: req.body.productName.trim(),
+      brandId: req.body.brandId,
+      categoryId: req.body.categoryId,
+      description: req.body.description.trim(),
+      petType,
+      isActive: req.body.isActive === "true"
+    });
+
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error("Update product error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
+
 
 
 // DELETE PRODUCT (AJAX)

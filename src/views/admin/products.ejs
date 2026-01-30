@@ -229,20 +229,19 @@
 
       <h2 class="text-2xl font-bold mb-6">Add Product</h2>
 
-      <form method="POST" action="/admin/products/add" class="space-y-4">
+      <form class="space-y-4" onsubmit="submitAddProduct(event)">
 
         <!-- PRODUCT NAME -->
         <div>
           <label class="block text-sm font-bold mb-1">Product Name</label>
-          <input name="productName" required
+          <input name="productName"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
         </div>
 
         <!-- BRAND -->
         <div>
           <label class="block text-sm font-bold mb-1">Brand</label>
-          <select name="brandId" required
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
+          <select name="brandId" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
             <option value="">Select Brand</option>
             <% brands.forEach(brand=> { %>
               <option value="<%= brand._id %>">
@@ -255,7 +254,7 @@
         <!-- CATEGORY -->
         <div>
           <label class="block text-sm font-bold mb-1">Category</label>
-          <select name="categoryId" required
+          <select name="categoryId"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
             <option value="">Select Category</option>
             <% categories.forEach(cat=> { %>
@@ -305,7 +304,7 @@
         <!-- DESCRIPTION -->
         <div>
           <label class="block text-sm font-bold mb-1">Description</label>
-          <textarea name="description" required minlength="10" maxlength="250" rows="4"
+          <textarea name="description" rows="4"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none"></textarea>
         </div>
 
@@ -337,17 +336,17 @@
 
       <h2 class="text-2xl font-bold mb-6">Edit Product</h2>
 
-      <form method="POST" id="editProductForm" class="space-y-4">
+      <form method="POST" id="editProductForm" class="space-y-4" onsubmit="submitEditProduct(event)">
 
         <div>
           <label class="block text-sm font-bold mb-1">Product Name</label>
-          <input id="editProductName" name="productName" required
+          <input id="editProductName" name="productName"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
         </div>
 
         <div>
           <label class="block text-sm font-bold mb-1">Brand</label>
-          <select id="editBrandId" name="brandId" required
+          <select id="editBrandId" name="brandId"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
             <% brands.forEach(brand=> { %>
               <option value="<%= brand._id %>">
@@ -359,7 +358,7 @@
 
         <div>
           <label class="block text-sm font-bold mb-1">Category</label>
-          <select id="editCategoryId" name="categoryId" required
+          <select id="editCategoryId" name="categoryId"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
             <% categories.forEach(cat=> { %>
               <option value="<%= cat._id %>">
@@ -410,7 +409,7 @@
 
         <div>
           <label class="block text-sm font-bold mb-1">Description</label>
-          <textarea id="editDescription" name="description" rows="4" required
+          <textarea id="editDescription" name="description" rows="4"
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5"></textarea>
         </div>
 
@@ -446,12 +445,12 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold mb-1">Price</label>
-            <input type="number" name="price" required min="0"
+            <input type="number" name="price" 
               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
           </div>
           <div>
             <label class="block text-sm font-bold mb-1">Stock</label>
-            <input type="number" name="stock" required min="0"
+            <input type="number" name="stock" 
               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
           </div>
         </div>
@@ -460,11 +459,10 @@
           <div>
             <label class="block text-sm font-bold mb-1">Size</label>
             <select name="size" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="XXL">XXL</option>
+              <option value="Free Size">Free Size</option>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option>
             </select>
           </div>
           <div>
@@ -484,8 +482,7 @@
               </div>
             </div>
             <div class="flex-1">
-              <input type="file" name="coverImage" required accept="image/*"
-                onchange="previewImage(this, 'variantCoverPreview')"
+              <input type="file" name="coverImage" accept="image/*" onchange="previewImage(this, 'variantCoverPreview')"
                 class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-500 hover:file:bg-brand-100">
             </div>
           </div>
@@ -539,13 +536,13 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold mb-1">Price</label>
-            <input id="editVariantPrice" type="number" min="0"
+            <input id="editVariantPrice" type="number" 
               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
           </div>
 
           <div>
             <label class="block text-sm font-bold mb-1">Stock</label>
-            <input id="editVariantStock" type="number" min="0"
+            <input id="editVariantStock" type="number" 
               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
           </div>
         </div>
@@ -553,9 +550,17 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold mb-1">Size</label>
-            <input id="editVariantSize" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
-          </div>
+            <select id="editVariantSize"
+              class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none">
 
+              <option value="">Select Size</option>
+              <option value="Free Size">Free Size</option>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option>
+
+            </select>
+          </div>
           <div>
             <label class="block text-sm font-bold mb-1">Color</label>
             <input id="editVariantColor" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5">
@@ -1024,14 +1029,29 @@
   }
 
   function validateVariantForm() {
-    const errorMsg = document.getElementById("imageLimitError");
+    const priceInput = document.querySelector('#addVariantModal input[name="price"]');
+    const stockInput = document.querySelector('#addVariantModal input[name="stock"]');
+
+    if (priceInput.value < 0) {
+      Swal.fire("Error", "Price cannot be negative", "error");
+      return false;
+    }
+    if (stockInput.value < 0) {
+      Swal.fire("Error", "Stock cannot be negative", "error");
+      return false;
+    }
+
     if (selectedVariantSubImages.length < 3) {
-      errorMsg.classList.remove("hidden");
-      errorMsg.innerText = `You must upload at least 3 images. You currently have ${selectedVariantSubImages.length}.`;
+      Swal.fire("Error", `You must upload at least 3 images. Current: ${selectedVariantSubImages.length}`, "error");
+      return false;
+    }
+    if (selectedVariantSubImages.length > 5) {
+      Swal.fire("Error", `You can only upload up to 5 images. Current: ${selectedVariantSubImages.length}`, "error");
       return false;
     }
     return true;
   }
+
 
   function openDeleteModal(type, id) {
     deleteType = type;
@@ -1489,6 +1509,97 @@
 </script>
 
 <script>
+  async function submitAddProduct(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    if (!validateProductForm(form)) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/admin/products/add", {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", data.message || "Failed to add product", "error");
+        return;
+      }
+
+      closeAddProductModal();
+      form.reset();
+
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Product added successfully",
+        showConfirmButton: false,
+        timer: 3000
+      });
+
+      fetchProducts(1); // refresh table
+
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong", "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function submitEditProduct(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    if (!validateProductForm(form)) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", data.message || "Failed to update product", "error");
+        return;
+      }
+
+      closeEditProductModal();
+
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Product updated successfully",
+        showConfirmButton: false,
+        timer: 3000
+      });
+
+      fetchProducts(currentPage); // refresh
+
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong", "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
   async function submitAddVariantForm(event) {
     event.preventDefault();
     if (!validateVariantForm()) return;
@@ -1552,6 +1663,14 @@
     if (!variantId) return;
 
     // Validation
+    const priceVal = document.getElementById("editVariantPrice").value;
+    const stockVal = document.getElementById("editVariantStock").value;
+
+    if (priceVal < 0 || stockVal < 0) {
+      Swal.fire("Error", "Price and Stock cannot be negative", "error");
+      return;
+    }
+
     const totalImages = editVariantKeptImages.length + editVariantNewFiles.length;
     if (totalImages < 3) {
       Swal.fire("Error", `You need at least 3 sub-images. Current: ${totalImages}`, "error");
@@ -1623,6 +1742,41 @@
       submitBtn.innerText = originalText;
     }
   }
+
+
+  function validateProductForm(form) {
+    const productName = form.productName.value.trim();
+    const description = form.description.value.trim();
+    const petTypes = form.querySelectorAll('input[name="petType"]:checked');
+
+    if (productName.length < 3) {
+      Swal.fire("Validation Error", "Product name must be at least 3 characters", "error");
+      return false;
+    }
+
+    if (productName.length > 100) {
+      Swal.fire("Validation Error", "Product name cannot exceed 100 characters", "error");
+      return false;
+    }
+
+    if (petTypes.length === 0) {
+      Swal.fire("Validation Error", "Select at least one pet type", "error");
+      return false;
+    }
+
+    if (description.length < 10 || description.length > 250) {
+      Swal.fire(
+        "Validation Error",
+        "Description must be between 10 and 250 characters",
+        "error"
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+
 </script>
 
 <script>
