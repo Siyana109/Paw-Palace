@@ -7,23 +7,41 @@ import Product from "../../model/productModel.js";
 const listProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 8;
-    const search = req.query.search || "";
-    const sort = req.query.sort || "newest";
-
+    const limit = 8;
     const skip = (page - 1) * limit;
 
-    /* 🔍 Search filter */
-    const searchQuery = {
-      productName: { $regex: search, $options: "i" }
-    };
+    const search = req.query.search || "";
+    const sort = req.query.sort || "newest";
+    const category = req.query.category || "";
+    const status = req.query.status || "";
 
-    /* 🔃 Sorting */
+    /* 🔍 BUILD FILTER QUERY */
+    const searchQuery = {};
+
+    // Search by product name
+    if (search) {
+      searchQuery.productName = { $regex: search, $options: "i" };
+    }
+
+    // Filter by category
+    if (category) {
+      searchQuery.categoryId = category;
+    }
+
+    // Filter by status
+    if (status === "active") {
+      searchQuery.isActive = true;
+    }
+    if (status === "inactive") {
+      searchQuery.isActive = false;
+    }
+
+    /* 🔃 SORTING */
     let sortQuery = { createdAt: -1 };
     if (sort === "name_asc") sortQuery = { productName: 1 };
     if (sort === "name_desc") sortQuery = { productName: -1 };
 
-    /* 📦 Fetch products */
+    /* 📦 FETCH PRODUCTS */
     const products = await Product.find(searchQuery)
       .populate("categoryId")
       .populate("brandId")
@@ -34,13 +52,12 @@ const listProducts = async (req, res) => {
 
     const productIds = products.map(p => p._id);
 
-    /* 🧮 Variant aggregation */
+    /* 🧮 VARIANT AGGREGATION */
     const variants = await Variant.aggregate([
       { $match: { product: { $in: productIds } } },
       {
         $group: {
           _id: "$product",
-          minPrice: { $min: "$price" },
           totalStock: { $sum: "$stock" },
           coverImage: { $first: "$coverImage" }
         }
@@ -48,11 +65,12 @@ const listProducts = async (req, res) => {
     ]);
 
     const variantMap = {};
-    variants.forEach(v => variantMap[v._id.toString()] = v);
+    variants.forEach(v => {
+      variantMap[v._id.toString()] = v;
+    });
 
     const finalProducts = products.map(p => ({
       ...p,
-      minPrice: variantMap[p._id]?.minPrice || 0,
       totalStock: variantMap[p._id]?.totalStock || 0,
       coverImage: variantMap[p._id]?.coverImage || "/images/placeholder.png"
     }));
@@ -60,16 +78,20 @@ const listProducts = async (req, res) => {
     const totalProducts = await Product.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    /* 🟢 AJAX response */
+    /* 🟢 AJAX RESPONSE */
     if (req.xhr) {
       return res.json({
         success: true,
         products: finalProducts,
-        pagination: { page, totalPages, totalProducts }
+        pagination: {
+          page,
+          totalPages,
+          totalProducts
+        }
       });
     }
 
-    /* 🟢 Normal render */
+    /* 🟢 NORMAL RENDER */
     const brands = await Brand.find({ isActive: true }).lean();
     const categories = await Category.find({ isActive: true }).lean();
 
@@ -87,6 +109,7 @@ const listProducts = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 
 
 const postAddProduct = async (req, res) => {

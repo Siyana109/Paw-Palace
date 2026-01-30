@@ -56,15 +56,22 @@
                 class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition">
             </div>
             <div class="flex items-center gap-3">
-              <select
+              <select id="categoryFilter" onchange="fetchProducts(1)"
                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                <option>Category</option>
+                <option value="">All Categories</option>
+                <% categories.forEach(cat=> { %>
+                  <option value="<%= cat._id %>">
+                    <%= cat.categoryName %>
+                  </option>
+                  <% }) %>
               </select>
-              <select
+              <select id="statusFilter" onchange="fetchProducts(1)"
                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none">
-                <option>Status</option>
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
-              <select onchange="fetchProducts(1, document.getElementById('searchInput').value, this.value)"
+              <select id="sortFilter" onchange="fetchProducts(1)"
                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition">
                 <option value="newest">Sort: Newest</option>
                 <option value="name_asc">Sort: Name (A-Z)</option>
@@ -1626,15 +1633,19 @@
   document.getElementById("searchInput").addEventListener("input", (e) => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
-      fetchProducts(1, e.target.value, currentSort);
+      fetchProducts(1);
     }, 400); // debounce
   });
 
-  function fetchProducts(page = 1, search = "", sort = "newest") {
+  function fetchProducts(page = 1) {
     currentPage = page;
-    currentSort = sort;
+    const search = document.getElementById("searchInput").value;
+    const category = document.getElementById("categoryFilter").value;
+    const status = document.getElementById("statusFilter").value;
+    const sort = document.getElementById("sortFilter").value;
+    currentSort = sort; // Update global
 
-    fetch(`/admin/products?page=${page}&search=${search}&sort=${sort}`, {
+    fetch(`/admin/products?page=${page}&search=${search}&sort=${sort}&category=${category}&status=${status}`, {
       headers: { "X-Requested-With": "XMLHttpRequest" }
     })
       .then(res => res.json())
@@ -1735,19 +1746,17 @@
 
     // Prev
     if (page > 1) {
-      links += `<button onclick="fetchProducts(${page - 1}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
+      links += `<button onclick="fetchProducts(${page - 1})" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
     }
 
-    // Pages (Simple logic: Show all if few, or simpler range. For now let's just show 1..totalPages with max limit logic if needed, but to keep it simple and consistent with previous UI:)
-    // The previous UI had 1 2 3 ... 161. Let's do a simple window.
-
+    // Pages
     for (let i = 1; i <= totalPages; i++) {
       // Show current, first, last, and neighbours
       if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
         if (i === page) {
           links += `<button class="w-10 h-10 rounded-xl bg-brand-500 text-white">${i}</button>`;
         } else {
-          links += `<button onclick="fetchProducts(${i}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="w-10 h-10 rounded-xl hover:bg-gray-50">${i}</button>`;
+          links += `<button onclick="fetchProducts(${i})" class="w-10 h-10 rounded-xl hover:bg-gray-50">${i}</button>`;
         }
       } else if (i === page - 2 || i === page + 2) {
         links += `<span class="px-2">...</span>`;
@@ -1756,7 +1765,7 @@
 
     // Next
     if (page < totalPages) {
-      links += `<button onclick="fetchProducts(${page + 1}, '${document.getElementById('searchInput').value}', '${currentSort}')" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
+      links += `<button onclick="fetchProducts(${page + 1})" class="px-4 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
     }
 
     container.innerHTML = `
