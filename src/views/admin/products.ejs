@@ -1775,6 +1775,23 @@
         </div>
     `;
   }
+
+  // Initialize Pagination with server-side data
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      const initialPagination = {
+        page: <%= (typeof page !== 'undefined') ? page : 1 %>,
+        totalPages: <%= (typeof totalPages !== 'undefined') ? totalPages : 1 %>,
+    totalProducts: <%= (typeof totalProducts !== 'undefined') ? totalProducts : 0 %>
+        };
+
+  if (typeof renderPagination === 'function') {
+    renderPagination(initialPagination);
+  }
+    } catch (err) {
+    console.error("Pagination init error:", err);
+  }
+  });
 </script>
 
 <!-- <script>
