@@ -251,7 +251,8 @@
                                             </button>
                                         </form>
 
-                                        <form action="/cart/add" method="POST" class="pointer-events-auto">
+                                        <form action="/cart/add" method="POST"
+  class="pointer-events-auto <%= !product.inStock ? 'opacity-50 pointer-events-none' : '' %>">
                                             <input type="hidden" name="productId" value="<%= product._id %>">
                                             <button
                                                 class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition">
@@ -278,8 +279,18 @@
                                         </div>
 
                                         <div class="flex justify-between items-center mt-4">
-                                            <span class="text-xl font-black">₹<%= product.price %></span>
-                                        </div>
+
+  <!-- PRICE -->
+  <span class="text-xl font-black">₹<%= product.price %></span>
+
+  <!-- STOCK STATUS -->
+  <% if (!product.inStock) { %>
+    <span class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
+      Out of Stock
+    </span>
+  <% } %>
+
+</div>
                                     </div>
 
                                 </div>
