@@ -172,69 +172,69 @@
 
                     <!-- ACTIONS ROW -->
                     <!-- Quantity Wrapper -->
-<div id="quantityWrapper" class="flex items-center gap-2">
+                    <div id="quantityWrapper" class="flex items-center gap-2">
 
-  <!-- Quantity Stepper -->
-  <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
-    <button onclick="updateQuantity(-1)"
-      class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
+                        <!-- Quantity Stepper -->
+                        <div class="flex items-center border border-gray-200 rounded-xl bg-white h-12 w-32 px-2">
+                            <button onclick="updateQuantity(-1)"
+                                class="w-8 h-full flex items-center justify-center text-gray-400 hover:text-brand-500 transition font-bold text-lg">-</button>
 
-    <input type="number" id="quantityInput" value="1" min="1"
-      class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
+                            <input type="number" id="quantityInput" value="1" min="1"
+                                class="w-full text-center font-bold text-gray-700 outline-none bg-transparent" readonly>
 
-    <button id="qtyPlusBtn" onclick="updateQuantity(1)"
-      class="w-8 h-full flex items-center justify-center font-bold text-lg transition">+</button>
-  </div>
+                            <button id="qtyPlusBtn" onclick="updateQuantity(1)"
+                                class="w-8 h-full flex items-center justify-center font-bold text-lg transition">+</button>
+                        </div>
 
-</div>
+                    </div>
 
-                        <p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
-                            Only <span id="stockCount"></span> items available
-                        </p>
+                    <p id="stockMessage" class="text-xs text-red-500 mt-2 hidden">
+                        Only <span id="stockCount"></span> items available
+                    </p>
 
-                        <!-- Add to Cart -->
-                        <form class="flex-1" id="addToCartForm">
-                            <input type="hidden" name="productId" value="<%= product._id %>">
-                            <input type="hidden" name="variantId" id="cartVariantId" value="<%= variants[0]._id %>">
-                            <input type="hidden" name="quantity" id="formQuantity" value="1">
+                    <!-- Add to Cart -->
+                    <form class="flex-1" id="addToCartForm">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        <input type="hidden" name="variantId" id="cartVariantId" value="<%= variants[0]._id %>">
+                        <input type="hidden" name="quantity" id="formQuantity" value="1">
 
-                            <% if (isInCart) { %>
-                                <a href="/cart" class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
+                        <% if (isInCart) { %>
+                            <a href="/cart" class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm
             flex items-center justify-center hover:bg-black transition">
-                                    Go to Cart
-                                </a>
-                                <% } else { %>
-                                    <button id="addToCartBtn" class="px-6 py-3 rounded-xl font-bold
+                                Go to Cart
+                            </a>
+                            <% } else { %>
+                                <button id="addToCartBtn" class="px-6 py-3 rounded-xl font-bold
   <%= !hasStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-brand-500 text-white' %>" <%=!hasStock ? 'disabled' : '' %>>
-                                        Add to Cart
-                                    </button>
-                                    <% } %>
-                                        <!-- <% if (!hasStock) { %>
+                                    Add to Cart
+                                </button>
+                                <% } %>
+                                    <!-- <% if (!hasStock) { %>
                                             <p class="text-red-600 font-bold mt-3">
                                                 Out of Stock
                                             </p>
                                             <% } %> -->
-                        </form>
+                    </form>
 
-                        <!-- Wishlist -->
-                        <button id="wishlistBtn" data-variant="<%= variants[0]._id %>" class="w-12 h-12 bg-white border border-gray-200 rounded-xl
+                    <!-- Wishlist -->
+                    <button id="wishlistBtn" data-variant="<%= variants[0]._id %>" class="w-12 h-12 bg-white border border-gray-200 rounded-xl
          text-gray-400 hover:border-brand-500 hover:text-brand-500
          transition-all active:scale-95 flex items-center justify-center">
-                            <i id="wishlistIcon"
-                                class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
-                            </i>
+                        <i id="wishlistIcon"
+                            class="<%= inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-lg">
+                        </i>
 
-                        </button>
-
-                    </div>
-
-                    <!-- Delivery Info -->
-                    <div class="flex items-center gap-12 text-xs text-gray-400 mb-12 ml-1">
-                        <span class="flex items-center gap-2">Free Delivery</span>
-                        <span class="flex items-center gap-2">30-Day Returns</span>
-                    </div>
+                    </button>
 
                 </div>
+
+                <!-- Delivery Info -->
+                <div class="flex items-center gap-12 text-xs text-gray-400 mb-12 ml-1">
+                    <span class="flex items-center gap-2">Free Delivery</span>
+                    <span class="flex items-center gap-2">30-Day Returns</span>
+                </div>
+
+            </div>
             </div>
 
             <!-- TABS SECTION -->
@@ -320,7 +320,7 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <%- JSON.stringify(variants) %>;
+                const variants = <% - JSON.stringify(variants) %>;
                 let activeVariant = variants[0];
 
                 // Color Mapping Helper
@@ -479,28 +479,28 @@
             `).join('');
                 }
 
-function updateStock(variant) {
-  const btn = document.getElementById('addToCartBtn');
-  const qtyWrapper = document.getElementById('quantityWrapper');
-  const stockMsg = document.getElementById('stockMessage');
+                function updateStock(variant) {
+                    const btn = document.getElementById('addToCartBtn');
+                    const qtyWrapper = document.getElementById('quantityWrapper');
+                    const stockMsg = document.getElementById('stockMessage');
 
-  if (variant.stock > 0) {
-    // ✅ In stock
-    qtyWrapper.classList.remove('hidden');
-    btn.disabled = false;
-    btn.innerText = 'Add to Cart';
-    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-    stockMsg.classList.add('hidden');
-  } 
-  else {
-    // ❌ Out of stock
-    qtyWrapper.classList.add('hidden');
-    btn.disabled = true;
-    btn.innerText = 'Out of Stock';
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
-    stockMsg.classList.add('hidden');
-  }
-}
+                    if (variant.stock > 0) {
+                        // ✅ In stock
+                        qtyWrapper.classList.remove('hidden');
+                        btn.disabled = false;
+                        btn.innerText = 'Add to Cart';
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        stockMsg.classList.add('hidden');
+                    }
+                    else {
+                        // ❌ Out of stock
+                        qtyWrapper.classList.add('hidden');
+                        btn.disabled = true;
+                        btn.innerText = 'Out of Stock';
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        stockMsg.classList.add('hidden');
+                    }
+                }
 
                 function updateQuantity(change) {
 
