@@ -78,7 +78,7 @@ WEEK-8 PENDINGS:
 WEEK-9 PENDINGS:
     ✔ dont show option to change email for Google user @done (1/30/2026, 1:16:19 PM)
     ✔ edit profile image @done (1/27/2026, 5:22:00 PM)
-    ☐ add js form validation
+    ✔ add js form validation @done (1/31/2026, 1:44:13 AM)
     ✔ show recent added. items  at top @done (1/30/2026, 3:26:29 PM)
     ✔ image edit option for product @done (1/29/2026, 8:23:57 PM)
     ✔ view product details in admin side @done (1/29/2026, 8:24:00 PM)
@@ -109,7 +109,7 @@ TODO :
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
-        ☐ swal on add/edit products
+        ✔ swal on add/edit products @done (1/31/2026, 2:02:15 AM)
         ✔ sort & search & pagination brand, top brand @done (1/30/2026, 4:38:51 PM)
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
 

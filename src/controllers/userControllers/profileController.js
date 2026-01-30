@@ -529,10 +529,11 @@ const updateProfileImage = async (req, res) => {
 
 
 const removeProfilePic = async (req, res) => {
-    await User.findByIdAndUpdate(req.session.user.id, {
-        profilePic: null
-    });
-    res.sendStatus(200);
+  await User.findByIdAndUpdate(req.session.user.id, {
+    profilePic: null
+  });
+
+  return res.redirect('/profile');
 };
 
 

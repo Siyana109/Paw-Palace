@@ -95,12 +95,13 @@
                         class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
                         <i class="fa-solid fa-box"></i> Orders
                     </a>
-                    <form action="/logout" method="POST" class="w-full">
-                        <button type="submit"
-                            class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
-                        </button>
-                    </form>
+                    <button type="button"
+  onclick="openLogoutModal()"
+  class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left">
+  <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+</button>
+
+<form id="logoutForm" action="/logout" method="POST"></form>
 
                 </div>
             </div>
@@ -177,44 +178,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- <% (addresses || []).forEach((addr, index)=> { %>
-                                <label class="relative cursor-pointer group">
-                                    <input type="radio" name="defaultAddress" value="<%= addr.id %>" <%=addr.isDefault
-                                        ? 'checked' : '' %> class="peer hidden">
-                                    <div
-                                        class="p-6 border-2 border-gray-100 rounded-2xl peer-checked:border-brand-500 peer-checked:bg-brand-50/30 transition-all">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="font-bold">
-                                                <%= addr.label %> <span
-                                                        class="ml-2 text-[10px] text-gray-400 px-2 py-0.5 bg-gray-100 rounded uppercase">
-                                                        <%= addr.type %>
-                                                    </span>
-                                            </span>
-                                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                                                <a href="/profile/address/<%= addr.id %>/edit"
-                                                    class="text-xs text-gray-400 hover:text-brand-500">Edit</a>
-                                                <form action="/profile/address/<%= addr.id %>/delete" method="POST"
-                                                    onsubmit="return confirm('Delete this address?')">
-                                                    <button type="submit"
-                                                        class="text-xs text-gray-400 hover:text-red-500"> Delete
-                                                    </button>
-                                                </form>
-
-                                            </div>
-                                        </div>
-                                        <p class="text-xs text-gray-500 leading-relaxed">
-                                            <%= addr.street %><br>
-                                                <%= addr.city %>, <%= addr.state %>
-                                                        <%= addr.zip %><br>
-                                                            <%= addr.phone %>
-                                        </p>
-                                    </div>
-                                    <div
-                                        class="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-gray-200 peer-checked:border-brand-500 peer-checked:bg-brand-500 flex items-center justify-center transition">
-                                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                    </div>
-                                </label>
-                                <% }) %> -->
                             <% (addresses || []).forEach(addr=> { %>
                                 <label class="relative cursor-pointer group">
                                     <div
@@ -255,8 +218,6 @@
                         </div>
                     </div>
                 </form>
-
-                <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-[2rem] p-8 shadow-sm">
                         <div class="flex items-center gap-3 mb-4">
@@ -375,7 +336,59 @@
             </div>
         </div>
 
+        <div id="logoutModal"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+
+  <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
+    <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+    </div>
+
+    <h3 class="text-xl font-bold mb-2">Log out?</h3>
+    <p class="text-gray-400 text-sm mb-6">
+      Are you sure you want to log out of your account?
+    </p>
+
+    <div class="flex gap-3">
+      <button onclick="submitLogout()"
+        class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600 transition">
+        Yes, Log out
+      </button>
+
+      <button onclick="closeLogoutModal()"
+        class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
+<script>
+  const logoutModal = document.getElementById('logoutModal');
+  const logoutForm = document.getElementById('logoutForm');
+
+  function openLogoutModal() {
+    logoutModal.classList.remove('hidden');
+    logoutModal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLogoutModal() {
+    logoutModal.classList.add('hidden');
+    logoutModal.classList.remove('flex');
+    document.body.style.overflow = 'auto';
+  }
+
+  function submitLogout() {
+    logoutForm.submit();
+  }
+
+  logoutModal.addEventListener('click', (e) => {
+    if (e.target === logoutModal) closeLogoutModal();
+  });
+</script>
+
 <script>
     const deleteModal = document.getElementById('deleteModal');
     const deleteForm = document.getElementById('deleteForm');
