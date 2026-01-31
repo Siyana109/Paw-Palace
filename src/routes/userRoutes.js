@@ -57,6 +57,6 @@ router.post('/cart/add', userMiddleware.checkSession, productController.addToCar
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 
 
-router.post('/logout', authController.logout)
+router.post('/logout', userMiddleware.checkSession, authController.logout)
 
 export default router

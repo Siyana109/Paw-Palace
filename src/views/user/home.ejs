@@ -46,8 +46,6 @@
 
                     <form method="GET" action="/home" id="filterForm">
                         <!-- Preserve Search & Sort & Price in Side Filters -->
-                        <!-- Using loop to be robust, excluding keys handled by this form inputs -->
-                        <!-- Using loop to be robust, excluding keys handled by this form inputs -->
                         <% Object.keys(query || {}).forEach(key=> {
                             if (
                             key !== 'page' &&

@@ -17,7 +17,7 @@ const homePage = async (req, res) => {
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    /* ---------------- PRODUCT MATCH ---------------- */
+    // PRODUCT MATCH
     const productMatch = { isActive: true };
 
     if (search) {
@@ -33,7 +33,7 @@ const homePage = async (req, res) => {
       productMatch.petType = { $in: petTypes };
     }
 
-    /* ---------------- SORT ---------------- */
+    // SORT
     let sortStage = {};
     switch (sort) {
       case "price_asc": sortStage = { price: 1 }; break;
@@ -43,7 +43,7 @@ const homePage = async (req, res) => {
       default: sortStage = { createdAt: -1 };
     }
 
-    /* ---------------- AGGREGATION ---------------- */
+    // AGGREGATION
     const pipeline = [
       { $match: productMatch },
 
@@ -79,7 +79,7 @@ const homePage = async (req, res) => {
           createdAt: { $first: "$createdAt" },
           petType: { $first: "$petType" },
 
-          // ⭐ STOCK CALCULATION
+          // STOCK CALCULATION
           totalStock: { $sum: "$variants.stock" }
         }
       },
@@ -91,13 +91,13 @@ const homePage = async (req, res) => {
 
     let products = await Product.aggregate(pipeline);
 
-    // 🔥 ADD inStock FLAG
+    // ADD inStock FLAG
     products = products.map(p => ({
       ...p,
       inStock: p.totalStock > 0
     }));
 
-    /* ---------------- COUNT ---------------- */
+    // COUNT
     const countPipeline = [
       { $match: productMatch },
       {

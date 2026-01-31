@@ -38,7 +38,7 @@ const postAddVariant = async (req, res) => {
       isActive: true
     });
 
-    // 🔥 Update product stock
+    // Update product stock
     const variants = await Variant.find({ product: productId });
     const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
 
@@ -69,8 +69,7 @@ const getVariantsByProduct = async (req, res) => {
 
 
 
-//   DELETE VARIANT
-// DELETE VARIANT (FINAL)
+// DELETE VARIANT
 const deleteVariant = async (req, res) => {
   try {
     const variant = await Variant.findById(req.params.variantId);
@@ -151,16 +150,6 @@ const updateVariant = async (req, res) => {
     }
 
     // 3. Validation
-    // If no changes (no new files and kept all old), finalSubImages will be equal to old. 
-    // If user deleted all, finalSubImages empty.
-    // If user provided nothing but we had images before? 
-    // The frontend sends `keptSubImages` as the current state.
-    // If keptSubImages is missing BUT we have files, we assume replace? 
-    // No, frontend always sends keptSubImages. If it's missing, it effectively means 'keep none' (unless we fallback, but secure to assume empty).
-
-    // However, if the user didn't touch images at all, frontend sends the list.
-    // So finalSubImages is the source of truth.
-
     if (finalSubImages.length < 3) {
       return res.json({ success: false, message: "Variant must have at least 3 sub-images (Existing + New)" });
     }

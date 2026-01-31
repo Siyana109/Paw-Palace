@@ -15,7 +15,7 @@ const listProducts = async (req, res) => {
     const category = req.query.category || "";
     const status = req.query.status || "";
 
-    /* 🔍 BUILD FILTER QUERY */
+    // BUILD FILTER QUERY 
     const searchQuery = {};
 
     // Search by product name
@@ -36,12 +36,12 @@ const listProducts = async (req, res) => {
       searchQuery.isActive = false;
     }
 
-    /* 🔃 SORTING */
+    // SORTING
     let sortQuery = { createdAt: -1 };
     if (sort === "name_asc") sortQuery = { productName: 1 };
     if (sort === "name_desc") sortQuery = { productName: -1 };
 
-    /* 📦 FETCH PRODUCTS */
+    // FETCH PRODUCTS
     const products = await Product.find(searchQuery)
       .populate("categoryId")
       .populate("brandId")
@@ -52,7 +52,7 @@ const listProducts = async (req, res) => {
 
     const productIds = products.map(p => p._id);
 
-    /* 🧮 VARIANT AGGREGATION */
+    // VARIANT AGGREGATION
     const variants = await Variant.aggregate([
       { $match: { product: { $in: productIds } } },
       {
@@ -78,7 +78,7 @@ const listProducts = async (req, res) => {
     const totalProducts = await Product.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    /* 🟢 AJAX RESPONSE */
+    // AJAX RESPONSE
     if (req.xhr) {
       return res.json({
         success: true,
@@ -91,7 +91,7 @@ const listProducts = async (req, res) => {
       });
     }
 
-    /* 🟢 NORMAL RENDER */
+    // NORMAL RENDER
     const brands = await Brand.find({ isActive: true }).lean();
     const categories = await Category.find({ isActive: true }).lean();
 

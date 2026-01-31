@@ -17,7 +17,7 @@ const getProfile = async (req, res) => {
             return res.redirect('/login');
         }
 
-        // 👤 Fetch user
+        // Fetch user
         const user = await User.findById(userId).lean();
         if (!user) {
             req.session.destroy();
@@ -240,7 +240,7 @@ const postChangePassword = async (req, res) => {
         console.log('error 1')
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
-        /* ---------- Validation ---------- */
+        // Validation
         if (!currentPassword || !newPassword || !confirmPassword) {
             return res.render('user/changePassword', {
                 error: 'All fields are required'
@@ -273,12 +273,12 @@ const postChangePassword = async (req, res) => {
             });
         }
         console.log('error 6')
-        /* ---------- Update Password ---------- */
+        // Update Password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         await user.save();
         console.log('error 7')
-        /* ---------- Success ---------- */
+        // Success 
         // return res.render('user/profile', {
         //   success: 'Password updated successfully'
         // });
@@ -325,7 +325,7 @@ const postChangeEmail = async (req, res) => {
 
         if (!user) return res.redirect('/login');
 
-        /* ---------- Password check ---------- */
+        // Password check
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.render('user/changeEmail', {
@@ -334,7 +334,7 @@ const postChangeEmail = async (req, res) => {
             });
         }
         console.log('error 1')
-        /* ---------- Same email check ---------- */
+        // Same email check
         if (newEmail === user.email) {
             return res.render('user/changeEmail', {
                 user,
@@ -342,7 +342,7 @@ const postChangeEmail = async (req, res) => {
             });
         }
         console.log('error 2')
-        /* ---------- Email uniqueness ---------- */
+        // Email uniqueness
         const emailExists = await User.findOne({ email: newEmail });
         if (emailExists) {
             return res.render('user/changeEmail', {
@@ -351,7 +351,7 @@ const postChangeEmail = async (req, res) => {
             });
         }
         console.log('error 3')
-        /* ---------- Generate OTP ---------- */
+        // Generate OTP
         const otp = generateOTP();
 
         await OTP.findOneAndUpdate(
@@ -416,7 +416,7 @@ const verifyEmailOtp = async (req, res) => {
             return res.redirect('/profile');
         }
 
-        // 🔐 Fetch OTP from DB
+        // Fetch OTP from DB
         const otpDoc = await OTP.findOne({
             email: sessionData.newEmail
         });
@@ -442,7 +442,7 @@ const verifyEmailOtp = async (req, res) => {
             });
         }
 
-        /* ---------- Update Email ---------- */
+        // Update Email
         await User.findByIdAndUpdate(userId, {
             email: sessionData.newEmail
         });
@@ -472,7 +472,7 @@ const resendEmailOtp = async (req, res) => {
         const otp = generateOTP();
 
         await OTP.findOneAndUpdate(
-            { email: sessionData.newEmail },   // ✅ use email
+            { email: sessionData.newEmail },  
             {
                 email: sessionData.newEmail,
                 otp,
