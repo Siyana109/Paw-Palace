@@ -1,0 +1,8 @@
+Monday:
+    ☐ Cart management
+    ☐ Add to cart, remove products, list cart products
+    ☐ Prevent adding blocked/unlisted products
+    ☐ Increase the quantity if the product is already in the cart
+    ☐ Remove product from wishlist when added to cart
+    ☐ Increment/decrement quantity with stock validations
+    ☐ Maximum quantity limits

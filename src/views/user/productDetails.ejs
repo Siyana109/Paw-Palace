@@ -174,7 +174,7 @@
                                 <label class="text-sm font-bold text-gray-900">Select Size</label>
                             </div>
                             <div class="flex flex-wrap gap-3" id="sizeSelectors">
-                                
+
                             </div>
                         </div>
 
@@ -182,7 +182,7 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-900 mb-3">Select Color</label>
                             <div class="flex flex-wrap gap-3" id="colorSelectors">
-                                
+
                             </div>
                         </div>
                     </div>
@@ -366,8 +366,8 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <%- JSON.stringify(variants) %>;
-                let activeVariant = <%- JSON.stringify(defaultVariant) %>;
+                const variants = <% - JSON.stringify(variants) %>;
+                let activeVariant = <% - JSON.stringify(defaultVariant) %>;
 
                 // Color Mapping Helper
                 const colorMap = {
@@ -396,7 +396,7 @@
                     if (!variants.length || !activeVariant) return;
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
@@ -464,7 +464,7 @@
                     updateStock(activeVariant);
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
@@ -755,8 +755,7 @@
                             );
 
                             btn.classList.add(
-                                'bg-[#2dd4bf]',        // teal
-                                'hover:bg-[#14b8a6]',  // darker teal
+                                'bg-gray-900',        // navy matching server
                                 'text-white'
                             );
 

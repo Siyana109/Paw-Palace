@@ -5,9 +5,9 @@ import userMiddleware from "../middlewares/userMiddleware.js"
 import profileController from "../controllers/userControllers/profileController.js";
 import homeController from "../controllers/userControllers/homeController.js";
 import productController from "../controllers/userControllers/productController.js";
-import { upload } from "../middlewares/upload.js"; 
+import { upload } from "../middlewares/upload.js";
 
-router.get('/',authController.landingPage)
+router.get('/', authController.landingPage)
 
 router.get('/signup', authController.getSignup)
 router.post('/signup', authController.postSignup)
@@ -20,7 +20,7 @@ router.get('/google', authController.googleSignup)
 router.get("/google/callback", authController.googleCallback)
 
 router.get('/login', userMiddleware.isLoggedIn, authController.getLogin)
-router.post('/login', userMiddleware.isLoggedIn,authController.postLogin)
+router.post('/login', userMiddleware.isLoggedIn, authController.postLogin)
 
 router.get('/forgot-password', authController.forgotPassword)
 router.post('/forgot-password', authController.verifyEmailSendOtp)
@@ -36,9 +36,9 @@ router.get('/profile/address/add', userMiddleware.checkSession, profileControlle
 router.post('/address/add', userMiddleware.checkSession, profileController.addAddress);
 router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
 router.post('/profile/address/:id/edit', userMiddleware.checkSession, profileController.updateAddress);
-router.post('/profile/address/:id/delete',userMiddleware.checkSession, profileController.deleteAddress);
+router.post('/profile/address/:id/delete', userMiddleware.checkSession, profileController.deleteAddress);
 
-router.post('/profile/image/update',userMiddleware.checkSession, upload.single('profilePic'), profileController.updateProfileImage)
+router.post('/profile/image/update', userMiddleware.checkSession, upload.single('profilePic'), profileController.updateProfileImage)
 router.post('/profile/image/remove', userMiddleware.checkSession, profileController.removeProfilePic);
 
 router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);

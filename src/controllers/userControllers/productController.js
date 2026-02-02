@@ -75,7 +75,7 @@ const getProductDetails = async (req, res) => {
       }
     }
 
-  
+
 
     /* 8️⃣ Render */
     res.render("user/productDetails", {
@@ -121,6 +121,13 @@ const addToCart = async (req, res) => {
         : req.session.user;
 
     const variant = await Variant.findById(variantId).populate("product");
+
+    if (!productId || !variantId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request"
+      });
+    }
 
     if (!variant || !variant.product || !variant.product.isActive) {
       return res.status(400).json({
@@ -199,14 +206,14 @@ const addToWishlist = async (req, res) => {
       variant: variantId
     });
 
-const variant = await Variant.findById(variantId).populate("product");
+    const variant = await Variant.findById(variantId).populate("product");
 
-if (!variant || !variant.product || !variant.product.isActive) {
-  return res.status(400).json({
-    success: false,
-    redirect: "/home"
-  });
-}
+    if (!variant || !variant.product || !variant.product.isActive) {
+      return res.status(400).json({
+        success: false,
+        redirect: "/home"
+      });
+    }
 
     // REMOVE FROM WISHLIST
     if (existing) {
