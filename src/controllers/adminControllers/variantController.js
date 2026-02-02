@@ -31,7 +31,7 @@ const postAddVariant = async (req, res) => {
       product: productId,
       price: Number(price),
       stock: Number(stock),
-      size: size || null,
+      size: size || 'Free Size',
       color: color || null,
       coverImage,
       subImages,
@@ -122,7 +122,7 @@ const updateVariant = async (req, res) => {
     // Update fields
     variant.price = Number(price);
     variant.stock = Number(stock);
-    variant.size = size || null;
+    variant.size = size || 'Free Size';
     variant.color = color || null;
 
     // Handle Image Updates
