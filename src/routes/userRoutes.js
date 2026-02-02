@@ -53,9 +53,13 @@ router.post('/reset-email/resend-otp', userMiddleware.checkSession, profileContr
 router.get("/home", homeController.homePage);
 router.get('/product/:id', productController.getProductDetails);
 
-router.post('/cart/add', userMiddleware.checkSession, productController.addToCart);
-router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 
+router.get('/cart', userMiddleware.checkSession, productController.getCartPage);
+router.post('/cart/add', userMiddleware.checkSession, productController.addToCart);
+router.patch('/cart/update', userMiddleware.checkSession, productController.updateCartQuantity);
+router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
+
+router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 
 router.post('/logout', userMiddleware.checkSession, authController.logout)
 

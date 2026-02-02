@@ -2,29 +2,74 @@ import userModel from "../model/userModel.js";
 
 const checkSession = async (req, res, next) => {
   try {
-    if (!req.session.user?.id) {
-      return res.redirect("/login?message=Please+login+to+continue&alertType=info");
+    // No user sessions
+     if (!req.session.user?.id) {
+      // AJAX request
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          redirect: "/login"
+        });
+      }
+
+      // Normal page request
+      return res.redirect(
+        "/login?message=Please+login+to+continue&alertType=info"
+      );
     }
 
     const user = await userModel.findById(req.session.user.id);
 
-    if (!user) {
+    // User not found
+     if (!user) {
       req.session.destroy();
-      return res.redirect("/login?message=Account+not+found&alertType=error");
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({
+          success: false,
+          redirect: "/login"
+        });
+      }
+
+      return res.redirect(
+        "/login?message=Account+not+found&alertType=error"
+      );
     }
 
-    if (user.isBlocked) {
+    // Blocked user
+     if (user.isBlocked) {
       req.session.destroy();
-      return res.redirect("/login?message=Your+account+has+been+blocked&alertType=error");
+
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({
+          success: false,
+          message: "Account blocked"
+        });
+      }
+
+      return res.redirect(
+        "/login?message=Your+account+has+been+blocked&alertType=error"
+      );
     }
 
-    // Optional: attach user to request
+    // Attach user
     req.currentUser = user;
-
     next();
-  } catch (error) {
+  } 
+  
+  catch (error) {
     console.error("Session Check Error:", error);
-    res.redirect("/login?message=Session+error+occurred&alertType=error");
+
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(500).json({
+        success: false,
+        message: "Session error"
+      });
+    }
+
+    res.redirect(
+      "/login?message=Session+error+occurred&alertType=error"
+    );
   }
 };
 

@@ -670,24 +670,7 @@
                 //script
                 const isLoggedIn = <%=user?'true': 'false' %>;
 
-                document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
-                    .forEach(form => {
-                        form.addEventListener('submit', function (e) {
-                            if (!isLoggedIn) {
-                                e.preventDefault();
 
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Login Required',
-                                    text: 'Please login to continue',
-                                    confirmButtonText: 'Login',
-                                    confirmButtonColor: '#ff4d6d'
-                                }).then(() => {
-                                    window.location.href = '/login';
-                                });
-                            }
-                        });
-                    });
             </script>
 
             <script>
@@ -695,6 +678,7 @@
                     e.preventDefault();
 
                     const btn = document.getElementById('addToCartBtn');
+                    if (!btn) return;
 
                     // If already converted → go to cart
                     if (btn.dataset.state === 'go') {
@@ -716,6 +700,15 @@
                         });
 
                         const data = await res.json();
+
+                        if (!res.ok) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Something went wrong'
+                            });
+                            return;
+                        }
 
                         // 🔐 Not logged in → redirect
                         if (res.status === 401 && data.redirect) {
@@ -755,7 +748,8 @@
                             );
 
                             btn.classList.add(
-                                'bg-gray-900',        // navy matching server
+                                'bg-[#2dd4bf]',        // teal
+                                'hover:bg-[#14b8a6]',  // darker teal
                                 'text-white'
                             );
 

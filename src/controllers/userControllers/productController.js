@@ -189,6 +189,97 @@ const addToCart = async (req, res) => {
 };
 
 
+const getCartPage = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user.id;
+
+    const cart = await Cart.findOne({ user: userId })
+      .populate('items.product')
+      .populate('items.variant');
+
+    res.render('user/cart', {
+      cart
+    });
+
+  } catch (error) {
+    console.error('Get cart error:', error);
+    res.status(500).send('Server Error');
+  }
+};
+
+const updateCartQuantity = async (req, res) => {
+  try {
+    const { variantId, change } = req.body;
+    const userId = req.session.user.id;
+
+    const cart = await Cart.findOne({ user: userId });
+    if (!cart) {
+      return res.status(404).json({ success: false });
+    }
+
+    const item = cart.items.find(
+      i => i.variant.toString() === variantId
+    );
+
+    if (!item) {
+      return res.status(404).json({ success: false });
+    }
+
+    const variant = await Variant.findById(variantId);
+    if (!variant) {
+      return res.status(404).json({ success: false });
+    }
+
+    const newQty = item.quantity + change;
+
+    if (newQty < 1) {
+      return res.json({ success: false });
+    }
+
+    if (newQty > variant.stock) {
+      return res.json({
+        success: false,
+        message: `Only ${variant.stock} items available`
+      });
+    }
+
+    item.quantity = newQty;
+    await cart.save();
+
+    res.json({
+      success: true,
+      quantity: item.quantity
+    });
+
+  } catch (error) {
+    console.error('Update cart error:', error);
+    res.status(500).json({ success: false });
+  }
+};
+
+const removeCartItem = async (req, res) => {
+  try {
+    const { variantId } = req.body;
+    const userId = req.session.user.id;
+
+    await Cart.updateOne(
+      { user: userId },
+      { $pull: { items: { variant: variantId } } }
+    );
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error('Remove cart item error:', error);
+    res.status(500).json({ success: false });
+  }
+};
+
+
 const addToWishlist = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -248,4 +339,5 @@ const addToWishlist = async (req, res) => {
 
 
 
-export default { getProductDetails, addToCart, addToWishlist };
+
+export default { getProductDetails, getCartPage, addToCart, updateCartQuantity, removeCartItem, addToWishlist };
