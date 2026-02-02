@@ -57,7 +57,7 @@ WEEK - 9
 
 
 WEEK-8 PENDINGS: 
-    User
+    User:
     ✔ Signup : Form Validationd @done (1/3/2026, 10:38:43 AM)
     ✔ Signup OTP expiry is too short @done (1/3/2026, 2:33:38 PM)
     ✔ Give a success msg after registration @done (1/3/2026, 2:33:55 PM)
@@ -68,7 +68,7 @@ WEEK-8 PENDINGS:
     ✔ Profile Picture is pending @done (1/28/2026, 7:35:30 PM)
     ☐ Don't pass the err msgs in url (Block user)
 
-    Admin
+    Admin:
     ✔ Skip the object id from user table and add serial number @done (1/4/2026, 7:07:54 PM)
     ✔ User Table Pagination @today @done (1/5/2026, 1:59:15 AM)
     ✔ User Table Search is pending @done (1/4/2026, 7:07:47 PM)
@@ -90,6 +90,58 @@ WEEK-9 PENDINGS:
     ✔ if a product is out of stock show that in shop page with that message @done (1/30/2026, 12:09:04 PM)
 
 
+
+
+
+
+
+
+WEEK 10:
+    User:
+    Cart management
+    Add to cart, remove products, list cart products
+    Prevent adding blocked/unlisted products
+    Increase the quantity if the product is already in the cart
+    Remove product from wishlist when added to cart
+    Increment/decrement quantity with stock validations
+    Maximum quantity limits
+    Disable out-of-stock products and restrict checkout
+    Checkout page
+    Show user addresses with an add/edit option, default address selection
+    Display products with image, quantity, item total, taxes (optional), discounts,
+    final price (including taxes, discounts, shipping)
+    Place an order with Cash on Delivery
+    Order success page with thank-you statement, illustration, buttons to order
+    details, and continue shopping
+    Order management
+    Order listing with unique, consistent orderID, status, and order date
+    Cancel order or specific products (stock increment on cancellation)
+    Reason (optional) for cancellation
+    Return order (mandatory reason) when delivered
+    Order detail page
+    Download invoice (PDF)
+    Search order
+
+    Admin:
+    Order management
+    List orders in descending order by order date
+    Show orderID, date, user details, and view detail button
+    Change order status (pending, shipped, out for delivery, delivered, cancelled)
+    Search, sort, and filter with clear functionality
+    Pagination
+    Inventory/Stock management
+
+
+
+
+
+
+
+WEEK-8 PENDINGS:
+    Try to use appropriate HTTP methods for apis
+    Object destructuring
+    Fix the css issue in products list page
+    Only use soft delete for product variants 
 
 
 

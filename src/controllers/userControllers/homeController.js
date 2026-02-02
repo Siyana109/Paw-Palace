@@ -14,7 +14,7 @@ const homePage = async (req, res) => {
       petType
     } = req.query;
 
-    const limit = 6;
+    const limit = 8;
     const skip = (page - 1) * limit;
 
     // PRODUCT MATCH

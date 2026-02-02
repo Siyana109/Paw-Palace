@@ -250,7 +250,7 @@
                                         </form>
 
                                         <form action="/cart/add" method="POST"
-  class="pointer-events-auto <%= !product.inStock ? 'opacity-50 pointer-events-none' : '' %>">
+                                            class="pointer-events-auto <%= !product.inStock ? 'opacity-50 pointer-events-none' : '' %>">
                                             <input type="hidden" name="productId" value="<%= product._id %>">
                                             <button
                                                 class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition">
@@ -278,17 +278,18 @@
 
                                         <div class="flex justify-between items-center mt-4">
 
-  <!-- PRICE -->
-  <span class="text-xl font-black">₹<%= product.price %></span>
+                                            <!-- PRICE -->
+                                            <span class="text-xl font-black">₹<%= product.price %></span>
 
-  <!-- STOCK STATUS -->
-  <% if (!product.inStock) { %>
-    <span class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
-      Out of Stock
-    </span>
-  <% } %>
+                                            <!-- STOCK STATUS -->
+                                            <% if (!product.inStock) { %>
+                                                <span
+                                                    class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
+                                                    Out of Stock
+                                                </span>
+                                                <% } %>
 
-</div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -306,50 +307,49 @@
 
                     </div>
 
+                    <!-- PAGINATION -->
+                    <% if (totalPages> 1) { %>
+                        <div class="flex justify-center gap-2 mt-16 col-span-full w-full">
+
+                            <% const qs=Object.keys(query || {}).filter(k=> k !== 'page')
+                                .map(k => {
+                                const v = query[k];
+                                if (Array.isArray(v)) {
+                                return v.map(val => `${k}=${encodeURIComponent(val)}`).join('&');
+                                }
+                                return `${k}=${encodeURIComponent(v)}`;
+                                })
+                                .join('&');
+                                %>
+
+                                <!-- PREV -->
+                                <% if (currentPage> 1) { %>
+                                    <a href="/home?page=<%= currentPage - 1 %>&<%= qs %>"
+                                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white hover:bg-gray-50 border border-gray-200 transition">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </a>
+                                    <% } %>
+
+                                        <% for (let i=1; i <=totalPages; i++) { %>
+                                            <a href="/home?page=<%= i %>&<%= qs %>"
+                                                class="w-10 h-10 flex items-center justify-center rounded-xl font-bold transition
+                                <%= currentPage === i ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200' %>">
+                                                <%= i %>
+                                            </a>
+                                            <% } %>
+
+                                                <!-- NEXT -->
+                                                <% if (currentPage < totalPages) { %>
+                                                    <a href="/home?page=<%= currentPage + 1 %>&<%= qs %>"
+                                                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white hover:bg-gray-50 border border-gray-200 transition">
+                                                        <i class="fa-solid fa-chevron-right"></i>
+                                                    </a>
+                                                    <% } %>
+                        </div>
+                        <% } %>
+
                 </div>
 
-                <!-- PAGINATION -->
-                <% if (totalPages> 1) { %>
-                    <div class="flex justify-center gap-2 mt-16 col-span-full w-full">
-
-                        <% const qs=Object.keys(query || {}) .filter(k=> k !== 'page')
-                            .map(k => {
-                            const v = query[k];
-                            if (Array.isArray(v)) {
-                            return v.map(val => `${k}=${encodeURIComponent(val)}`).join('&');
-                            }
-                            return `${k}=${encodeURIComponent(v)}`;
-                            })
-                            .join('&');
-                            %>
-
-                            <!-- PREV -->
-                            <% if (currentPage> 1) { %>
-                                <a href="/home?page=<%= currentPage - 1 %>&<%= qs %>"
-                                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white hover:bg-gray-50 border border-gray-200 transition">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </a>
-                                <% } %>
-
-                                    <% for (let i=1; i <=totalPages; i++) { %>
-                                        <a href="/home?page=<%= i %>&<%= qs %>"
-                                            class="w-10 h-10 flex items-center justify-center rounded-xl font-bold transition
-                               <%= currentPage === i ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200' %>">
-                                            <%= i %>
-                                        </a>
-                                        <% } %>
-
-                                            <!-- NEXT -->
-                                            <% if (currentPage < totalPages) { %>
-                                                <a href="/home?page=<%= currentPage + 1 %>&<%= qs %>"
-                                                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white hover:bg-gray-50 border border-gray-200 transition">
-                                                    <i class="fa-solid fa-chevron-right"></i>
-                                                </a>
-                                                <% } %>
-                    </div>
-                    <% } %>
-
-            </div>
             </div>
         </main>
 
