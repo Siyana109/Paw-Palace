@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Cart | PawPalace</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -226,15 +227,43 @@
                 }
 
                 async function removeItem(variantId) {
-                    if (!confirm('Remove this item?')) return;
+                    const result = await Swal.fire({
+                        title: 'Remove item?',
+                        text: 'This item will be removed from your cart.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, remove it',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-3xl',
+                            confirmButton: 'bg-red-500 text-white px-6 py-2 rounded-xl font-bold',
+                            cancelButton: 'bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-bold'
+                        },
+                        buttonsStyling: false
+                    });
 
-                    await fetch('/cart/remove', {
+                    if (!result.isConfirmed) return;
+
+                    const res = await fetch('/cart/remove', {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ variantId })
                     });
 
-                    location.reload();
+                    const data = await res.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: 'Item removed from cart.',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        setTimeout(() => location.reload(), 1200);
+                    }
                 }
             </script>
 
