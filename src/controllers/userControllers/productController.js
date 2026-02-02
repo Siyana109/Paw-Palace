@@ -173,12 +173,19 @@ const addToCart = async (req, res) => {
 
     await cart.save();
 
+    /* ✅ REMOVE FROM WISHLIST AFTER ADDING TO CART */
+    await Wishlist.updateOne(
+      { user: userId },
+      { $pull: { items: { variant: variantId } } }
+    );
+
     return res.json({
       success: true,
       message: "Added to cart",
+      removedFromWishlist: true,
       redirect: "/cart"
     });
-
+    
   } catch (err) {
     console.error("Add to cart error:", err);
     res.status(500).json({
@@ -261,12 +268,95 @@ const updateCartQuantity = async (req, res) => {
   }
 };
 
+
 const removeCartItem = async (req, res) => {
   try {
     const { variantId } = req.body;
+
     const userId = req.session.user.id;
 
-    await Cart.updateOne(
+    await Cart.updateOne({ user: userId },
+      { $pull: { items: { variant: variantId } } });
+
+    res.json({ success: true });
+  }
+
+  catch (error) {
+    console.error('Remove cart item error:', error);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+const getWishlist = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const wishlistDoc = await Wishlist.findOne({ user: userId })
+      .populate("items.product")
+      .populate("items.variant");
+
+    const wishlistItems = wishlistDoc ? wishlistDoc.items : [];
+
+    res.render("user/wishlist", {
+      wishlist: wishlistItems
+    });
+
+  } catch (error) {
+    console.error("Get Wishlist Error:", error);
+    res.redirect("/home");
+  }
+};
+
+
+
+const addToWishlist = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { productId, variantId } = req.body;
+
+    let wishlist = await Wishlist.findOne({ user: userId });
+
+    if (!wishlist) {
+      wishlist = new Wishlist({
+        user: userId,
+        items: [{ product: productId, variant: variantId }]
+      });
+      await wishlist.save();
+      return res.json({ success: true, added: true });
+    }
+
+    const exists = wishlist.items.some(
+      item => item.variant.toString() === variantId
+    );
+
+    if (exists) {
+      wishlist.items = wishlist.items.filter(
+        item => item.variant.toString() !== variantId
+      );
+      await wishlist.save();
+      return res.json({ success: true, removed: true });
+    }
+
+    wishlist.items.push({ product: productId, variant: variantId });
+    await wishlist.save();
+
+    res.json({ success: true, added: true });
+
+  } catch (error) {
+    console.error("Wishlist toggle error:", error);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+
+const removeFromWishlist = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { variantId } = req.body;
+
+    await Wishlist.updateOne(
       { user: userId },
       { $pull: { items: { variant: variantId } } }
     );
@@ -274,70 +364,13 @@ const removeCartItem = async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
-    console.error('Remove cart item error:', error);
+    console.error("Remove wishlist error:", error);
     res.status(500).json({ success: false });
   }
 };
 
 
-const addToWishlist = async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({
-        success: false,
-        redirect: "/login"
-      });
-    }
-
-    const userId = req.session.user.id;
-    const { productId, variantId } = req.body;
-
-    const existing = await Wishlist.findOne({
-      user: userId,
-      variant: variantId
-    });
-
-    const variant = await Variant.findById(variantId).populate("product");
-
-    if (!variant || !variant.product || !variant.product.isActive) {
-      return res.status(400).json({
-        success: false,
-        redirect: "/home"
-      });
-    }
-
-    // REMOVE FROM WISHLIST
-    if (existing) {
-      await Wishlist.deleteOne({ _id: existing._id });
-
-      return res.json({
-        success: true,
-        removed: true
-      });
-    }
-
-    // ADD TO WISHLIST
-    await Wishlist.create({
-      user: userId,
-      product: productId,
-      variant: variantId
-    });
-
-    res.json({
-      success: true,
-      added: true
-    });
-
-  } catch (error) {
-    console.error("Wishlist toggle error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
-  }
-};
 
 
 
-
-export default { getProductDetails, getCartPage, addToCart, updateCartQuantity, removeCartItem, addToWishlist };
+export default { getProductDetails, getCartPage, addToCart, updateCartQuantity, removeCartItem, addToWishlist, getWishlist, removeFromWishlist };

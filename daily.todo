@@ -1,8 +1,19 @@
 Monday:
-    ☐ Cart management
-    ☐ Add to cart, remove products, list cart products
-    ☐ Prevent adding blocked/unlisted products
-    ☐ Increase the quantity if the product is already in the cart
-    ☐ Remove product from wishlist when added to cart
-    ☐ Increment/decrement quantity with stock validations
+    ✔ Cart management @done (2/3/2026, 12:24:21 AM)
+    ✔ Add to cart, remove products, list cart products @done (2/3/2026, 12:24:24 AM)
+    ✔ Prevent adding blocked/unlisted products @done (2/3/2026, 1:30:25 AM)
+    ✔ Increase the quantity if the product is already in the cart @done (2/3/2026, 12:24:44 AM)
+    ✔ Remove product from wishlist when added to cart @done (2/3/2026, 1:27:32 AM)
+    ✔ Increment/decrement quantity with stock validations @done (2/3/2026, 12:24:51 AM)
     ☐ Maximum quantity limits
+
+Tuesday:
+    ☐ Disable out-of-stock products and restrict checkout
+    ☐ Checkout page
+    ☐ Show user addresses with an add/edit option, default address selection
+    ☐ Display products with image, quantity, item total, taxes (optional), discounts,
+    ☐ final price (including taxes, discounts, shipping)
+    ☐ Place an order with Cash on Delivery
+    ☐ Order success page with thank-you statement, illustration, buttons to order
+    ☐ details, and continue shopping
+

@@ -174,7 +174,7 @@
                                 <label class="text-sm font-bold text-gray-900">Select Size</label>
                             </div>
                             <div class="flex flex-wrap gap-3" id="sizeSelectors">
-
+                                <!-- Populated by JS -->
                             </div>
                         </div>
 
@@ -182,7 +182,7 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-900 mb-3">Select Color</label>
                             <div class="flex flex-wrap gap-3" id="colorSelectors">
-
+                                <!-- Populated by JS -->
                             </div>
                         </div>
                     </div>
@@ -295,18 +295,18 @@
 
                 <!-- Description Content -->
                 <div id="content-description"
-                    class="text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-800 space-y-4 animate-fade-in">
-                    <p>Designed for the ultimate napper, the <%= product.productName %> provides a safe haven for your
+                    class="text-center max-w-2xl mx-auto text-sm leading-relaxed text-gray-500 space-y-4 animate-fade-in">
+                    <!-- <p>Designed for the ultimate napper, the <%= product.productName %> provides a safe haven for your
                             pet. The raised rim creates a sense of security and provides head and neck support, while
                             the super-soft filling offers joint and muscle pain relief.</p>
                     <p>Perfect for pets who love to curl up! The deep crevices allow your pet to burrow, and the
-                        synthetic faux fur mimics the comfort of a mother's fur coat.</p>
-                    <ul class="list-disc list-inside pt-4 space-y-2 text-gray-700">
+                        synthetic faux fur mimics the comfort of a mother's fur coat.</p> -->
+                    <ul class="list-disc list-inside pt-4 space-y-2 text-gray-400">
                         <%= product.description %>
                             <!-- Fallback descriptive bullets if description is short -->
-                            <li>Machine washable and dryer safe</li>
+                            <!-- <li>Machine washable and dryer safe</li>
                             <li>Water-resistant and dirt-resistant bottom</li>
-                            <li>Available in natural colors to seamlessly blend with decor</li>
+                            <li>Available in natural colors to seamlessly blend with decor</li> -->
                     </ul>
                 </div>
 
@@ -366,8 +366,8 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <% - JSON.stringify(variants) %>;
-                let activeVariant = <% - JSON.stringify(defaultVariant) %>;
+                const variants = <%- JSON.stringify(variants) %>;
+                let activeVariant = <%- JSON.stringify(defaultVariant) %>;
 
                 // Color Mapping Helper
                 const colorMap = {
@@ -392,16 +392,26 @@
                 }
 
                 function initSelectors() {
+                    // Group variants by Size and Color to remove duplicates in display
+                    // FOR THIS UI: We assume variants are distinct combinations. 
+                    // The UI in image shows separated Size and Color. 
+                    // Complex logic needed if not all combinations exist. 
+                    // Simplified approach: Show all unique sizes and colors available for this product.
+                    // On click, valid combinations check or just strict filtering.
+
+                    // For now, let's just list the variants as buttons but styled differently.
+                    // Actually, the user wants "Select Size" [S] [M] [L] and "Select Color" (circles).
+                    // This implies a matrix. 
 
                     if (!variants.length || !activeVariant) return;
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
 
-                    // INITIAL RENDER
+                    // 🔥 INITIAL RENDER
                     selectVariant(activeVariant._id);
                 }
 
@@ -464,7 +474,7 @@
                     updateStock(activeVariant);
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
@@ -528,7 +538,7 @@
                     const stockCount = document.getElementById('stockCount');
 
                     if (variant.stock > 0) {
-                        // In stock
+                        // ✅ In stock
                         qtyWrapper.classList.remove('opacity-50', 'pointer-events-none');
                         if (btn) {
                             btn.disabled = false;
@@ -539,7 +549,7 @@
                         stockMsg.classList.add('hidden');
                     }
                     else {
-                        // Out of stock
+                        // ❌ Out of stock
                         qtyWrapper.classList.add('opacity-50', 'pointer-events-none');
                         if (btn) {
                             btn.disabled = true;
@@ -637,7 +647,7 @@
 
                         const data = await res.json();
 
-                        // Not logged in
+                        // 🔐 Not logged in
                         if (!data.success && data.redirect) {
                             window.location.href = data.redirect;
                             return;
@@ -670,7 +680,24 @@
                 //script
                 const isLoggedIn = <%=user?'true': 'false' %>;
 
+                document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
+                    .forEach(form => {
+                        form.addEventListener('submit', function (e) {
+                            if (!isLoggedIn) {
+                                e.preventDefault();
 
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Login Required',
+                                    text: 'Please login to continue',
+                                    confirmButtonText: 'Login',
+                                    confirmButtonColor: '#ff4d6d'
+                                }).then(() => {
+                                    window.location.href = '/login';
+                                });
+                            }
+                        });
+                    });
             </script>
 
             <script>
@@ -678,7 +705,6 @@
                     e.preventDefault();
 
                     const btn = document.getElementById('addToCartBtn');
-                    if (!btn) return;
 
                     // If already converted → go to cart
                     if (btn.dataset.state === 'go') {
@@ -700,15 +726,6 @@
                         });
 
                         const data = await res.json();
-
-                        if (!res.ok) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.message || 'Something went wrong'
-                            });
-                            return;
-                        }
 
                         // 🔐 Not logged in → redirect
                         if (res.status === 401 && data.redirect) {

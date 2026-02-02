@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist | PawPalace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#ff4d6d', 50: '#fff0f3' }, // Matched pinkish red
+                        accent: {
+                            navy: '#0f172a',
+                            cream: '#fffdf9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-accent-cream font-sans text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <%- include('../partials/header') %>
+
+        <main class="flex-grow max-w-7xl mx-auto py-12 px-6 w-full">
+
+            <div class="mb-12">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-accent-navy mb-2">My Favorites</h1>
+                <p class="text-gray-500 font-medium">Save them now, spoil them later.</p>
+            </div>
+
+            <% if (wishlist && wishlist.length> 0) { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+                    <% wishlist.forEach(item=> { %>
+                        <% if (item.variant && item.product) { %>
+                            <div
+                                class="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl transition-shadow duration-300 relative group border border-gray-100 flex flex-col h-full">
+
+                                <!-- REMOVE BUTTON -->
+                                <button onclick="removeFromWishlist('<%= item.variant._id %>')"
+                                    class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition shadow-sm border border-gray-100">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+
+                                <!-- IMAGE -->
+                                <a href="/product/<%= item.product._id %>"
+                                    class="block relative aspect-square rounded-2xl overflow-hidden bg-gray-50 mb-4 cursor-pointer">
+                                    <img src="<%= item.variant.coverImage %>" alt="<%= item.product.productName %>"
+                                        class="w-full h-full object-cover">
+
+                                    <!-- STOCK BADGE -->
+                                    <% if (item.variant.stock> 0) { %>
+                                        <% if (item.variant.stock < 5) { %>
+                                            <span
+                                                class="absolute bottom-3 left-3 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                Low Stock
+                                            </span>
+                                            <% } else { %>
+                                                <span
+                                                    class="absolute bottom-3 left-3 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                    In Stock
+                                                </span>
+                                                <% } %>
+                                                    <% } else { %>
+                                                        <div
+                                                            class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                                                            <span
+                                                                class="bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
+                                                                Restocking Soon
+                                                            </span>
+                                                        </div>
+                                                        <% } %>
+                                </a>
+
+                                <!-- CONTENT -->
+                                <div class="flex-1 flex flex-col">
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">
+                                        <%= item.product.categoryName || 'ACCESSORIES' %>
+                                    </p>
+
+                                    <a href="/product/<%= item.product._id %>"
+                                        class="font-bold text-lg text-accent-navy leading-tight mb-auto hover:text-brand-500 transition line-clamp-2">
+                                        <%= item.product.productName %>
+                                    </a>
+
+                                    <div class="flex items-baseline gap-2 mt-3 mb-4">
+                                        <% if (item.variant.offerApplied) { %>
+                                            <span class="text-xl font-black text-brand-500">₹<%= item.variant.offerPrice
+                                                    %></span>
+                                            <span class="text-sm text-gray-400 line-through font-bold">₹<%=
+                                                    item.variant.price %></span>
+                                            <% } else { %>
+                                                <span class="text-xl font-black text-brand-500">₹<%= item.variant.price
+                                                        %></span>
+                                                <% } %>
+                                    </div>
+
+                                    <!-- ADD TO CART BTN -->
+                                    <% if (item.variant.stock> 0) { %>
+                                        <button
+                                            onclick="addToCart('<%= item.product._id %>', '<%= item.variant._id %>')"
+                                            class="w-full h-12 bg-accent-navy text-white text-sm font-bold rounded-xl hover:bg-black transition shadow-lg shadow-accent-navy/20 flex items-center justify-center gap-2">
+                                            Add to Cart
+                                        </button>
+                                        <% } else { %>
+                                            <button disabled
+                                                class="w-full h-12 bg-gray-100 text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed">
+                                                Notify Me
+                                            </button>
+                                            <% } %>
+
+                                </div>
+                            </div>
+                            <% } %>
+                                <% }) %>
+
+                </div>
+
+                <% } else { %>
+                    <!-- EMPTY STATE -->
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <div
+                            class="w-32 h-32 bg-red-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                            <i class="fa-solid fa-heart-crack text-5xl text-brand-500"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-accent-navy mb-2">Your wishlist is empty</h2>
+                        <p class="text-gray-500 mb-8 max-w-md">Find something you love and tap the heart icon to save it
+                            here.</p>
+                        <a href="/home"
+                            class="bg-brand-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
+                            Explore Products
+                        </a>
+                    </div>
+                    <% } %>
+
+        </main>
+
+        <%- include('../partials/footer') %>
+
+            <script>
+                async function removeFromWishlist(variantId) {
+
+                    try {
+                        const res = await fetch('/wishlist/remove', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ variantId })
+                        });
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            // Handle error silently or toast
+                            console.error(data.message);
+                        }
+                    } catch (err) {
+                        console.error("Remove failed", err);
+                    }
+                }
+
+                async function addToCart(productId, variantId) {
+                    try {
+                        const res = await fetch('/cart/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                productId,
+                                variantId,
+                                quantity: 1
+                            })
+                        });
+
+                        if (res.redirected) {
+                            window.location.href = res.url;
+                            return;
+                        }
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Added to Cart',
+                                text: 'Item moved to your cart!',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            setTimeout(() => {
+                                location.reload(); // wishlist refresh
+                            }, 1500);
+                        }
+                        // Optional: Remove from wishlist automatically after adding to cart?
+                        // For now keep it as per standard e-com behavior (keep in wishlist or let user remove)
+                        // But typically "Move to cart" implies removing from wishlist. 
+                        // The button says "Add to Cart", implying copy. I'll leave it as copy.
+                     else if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops',
+                            text: data.message || 'Could not add to cart'
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong'
+                    });
+                }
+            }
+            </script>
+
+</body>
+
+</html>

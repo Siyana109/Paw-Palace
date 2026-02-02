@@ -36,7 +36,7 @@ WEEK - 9
     User side:
     ✔ Product listing page @done (1/9/2026, 3:31:35 PM)
     ✔ Search with cancel/clear button (backend) @done (1/12/2026, 11:44:04 AM)
-    ☐ Pagination (backend)
+    ✔ Pagination (backend) @done (2/3/2026, 12:31:17 AM)
     ✔ Sorting options (Price low to high, high to low, A-Z, Z-A) @done (1/12/2026, 11:43:58 AM)
     ✔ Filters (Category, Price range, Brand optional) @done (1/29/2026, 8:06:07 PM)
     ✔ Combined search, sort, filter @done (1/29/2026, 8:06:09 PM)
@@ -98,38 +98,37 @@ WEEK-9 PENDINGS:
 
 WEEK 10:
     User:
-    Cart management
-    Add to cart, remove products, list cart products
-    Prevent adding blocked/unlisted products
-    Increase the quantity if the product is already in the cart
-    Remove product from wishlist when added to cart
-    Increment/decrement quantity with stock validations
-    Maximum quantity limits
-    Disable out-of-stock products and restrict checkout
-    Checkout page
-    Show user addresses with an add/edit option, default address selection
-    Display products with image, quantity, item total, taxes (optional), discounts,
-    final price (including taxes, discounts, shipping)
-    Place an order with Cash on Delivery
-    Order success page with thank-you statement, illustration, buttons to order
-    details, and continue shopping
-    Order management
-    Order listing with unique, consistent orderID, status, and order date
-    Cancel order or specific products (stock increment on cancellation)
-    Reason (optional) for cancellation
-    Return order (mandatory reason) when delivered
-    Order detail page
-    Download invoice (PDF)
-    Search order
+    ☐ Cart management
+    ☐ Add to cart, remove products, list cart products
+    ☐ Prevent adding blocked/unlisted products
+    ☐ Increase the quantity if the product is already in the cart
+    ☐ Remove product from wishlist when added to cart
+    ☐ Increment/decrement quantity with stock validations
+    ☐ Maximum quantity limits
+    ☐ Disable out-of-stock products and restrict checkout
+    ☐ Checkout page
+    ☐ Show user addresses with an add/edit option, default address selection
+    ☐ Display products with image, quantity, item total, taxes (optional), discounts,
+    ☐ final price (including taxes, discounts, shipping)
+    ☐ Place an order with Cash on Delivery
+    ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
+    ☐ Order management
+    ☐ Order listing with unique, consistent orderID, status, and order date
+    ☐ Cancel order or specific products (stock increment on cancellation)
+    ☐ Reason (optional) for cancellation
+    ☐ Return order (mandatory reason) when delivered
+    ☐ Order detail page
+    ☐ Download invoice (PDF)
+    ☐ Search order
 
     Admin:
-    Order management
-    List orders in descending order by order date
-    Show orderID, date, user details, and view detail button
-    Change order status (pending, shipped, out for delivery, delivered, cancelled)
-    Search, sort, and filter with clear functionality
-    Pagination
-    Inventory/Stock management
+    ☐ Order management
+    ☐ List orders in descending order by order date
+    ☐ Show orderID, date, user details, and view detail button
+    ☐ Change order status (pending, shipped, out for delivery, delivered, cancelled)
+    ☐ Search, sort, and filter with clear functionality
+    ☐ Pagination
+    ☐ Inventory/Stock management
 
 
 
@@ -157,7 +156,10 @@ TODO :
         ☐ otp resent and submitting attempt limit
         ✔ confirm logout @done (1/31/2026, 2:26:10 AM)
         ✔ edit phone no: @done (1/31/2026, 2:42:48 AM)
-        ☐ product detailing page
+        ☐ product detailing page (wishlist)
+        ☐ manage out of stock profucts (display it in last and low transparency)
+        ☐ filter products based on size in shop page
+        ☐ show selected variant highlighted
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

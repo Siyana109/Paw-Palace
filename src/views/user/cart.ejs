@@ -217,9 +217,6 @@
                     const data = await res.json();
 
                     if (!data.success) {
-                        // User requested to remove visual error "cannot update quantity"
-                        // Just stop here or maybe show a simple alert if it's a real error not caught by UI
-                        // For now we do nothing as UI should handle limits
                         return;
                     }
 

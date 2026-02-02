@@ -60,6 +60,8 @@ router.patch('/cart/update', userMiddleware.checkSession, productController.upda
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
+router.get('/wishlist', userMiddleware.checkSession, productController.getWishlist);
+router.delete('/wishlist/remove', userMiddleware.checkSession, productController.removeFromWishlist);
 
 router.post('/logout', userMiddleware.checkSession, authController.logout)
 

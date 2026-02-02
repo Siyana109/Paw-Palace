@@ -62,7 +62,6 @@ app.use(passport.session());
 
 
 app.use(viewDataMiddleware);
-
 app.use(attachUserToViews);
 app.use('/',userRoutes)
 app.use('/admin',adminRoutes)

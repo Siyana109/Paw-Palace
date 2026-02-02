@@ -1,9 +1,27 @@
-const viewDataMiddleware = (req, res, next) => {
-    res.locals.wishlistCount = req.session?.wishlist?.length || 0;
-    res.locals.cartCount = req.session?.cart?.length || 0;
-    res.locals.currentPath = req.path;
-    res.locals.user = req.session?.user || null;
-    next();
+import Cart from '../model/cartModel.js';
+import Wishlist from '../model/wishlistModel.js';
+
+const viewDataMiddleware = async (req, res, next) => {
+  res.locals.currentPath = req.path;
+  res.locals.user = req.session?.user || null;
+
+  if (req.session?.user?.id) {
+    const userId = req.session.user.id;
+
+    const cart = await Cart.findOne({ user: userId });
+    const wishlist = await Wishlist.find({ user: userId });
+
+    res.locals.cartCount = cart
+      ? cart.items.reduce((sum, i) => sum + i.quantity, 0)
+      : 0;
+
+    res.locals.wishlistCount = wishlist.length;
+  } else {
+    res.locals.cartCount = 0;
+    res.locals.wishlistCount = 0;
+  }
+
+  next();
 };
 
 export default viewDataMiddleware;
