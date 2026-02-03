@@ -35,12 +35,27 @@ const homePage = async (req, res) => {
 
     // SORT
     let sortStage = {};
+
     switch (sort) {
-      case "price_asc": sortStage = { price: 1 }; break;
-      case "price_desc": sortStage = { price: -1 }; break;
-      case "name_asc": sortStage = { name: 1 }; break;
-      case "name_desc": sortStage = { name: -1 }; break;
-      default: sortStage = { createdAt: -1 };
+      case "price_asc":
+        sortStage = { inStock: -1, price: 1 };
+        break;
+
+      case "price_desc":
+        sortStage = { inStock: -1, price: -1 };
+        break;
+
+      case "name_asc":
+        sortStage = { inStock: -1, name: 1 };
+        break;
+
+      case "name_desc":
+        sortStage = { inStock: -1, name: -1 };
+        break;
+
+      default:
+        // Featured / newest
+        sortStage = { inStock: -1, createdAt: -1 };
     }
 
     // AGGREGATION
@@ -60,13 +75,13 @@ const homePage = async (req, res) => {
 
       ...(minPrice || maxPrice
         ? [{
-            $match: {
-              "variants.price": {
-                ...(minPrice && { $gte: Number(minPrice) }),
-                ...(maxPrice && { $lte: Number(maxPrice) })
-              }
+          $match: {
+            "variants.price": {
+              ...(minPrice && { $gte: Number(minPrice) }),
+              ...(maxPrice && { $lte: Number(maxPrice) })
             }
-          }]
+          }
+        }]
         : []),
 
       {
@@ -79,8 +94,14 @@ const homePage = async (req, res) => {
           createdAt: { $first: "$createdAt" },
           petType: { $first: "$petType" },
 
-          // STOCK CALCULATION
           totalStock: { $sum: "$variants.stock" }
+        }
+      },
+      {
+        $addFields: {
+          inStock: {
+            $cond: [{ $gt: ["$totalStock", 0] }, 1, 0]
+          }
         }
       },
 
@@ -90,12 +111,6 @@ const homePage = async (req, res) => {
     ];
 
     let products = await Product.aggregate(pipeline);
-
-    // ADD inStock FLAG
-    products = products.map(p => ({
-      ...p,
-      inStock: p.totalStock > 0
-    }));
 
     // COUNT
     const countPipeline = [
@@ -111,13 +126,13 @@ const homePage = async (req, res) => {
       { $unwind: "$variants" },
       ...(minPrice || maxPrice
         ? [{
-            $match: {
-              "variants.price": {
-                ...(minPrice && { $gte: Number(minPrice) }),
-                ...(maxPrice && { $lte: Number(maxPrice) })
-              }
+          $match: {
+            "variants.price": {
+              ...(minPrice && { $gte: Number(minPrice) }),
+              ...(maxPrice && { $lte: Number(maxPrice) })
             }
-          }]
+          }
+        }]
         : []),
       { $group: { _id: "$_id" } }
     ];

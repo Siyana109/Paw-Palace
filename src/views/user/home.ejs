@@ -229,14 +229,23 @@
                                 <div class="bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-xl
                     transition-all duration-500 group relative flex flex-col">
 
-                                    <!-- IMAGE -->
-                                    <a href="/product/<%= product._id %>">
-                                        <div
-                                            class="relative aspect-square rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
-                                            <img src="<%= product.image %>" alt="<%= product.name %>"
-                                                class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                                        </div>
-                                    </a>
+                                    <div class="relative aspect-square rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
+
+                                        <!-- PRODUCT IMAGE -->
+                                        <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full h-full object-cover transition duration-700
+       <%= !product.inStock ? 'blur-sm scale-105' : 'group-hover:scale-110' %>">
+
+                                        <% if (!product.inStock) { %>
+                                            <!-- DARK OVERLAY -->
+                                            <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                                <span
+                                                    class="bg-black/70 text-white text-xs font-bold px-4 py-2 rounded-full">
+                                                    Restocking Soon
+                                                </span>
+                                            </div>
+                                            <% } %>
+
+                                    </div>
 
                                     <!-- HOVER ACTIONS -->
                                     <div class="absolute inset-0 bg-accent-navy/20 opacity-0 group-hover:opacity-100
@@ -250,7 +259,7 @@
                                         </form>
 
                                         <form action="/cart/add" method="POST"
-                                            class="pointer-events-auto <%= !product.inStock ? 'opacity-50 pointer-events-none' : '' %>">
+                                            class="pointer-events-auto <%= !product.inStock ? 'opacity-40 pointer-events-none' : '' %>">
                                             <input type="hidden" name="productId" value="<%= product._id %>">
                                             <button
                                                 class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition">
@@ -276,18 +285,18 @@
                                             </a>
                                         </div>
 
+
+                                        <!-- PRICE -->
                                         <div class="flex justify-between items-center mt-4">
 
-                                            <!-- PRICE -->
-                                            <span class="text-xl font-black">₹<%= product.price %></span>
-
-                                            <!-- STOCK STATUS -->
-                                            <% if (!product.inStock) { %>
-                                                <span
-                                                    class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
-                                                    Out of Stock
-                                                </span>
-                                                <% } %>
+                                            <% if (product.inStock) { %>
+                                                <span class="text-xl font-black">₹<%= product.price %></span>
+                                                <% } else { %>
+                                                    <button
+                                                        class="w-full py-2 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm cursor-not-allowed">
+                                                        Out of Stock
+                                                    </button>
+                                                    <% } %>
 
                                         </div>
                                     </div>
