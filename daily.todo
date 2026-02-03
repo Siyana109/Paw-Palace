@@ -5,15 +5,14 @@ Monday:
     ✔ Increase the quantity if the product is already in the cart @done (2/3/2026, 12:24:44 AM)
     ✔ Remove product from wishlist when added to cart @done (2/3/2026, 1:27:32 AM)
     ✔ Increment/decrement quantity with stock validations @done (2/3/2026, 12:24:51 AM)
-    ☐ Maximum quantity limits
+    ☐ Maximum quantity limits (4/5)
 
 Tuesday:
     ☐ Disable out-of-stock products and restrict checkout
-    ☐ Checkout page
-    ☐ Show user addresses with an add/edit option, default address selection
-    ☐ Display products with image, quantity, item total, taxes (optional), discounts,
-    ☐ final price (including taxes, discounts, shipping)
+    ✔ Checkout page @done (2/3/2026, 3:00:28 PM)
+    ✔ Show user addresses with an add/edit option, default address selection @done (2/3/2026, 3:00:32 PM)
+    ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/3/2026, 3:00:41 PM)
+    ✔ final price (including taxes, discounts, shipping) @done (2/3/2026, 3:00:54 PM)
     ☐ Place an order with Cash on Delivery
-    ☐ Order success page with thank-you statement, illustration, buttons to order
-    ☐ details, and continue shopping
+    ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
 

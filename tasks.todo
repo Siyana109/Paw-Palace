@@ -157,9 +157,11 @@ TODO :
         ✔ confirm logout @done (1/31/2026, 2:26:10 AM)
         ✔ edit phone no: @done (1/31/2026, 2:42:48 AM)
         ☐ product detailing page (wishlist)
-        ☐ manage out of stock profucts (display it in last and low transparency)
+        ✔ manage out of stock profucts (display it in last and low transparency) @done (2/3/2026, 11:45:49 AM)
         ☐ filter products based on size in shop page
         ☐ show selected variant highlighted
+        ☐ wishlist cart Count
+        ☐ 
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

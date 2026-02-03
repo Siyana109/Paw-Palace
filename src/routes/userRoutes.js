@@ -5,6 +5,7 @@ import userMiddleware from "../middlewares/userMiddleware.js"
 import profileController from "../controllers/userControllers/profileController.js";
 import homeController from "../controllers/userControllers/homeController.js";
 import productController from "../controllers/userControllers/productController.js";
+import checkoutController from "../controllers/userControllers/checkoutController.js";
 import { upload } from "../middlewares/upload.js";
 
 router.get('/', authController.landingPage)
@@ -32,10 +33,10 @@ router.post("/reset-password", authController.resetPassword)
 
 router.get('/profile', userMiddleware.checkSession, profileController.getProfile)
 router.post('/profile/update', userMiddleware.checkSession, profileController.updateProfile)
-router.get('/profile/address/add', userMiddleware.checkSession, profileController.getAddAddress);
+// router.get('/profile/address/add', userMiddleware.checkSession, profileController.getAddAddress);
 router.post('/address/add', userMiddleware.checkSession, profileController.addAddress);
-router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
-router.post('/profile/address/:id/edit', userMiddleware.checkSession, profileController.updateAddress);
+// router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
+router.put('/profile/address/:id/edit', userMiddleware.checkSession, profileController.editAddress);
 router.post('/profile/address/:id/delete', userMiddleware.checkSession, profileController.deleteAddress);
 
 router.post('/profile/image/update', userMiddleware.checkSession, upload.single('profilePic'), profileController.updateProfileImage)
@@ -58,6 +59,10 @@ router.get('/cart', userMiddleware.checkSession, productController.getCartPage);
 router.post('/cart/add', userMiddleware.checkSession, productController.addToCart);
 router.patch('/cart/update', userMiddleware.checkSession, productController.updateCartQuantity);
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
+
+router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
+router.get('/order-confirmation', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
+router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 router.get('/wishlist', userMiddleware.checkSession, productController.getWishlist);

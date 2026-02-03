@@ -106,115 +106,160 @@ const updateProfile = async (req, res) => {
 
 
 
-const getAddAddress = (req, res) => {
-    res.render('user/addressForm', {
-        title: "Add Address | PawPalace",
-        isEdit: false,
-        address: null
-    })
-}
+// const getAddAddress = (req, res) => {
+//     res.render('user/addressForm', {
+//         title: "Add Address | PawPalace",
+//         isEdit: false,
+//         address: null
+//     })
+// }
 
 
-const getEditAddress = async (req, res) => {
-    const userId = req.session.user?.id
-    const addressId = req.params.id
-    const address = await Address.findOne({
-        _id: addressId,
-        userId
-    }).lean()
+// const getEditAddress = async (req, res) => {
+//     const userId = req.session.user?.id
+//     const addressId = req.params.id
+//     const address = await Address.findOne({
+//         _id: addressId,
+//         userId
+//     }).lean()
 
-    if (!address) return res.redirect('/profile')
+//     if (!address) return res.redirect('/profile')
 
-    res.render('user/addressForm', {
-        title: "Edit Address | PawPalace",
-        isEdit: true,
-        address
-    })
-}
+//     res.render('user/addressForm', {
+//         title: "Edit Address | PawPalace",
+//         isEdit: true,
+//         address
+//     })
+// }
 
+
+// const addAddress = async (req, res) => {
+//     try {
+//         const userId = req.session.user?.id;
+//         if (!userId) return res.redirect('/login');
+
+//         const {
+//             fullName,
+//             address,
+//             landmark,
+//             city,
+//             state,
+//             zipCode,
+//             phone
+//         } = req.body;
+
+//         await Address.create({
+//             userId,
+//             fullName,
+//             phone,
+//             address,
+//             landMark: landmark || '',
+//             city,
+//             state,
+//             zipCode
+//         });
+
+//         res.redirect('/profile');
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).render('error', { message: 'Failed to add address' });
+//     }
+// };
 
 const addAddress = async (req, res) => {
     try {
-        const userId = req.session.user?.id;
-        if (!userId) return res.redirect('/login');
+        const userId = req.session.user.id;
 
         const {
-            fullName,
-            address,
-            landmark,
-            city,
-            state,
-            zipCode,
-            phone
-        } = req.body;
-
-        await Address.create({
-            userId,
+            addressType,
             fullName,
             phone,
             address,
-            landMark: landmark || '',
+            landMark = '',
+            city,
+            state,
+            zipCode
+        } = req.body;
+
+        const newAddress = new Address({
+            userId,
+            addressType,
+            fullName,
+            phone,
+            address,
+            landMark,
             city,
             state,
             zipCode
         });
 
-        res.redirect('/profile');
-    } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Failed to add address' });
+        await newAddress.save();
+
+        res.status(201).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
     }
 };
 
 
-const updateAddress = async (req, res) => {
+const editAddress = async (req, res) => {
     try {
-        const userId = req.session.user?.id;
+        const userId = req.session.user.id;
         const addressId = req.params.id;
 
-        if (!userId) return res.redirect('/login');
-
         const {
+            addressType,
             fullName,
+            phone,
             address,
-            landmark,
+            landMark = '',
             city,
             state,
-            zipCode,
-            phone
+            zipCode
         } = req.body;
 
-        await Address.findOneAndUpdate(
+        const updated = await Address.findOneAndUpdate(
             { _id: addressId, userId },
             {
+                addressType,
                 fullName,
                 phone,
                 address,
-                landMark: landmark || '',
+                landMark,
                 city,
                 state,
                 zipCode
-            }
+            },
+            { new: true }
         );
 
-        res.redirect('/profile');
-    } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Failed to update address' });
+        if (!updated) {
+            return res.status(404).json({ success: false });
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
     }
 };
 
 
+
 const deleteAddress = async (req, res) => {
-    const userId = req.session.user?.id;
-    const addressId = req.params.id;
+    try {
+        const userId = req.session.user.id;
+        const addressId = req.params.id;
 
-    if (!userId) return res.redirect('/login');
+        await Address.findOneAndDelete({ _id: addressId, userId });
 
-    await Address.findOneAndDelete({ _id: addressId, userId });
+        res.json({ success: true });
 
-    res.redirect('/profile');
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
 };
+
 
 
 const getChangePassword = (req, res) => {
@@ -472,7 +517,7 @@ const resendEmailOtp = async (req, res) => {
         const otp = generateOTP();
 
         await OTP.findOneAndUpdate(
-            { email: sessionData.newEmail },  
+            { email: sessionData.newEmail },
             {
                 email: sessionData.newEmail,
                 otp,
@@ -529,18 +574,18 @@ const updateProfileImage = async (req, res) => {
 
 
 const removeProfilePic = async (req, res) => {
-  await User.findByIdAndUpdate(req.session.user.id, {
-    profilePic: null
-  });
+    await User.findByIdAndUpdate(req.session.user.id, {
+        profilePic: null
+    });
 
-  return res.redirect('/profile');
+    return res.redirect('/profile');
 };
 
 
 
 export default {
     getProfile, updateProfile,
-    getAddAddress, getEditAddress, addAddress, updateAddress, deleteAddress,
+    addAddress, editAddress, deleteAddress,
     getChangePassword, postChangePassword,
     getChangeEmail, postChangeEmail, getVerifyEmailOtp, verifyEmailOtp, resendEmailOtp,
     updateProfileImage, removeProfilePic

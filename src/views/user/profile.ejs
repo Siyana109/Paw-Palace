@@ -95,20 +95,18 @@
                         class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition">
                         <i class="fa-solid fa-box"></i> Orders
                     </a>
-                    <button type="button"
-  onclick="openLogoutModal()"
-  class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left">
-  <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
-</button>
+                    <button type="button" onclick="openLogoutModal()"
+                        class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                    </button>
 
-<form id="logoutForm" action="/logout" method="POST"></form>
+                    <form id="logoutForm" action="/logout" method="POST"></form>
 
                 </div>
             </div>
 
             <div class="lg:col-span-9 space-y-6">
-                <form action="/profile/update" method="POST"
-                    class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
+                <form action="/profile/update" method="POST" class="bg-white rounded-[2.5rem] p-10 shadow-sm relative">
 
                     <div class="flex justify-between items-center mb-8">
                         <h3 class="text-2xl font-bold">Personal Information</h3>
@@ -172,14 +170,16 @@
                     <div class="border-t border-gray-50 pt-8">
                         <div class="flex justify-between items-center mb-6">
                             <h4 class="font-bold text-gray-400 uppercase text-[10px]">Shipping Address</h4>
-                            <a href="/profile/address/add" class="text-brand-500 font-bold text-xs">+ Add New
+                            <a href="javascript:void(0)" onclick="openAddAddressModal()"
+                                class="text-brand-500 font-bold text-xs">
+                                + Add New
                                 Address</a>
 
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <% (addresses || []).forEach(addr=> { %>
-                                <label class="relative cursor-pointer group">
+                                <div class="relative group">
                                     <div
                                         class="p-6 border-2 border-gray-100 rounded-2xl hover:border-brand-500 transition-all">
 
@@ -189,20 +189,19 @@
                                             </span>
 
                                             <div class="flex gap-3 items-center whitespace-nowrap">
-                                                <a href="/profile/address/<%= addr._id %>/edit"
+                                                <a href="javascript:void(0)"
+                                                    onclick="event.stopPropagation(); openEditAddressModal('<%= encodeURIComponent(JSON.stringify(addr)) %>')"
                                                     class="text-xs text-gray-400 hover:text-brand-500">
                                                     Edit
                                                 </a>
 
                                                 <button type="button"
-                                                    onclick="openDeleteModal('<%= addr._id %>', '<%= addr.fullName %>', '<%= addr.address %>')"
+                                                    onclick="event.stopPropagation(); openDeleteModal('<%= addr._id %>', '<%= addr.fullName %>', '<%= addr.address %>')"
                                                     class="text-xs text-red-400 hover:text-red-500">
                                                     Delete
                                                 </button>
                                             </div>
                                         </div>
-
-
 
                                         <p class="text-xs text-gray-500 leading-relaxed">
                                             <%= addr.address %><br>
@@ -212,7 +211,7 @@
                                         </p>
 
                                     </div>
-                                </label>
+                                </div>
                                 <% }) %>
 
                         </div>
@@ -244,7 +243,7 @@
                             <% } else { %>
                                 <!-- GOOGLE USER -->
                                 <p class="text-xs text-gray-400 text-center italic">
-                                    
+
                                 </p>
                                 <% } %>
                     </div>
@@ -269,9 +268,10 @@
                             <h3 class="font-bold text-lg">Danger Zone</h3>
                         </div>
                         <p class="text-gray-400 text-sm mb-6">Once you delete your account, there is no going back.</p>
-                        <button
-                            class="block w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Delete
-                            Account</button>
+                        <button type="button"
+                            class="block w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">
+                            Delete Account
+                        </button>
                     </div>
                 </div>
             </div>
@@ -304,7 +304,7 @@
                 </div>
 
                 <!-- Actions -->
-                <form id="deleteForm" method="POST" class="space-y-3">
+                <form id="deleteForm" method="POST" class="space-y-3" onsubmit="handleDelete(event)">
                     <button type="submit"
                         class="w-full bg-red-500 text-white py-4 rounded-xl font-bold hover:bg-red-600 transition">
                         Yes, Delete Address
@@ -337,56 +337,124 @@
         </div>
 
         <div id="logoutModal"
-  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
 
-  <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
-    <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-      <i class="fa-solid fa-arrow-right-from-bracket"></i>
-    </div>
+            <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
+                <div
+                    class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </div>
 
-    <h3 class="text-xl font-bold mb-2">Log out?</h3>
-    <p class="text-gray-400 text-sm mb-6">
-      Are you sure you want to log out of your account?
-    </p>
+                <h3 class="text-xl font-bold mb-2">Log out?</h3>
+                <p class="text-gray-400 text-sm mb-6">
+                    Are you sure you want to log out of your account?
+                </p>
 
-    <div class="flex gap-3">
-      <button onclick="submitLogout()"
-        class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600 transition">
-        Yes, Log out
-      </button>
+                <div class="flex gap-3">
+                    <button onclick="submitLogout()"
+                        class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600 transition">
+                        Yes, Log out
+                    </button>
 
-      <button onclick="closeLogoutModal()"
-        class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
-        Cancel
-      </button>
-    </div>
-  </div>
-</div>
+                    <button onclick="closeLogoutModal()"
+                        class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD / EDIT ADDRESS MODAL -->
+        <div id="addressModal"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-accent-navy/40 backdrop-blur-sm px-4">
+
+            <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl relative">
+
+                <h3 id="addressModalTitle" class="text-2xl font-bold mb-6">
+                    Add Address
+                </h3>
+
+                <!-- MESSAGE -->
+                <div id="addressMessage" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-semibold">
+                </div>
+
+                <form id="addressForm" class="space-y-4">
+                    <input type="hidden" id="addressId">
+
+                    <input id="addrFullName" class="w-full border rounded-xl p-3 font-medium" placeholder="Full Name">
+
+                    <input id="addrPhone" class="w-full border rounded-xl p-3 font-medium" placeholder="Phone">
+
+                    <textarea id="addrAddress" class="w-full border rounded-xl p-3 font-medium"
+                        placeholder="Address"></textarea>
+
+                    <input id="addrLandmark" class="w-full border rounded-xl p-3 font-medium"
+                        placeholder="Landmark (optional)">
+
+                    <input id="addrCity" class="w-full border rounded-xl p-3 font-medium" placeholder="City">
+
+                    <input id="addrState" class="w-full border rounded-xl p-3 font-medium" placeholder="State">
+
+                    <input id="addrZip" class="w-full border rounded-xl p-3 font-medium" placeholder="Pincode">
+
+                    <div class="flex gap-3">
+                        <button type="button" class="addr-type-btn px-5 py-2 rounded-xl font-bold border"
+                            data-type="Home">
+                            Home
+                        </button>
+
+                        <button type="button" class="addr-type-btn px-5 py-2 rounded-xl font-bold border"
+                            data-type="Work">
+                            Work
+                        </button>
+
+                        <button type="button" class="addr-type-btn px-5 py-2 rounded-xl font-bold border"
+                            data-type="Other">
+                            Other
+                        </button>
+                    </div>
+
+                    <input type="hidden" id="addrType" value="Home">
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeAddressModal()"
+                            class="flex-1 bg-gray-100 py-3 rounded-xl font-bold">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="flex-1 bg-brand-500 text-white py-3 rounded-xl font-bold">
+                            Save Address
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
 </body>
+
 <script>
-  const logoutModal = document.getElementById('logoutModal');
-  const logoutForm = document.getElementById('logoutForm');
+    const logoutModal = document.getElementById('logoutModal');
+    const logoutForm = document.getElementById('logoutForm');
 
-  function openLogoutModal() {
-    logoutModal.classList.remove('hidden');
-    logoutModal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-  }
+    function openLogoutModal() {
+        logoutModal.classList.remove('hidden');
+        logoutModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
 
-  function closeLogoutModal() {
-    logoutModal.classList.add('hidden');
-    logoutModal.classList.remove('flex');
-    document.body.style.overflow = 'auto';
-  }
+    function closeLogoutModal() {
+        logoutModal.classList.add('hidden');
+        logoutModal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
 
-  function submitLogout() {
-    logoutForm.submit();
-  }
+    function submitLogout() {
+        logoutForm.submit();
+    }
 
-  logoutModal.addEventListener('click', (e) => {
-    if (e.target === logoutModal) closeLogoutModal();
-  });
+    logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) closeLogoutModal();
+    });
 </script>
 
 <script>
@@ -396,7 +464,7 @@
     const modalAddrText = document.getElementById('modalAddrText');
 
     function openDeleteModal(id, name, address) {
-        deleteForm.action = `/profile/address/${id}/delete`;
+        deleteForm.dataset.action = `/profile/address/${id}/delete`; // Store in dataset
         modalAddrName.textContent = name;
         modalAddrText.textContent = address;
 
@@ -405,16 +473,24 @@
         document.body.style.overflow = 'hidden';
     }
 
-    function closeDeleteModal() {
-        deleteModal.classList.add('hidden');
-        deleteModal.classList.remove('flex');
-        document.body.style.overflow = 'auto';
-    }
+    async function handleDelete(e) {
+        e.preventDefault();
+        const url = deleteForm.dataset.action;
+        if (!url) return;
 
-    // Close on backdrop click
-    deleteModal.addEventListener('click', (e) => {
-        if (e.target === deleteModal) closeDeleteModal();
-    });
+        try {
+            const res = await fetch(url, { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete address');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error deleting address');
+        }
+    }
 </script>
 
 <script>
@@ -582,6 +658,147 @@
     }
 </script>
 
+<script>
+    const addressModal = document.getElementById("addressModal");
+    const addressForm = document.getElementById("addressForm");
+    const messageBox = document.getElementById("addressMessage");
+    const titleEl = document.getElementById("addressModalTitle");
+
+    function showMsg(type, text) {
+        messageBox.className =
+            `mb-4 px-4 py-3 rounded-xl text-sm font-semibold ${type === "error"
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }`;
+        messageBox.textContent = text;
+        messageBox.classList.remove("hidden");
+    }
+
+    function openAddAddressModal() {
+        addressForm.reset();
+        document.getElementById("addressId").value = "";
+        titleEl.innerText = "Add Address";
+        messageBox.classList.add("hidden");
+
+        addressModal.classList.remove("hidden");
+        addressModal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+
+        typeButtons.forEach(b =>
+            b.classList.remove("bg-brand-500", "text-white", "border-brand-500")
+        );
+
+        typeButtons[0].classList.add("bg-brand-500", "text-white", "border-brand-500");
+        addrTypeInput.value = "Home";
+
+    }
+
+    function openEditAddressModal(encodedAddr) {
+        const addr = JSON.parse(decodeURIComponent(encodedAddr));
+
+        titleEl.innerText = "Edit Address";
+        messageBox.classList.add("hidden");
+
+        document.getElementById("addressId").value = addr._id;
+        document.getElementById("addrFullName").value = addr.fullName;
+        document.getElementById("addrPhone").value = addr.phone;
+        document.getElementById("addrAddress").value = addr.address;
+        document.getElementById("addrLandmark").value = addr.landMark || "";
+        document.getElementById("addrCity").value = addr.city;
+        document.getElementById("addrState").value = addr.state;
+        document.getElementById("addrZip").value = addr.zipCode;
+        document.getElementById("addrType").value = addr.addressType || "Home";
+
+        typeButtons.forEach(b => {
+            b.classList.remove("bg-brand-500", "text-white", "border-brand-500");
+
+            if (b.dataset.type === (addr.addressType || "Home")) {
+                b.classList.add("bg-brand-500", "text-white", "border-brand-500");
+                addrTypeInput.value = b.dataset.type;
+            }
+        });
+
+        addressModal.classList.remove("hidden");
+        addressModal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeAddressModal() {
+        addressModal.classList.add("hidden");
+        addressModal.classList.remove("flex");
+        document.body.style.overflow = "auto";
+    }
+
+    addressForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById("addressId").value;
+        const data = {
+            fullName: addrFullName.value.trim(),
+            phone: addrPhone.value.trim(),
+            address: addrAddress.value.trim(),
+            landMark: addrLandmark.value.trim(),
+            city: addrCity.value.trim(),
+            state: addrState.value.trim(),
+            zipCode: addrZip.value.trim(),
+            addressType: addrType.value
+        };
+
+        if (data.fullName.length < 3)
+            return showMsg("error", "Name must be at least 3 characters");
+
+        if (!/^\d{10}$/.test(data.phone))
+            return showMsg("error", "Enter a valid 10-digit phone number");
+
+        if (data.address.length < 10)
+            return showMsg("error", "Address must be at least 10 characters");
+
+        if (data.city.length < 2)
+            return showMsg("error", "Enter a valid city name");
+
+        if (data.state.length < 2)
+            return showMsg("error", "Enter a valid state name");
+
+        if (!/^\d{6}$/.test(data.zipCode))
+            return showMsg("error", "Enter a valid 6-digit pincode");
+
+        const url = id
+            ? `/profile/address/${id}/edit`
+            : `/address/add`;
+
+        const method = id ? "PUT" : "POST";
+
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            showMsg("success", "Address saved successfully");
+            setTimeout(() => location.reload(), 700);
+        } else {
+            showMsg("error", "Failed to save address");
+        }
+    });
+
+    const typeButtons = document.querySelectorAll(".addr-type-btn");
+    const addrTypeInput = document.getElementById("addrType");
+
+    typeButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            typeButtons.forEach(b =>
+                b.classList.remove("bg-brand-500", "text-white", "border-brand-500")
+            );
+
+            btn.classList.add("bg-brand-500", "text-white", "border-brand-500");
+            addrTypeInput.value = btn.dataset.type;
+        });
+    });
+
+</script>
 
 
 </html>
