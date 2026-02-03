@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category Management | PawPalace Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -70,13 +71,13 @@
                                     class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/10 text-sm">
                             </div>
                             <select id="sortSelect"
-  class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500">
-  <option value="">Sort By</option>
-  <option value="active">Active first</option>
-  <option value="inactive">Inactive first</option>
-  <option value="latest">Recently added</option>
-  <option value="oldest">Earlier added</option>
-</select>
+                                class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500">
+                                <option value="">Sort By</option>
+                                <option value="active">Active first</option>
+                                <option value="inactive">Inactive first</option>
+                                <option value="latest">Recently added</option>
+                                <option value="oldest">Earlier added</option>
+                            </select>
 
 
                             <button onclick="openAddModal()"
@@ -294,7 +295,7 @@
                     id="deleteCatName" class="font-bold"></span>? All associated products will lose this category
                 reference.</p>
             <div class="flex flex-col gap-3">
-                <form id="deleteForm" method="POST">
+                <form id="deleteForm">
                     <button type="submit"
                         class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">Yes,
                         Confirm Delete</button>
@@ -356,16 +357,16 @@
     </script>
 
     <script>
-  const sortSelect = document.getElementById("sortSelect");
+        const sortSelect = document.getElementById("sortSelect");
 
-  sortSelect.addEventListener("change", () => {
-    const value = sortSelect.value;
-    const params = new URLSearchParams(window.location.search);
-    params.set("sort", value);
-    params.set("page", 1); // reset page
-    window.location.search = params.toString();
-  });
-</script>
+        sortSelect.addEventListener("change", () => {
+            const value = sortSelect.value;
+            const params = new URLSearchParams(window.location.search);
+            params.set("sort", value);
+            params.set("page", 1); // reset page
+            window.location.search = params.toString();
+        });
+    </script>
 
 
 
@@ -399,84 +400,124 @@
 
     </script>
 
-<script>
-  const addForm = document.getElementById("addCategoryForm");
+    <script>
+        const addForm = document.getElementById("addCategoryForm");
 
-  addForm.addEventListener("submit", async (e) => {
-    e.preventDefault(); // 🔑 stop normal submit
+        addForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-    const formData = new FormData(addForm);
+            const payload = {
+                name: addForm.name.value,
+                status: addForm.status.value
+            };
 
-    try {
-      const res = await fetch("/admin/categories/add", {
-        method: "POST",
-        body: formData
-      });
+            try {
+                const res = await fetch("/admin/categories/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
 
-      const data = await res.json();
+                const data = await res.json();
 
-      if (!data.success) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops!",
-          text: data.message
+                if (!data.success) {
+                    Swal.fire("Error", data.message, "error");
+                    return;
+                }
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Added",
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    closeModal("addModal");   // ✅ close modal
+                    window.location.reload();
+                });
+
+            } catch (err) {
+                Swal.fire("Error", "Something went wrong", "error");
+            }
         });
-        return;
-      }
-
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: data.message,
-        timer: 1500,
-        showConfirmButton: false
-      }).then(() => {
-        window.location.reload(); // refresh list
-      });
-
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong"
-      });
-    }
-  });
-</script>
+    </script>
 
 
     <script>
         document.getElementById("editForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+            e.preventDefault();
 
-  const form = e.target;
-  const formData = new FormData(form);
+            const form = e.target;
 
-  const res = await fetch(form.action, {
-    method: "POST",
-    body: formData
-  });
+            const payload = {
+                name: form.name.value,
+                status: form.status.value
+            };
 
-  const data = await res.json();
+            try {
+                const res = await fetch(form.action, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
 
-  if (!data.success) {
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: data.message
-    });
-    return;
-  }
+                const data = await res.json();
 
-  Swal.fire({
-    icon: "success",
-    title: "Updated",
-    text: data.message,
-    timer: 1500,
-    showConfirmButton: false
-  }).then(() => location.reload());
-});
+                if (!data.success) {
+                    Swal.fire("Error", data.message, "error");
+                    return;
+                }
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Updated",
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    closeModal("editModal");  // ✅ close modal
+                    window.location.reload();
+                });
+
+            } catch (err) {
+                Swal.fire("Error", "Something went wrong", "error");
+            }
+        });
     </script>
+
+
+    <script>
+        document.getElementById("deleteForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+
+            try {
+                const res = await fetch(form.action, { method: "POST" });
+                const data = await res.json();
+
+                if (!data.success) {
+                    Swal.fire("Error", data.message, "error");
+                    return;
+                }
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Deleted",
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    closeModal("deleteModal"); // ✅ close modal
+                    window.location.reload();
+                });
+
+            } catch (err) {
+                Swal.fire("Error", "Something went wrong", "error");
+            }
+        });
+    </script>
+
 
 
 </body>

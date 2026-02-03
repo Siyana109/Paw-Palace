@@ -200,6 +200,7 @@ const getCategoriesPage = async (req, res) => {
 const addCategory = async (req, res) => {
   try {
     const { name, status } = req.body;
+    console.log(req.body)
 
     if (!name || !name.trim()) {
       return res.json({ success: false, message: "Invalid category name" });
@@ -240,6 +241,7 @@ const editCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, status } = req.body;
+    console.log(req.body)
 
     const exists = await Category.findOne({
       categoryName: { $regex: `^${name.trim()}$`, $options: "i" },
@@ -280,26 +282,36 @@ const deleteCategory = async (req, res) => {
 
     const categoryExists = await Category.findById(id);
     if (!categoryExists) {
-      return res.redirect('/admin/categories?error=Category not found');
+      return res.json({
+        success: false,
+        message: "Category not found"
+      });
     }
 
-    // Optional safety: prevent delete if products exist
     const productCount = await Product.countDocuments({ categoryId: id });
     if (productCount > 0) {
-      return res.redirect(
-        '/admin/categories?error=Cannot delete category with products'
-      );
+      return res.json({
+        success: false,
+        message: "Cannot delete category with products"
+      });
     }
 
     await Category.findByIdAndDelete(id);
 
-    res.redirect('/admin/categories?success=Category deleted successfully');
+    return res.json({
+      success: true,
+      message: "Category deleted successfully"
+    });
 
   } catch (error) {
-    console.error('Delete Category Error:', error);
-    res.redirect('/admin/categories?error=Failed to delete category');
+    console.error("Delete Category Error:", error);
+    return res.json({
+      success: false,
+      message: "Failed to delete category"
+    });
   }
 };
+
 
 
 
