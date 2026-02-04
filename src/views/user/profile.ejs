@@ -184,9 +184,18 @@
                                         class="p-6 border-2 border-gray-100 rounded-2xl hover:border-brand-500 transition-all">
 
                                         <div class="flex justify-between items-center mb-2">
-                                            <span class="font-bold truncate max-w-[70%]">
-                                                <%= addr.fullName %>
-                                            </span>
+                                            <div class="flex items-center gap-2 max-w-[70%]">
+                                                <span class="font-bold truncate">
+                                                    <%= addr.fullName %>
+                                                </span>
+
+                                                <% if (addr.isDefault) { %>
+                                                    <span
+                                                        class="bg-brand-50 text-brand-500 text-[10px] font-bold px-2 py-0.5 rounded">
+                                                        DEFAULT
+                                                    </span>
+                                                    <% } %>
+                                            </div>
 
                                             <div class="flex gap-3 items-center whitespace-nowrap">
                                                 <a href="javascript:void(0)"
@@ -209,6 +218,13 @@
                                                         <%= addr.zipCode %><br>
                                                             <%= addr.phone %>
                                         </p>
+
+                                        <!-- <% if (addr.isDefault) { %>
+                                            <div
+                                                class="absolute top-4 right-4 bg-brand-50 text-brand-500 text-[10px] font-bold px-2 py-1 rounded">
+                                                DEFAULT
+                                            </div>
+                                            <% } %> -->
 
                                     </div>
                                 </div>
@@ -415,6 +431,14 @@
                     </div>
 
                     <input type="hidden" id="addrType" value="Home">
+
+                    <div class="flex items-center gap-2 mt-4 ml-1">
+                        <input type="checkbox" id="addrIsDefault"
+                            class="w-5 h-5 accent-brand-500 rounded cursor-pointer">
+                        <label for="addrIsDefault"
+                            class="text-sm font-bold text-gray-500 cursor-pointer select-none">Set as
+                            default address</label>
+                    </div>
 
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="closeAddressModal()"
@@ -690,6 +714,7 @@
 
         typeButtons[0].classList.add("bg-brand-500", "text-white", "border-brand-500");
         addrTypeInput.value = "Home";
+        document.getElementById("addrIsDefault").checked = false;
 
     }
 
@@ -708,6 +733,7 @@
         document.getElementById("addrState").value = addr.state;
         document.getElementById("addrZip").value = addr.zipCode;
         document.getElementById("addrType").value = addr.addressType || "Home";
+        document.getElementById("addrIsDefault").checked = addr.isDefault || false;
 
         typeButtons.forEach(b => {
             b.classList.remove("bg-brand-500", "text-white", "border-brand-500");
@@ -741,7 +767,8 @@
             city: addrCity.value.trim(),
             state: addrState.value.trim(),
             zipCode: addrZip.value.trim(),
-            addressType: addrType.value
+            addressType: addrType.value,
+            isDefault: document.getElementById("addrIsDefault").checked
         };
 
         if (data.fullName.length < 3)

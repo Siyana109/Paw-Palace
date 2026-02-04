@@ -33,9 +33,7 @@ router.post("/reset-password", authController.resetPassword)
 
 router.get('/profile', userMiddleware.checkSession, profileController.getProfile)
 router.post('/profile/update', userMiddleware.checkSession, profileController.updateProfile)
-// router.get('/profile/address/add', userMiddleware.checkSession, profileController.getAddAddress);
 router.post('/address/add', userMiddleware.checkSession, profileController.addAddress);
-// router.get('/profile/address/:id/edit', userMiddleware.checkSession, profileController.getEditAddress);
 router.put('/profile/address/:id/edit', userMiddleware.checkSession, profileController.editAddress);
 router.post('/profile/address/:id/delete', userMiddleware.checkSession, profileController.deleteAddress);
 
@@ -61,7 +59,6 @@ router.patch('/cart/update', userMiddleware.checkSession, productController.upda
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
 
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
-router.get('/order-confirmation', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);

@@ -178,8 +178,16 @@ const addAddress = async (req, res) => {
             landMark = '',
             city,
             state,
-            zipCode
+            zipCode,
+            isDefault
         } = req.body;
+
+        if (isDefault) {
+            await Address.updateMany(
+                { userId },
+                { $set: { isDefault: false } }
+            );
+        }
 
         const newAddress = new Address({
             userId,
@@ -190,7 +198,8 @@ const addAddress = async (req, res) => {
             landMark,
             city,
             state,
-            zipCode
+            zipCode,
+            isDefault: isDefault === true || isDefault === 'true'
         });
 
         await newAddress.save();
@@ -215,8 +224,16 @@ const editAddress = async (req, res) => {
             landMark = '',
             city,
             state,
-            zipCode
+            zipCode,
+            isDefault
         } = req.body;
+
+        if (isDefault) {
+            await Address.updateMany(
+                { userId },
+                { $set: { isDefault: false } }
+            );
+        }
 
         const updated = await Address.findOneAndUpdate(
             { _id: addressId, userId },
@@ -228,7 +245,8 @@ const editAddress = async (req, res) => {
                 landMark,
                 city,
                 state,
-                zipCode
+                zipCode,
+                isDefault: isDefault === true || isDefault === 'true'
             },
             { new: true }
         );

@@ -13,6 +13,11 @@ const addressSchema = new mongoose.Schema({
     default: "Home"
   },
 
+  isDefault: {
+    type: Boolean,
+    default: false
+  },
+
   fullName: {
     type: String,
     required: true,
@@ -21,8 +26,7 @@ const addressSchema = new mongoose.Schema({
   },
 
   phone: {
-    type: String, // ✅ string is better than number
-    required: true
+    type: Number
   },
 
   address: {
@@ -43,8 +47,7 @@ const addressSchema = new mongoose.Schema({
   },
 
   zipCode: {
-    type: String, // ✅ keep as string
-    required: true
+    type: Number
   }
 
 }, { timestamps: true });
