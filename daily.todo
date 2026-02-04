@@ -10,9 +10,12 @@ Monday:
 Tuesday:
     ☐ Disable out-of-stock products and restrict checkout
     ✔ Checkout page @done (2/3/2026, 3:00:28 PM)
-    ✔ Show user addresses with an add/edit option, default address selection @done (2/3/2026, 3:00:32 PM)
+    ☐ Show user addresses with an add/edit option, default address selection
     ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/3/2026, 3:00:41 PM)
     ✔ final price (including taxes, discounts, shipping) @done (2/3/2026, 3:00:54 PM)
     ☐ Place an order with Cash on Delivery
     ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
 
+Wednesday: 
+    ☐ offers
+    ☐ coupon
