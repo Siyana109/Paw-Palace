@@ -60,6 +60,7 @@ router.delete('/cart/remove', userMiddleware.checkSession, productController.rem
 
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
+router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 router.get('/wishlist', userMiddleware.checkSession, productController.getWishlist);

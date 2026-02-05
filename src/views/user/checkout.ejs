@@ -164,23 +164,29 @@
                         </div>
 
                         <!-- SELECT DROPDOWN FOR COUPONS -->
-                        <div class="relative">
-                            <select id="couponSelect"
-                                class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 pl-4 pr-10 rounded-xl appearance-none focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer">
-                                <option value="">Select a coupon</option>
-                                <% if (coupons && coupons.length> 0) { %>
-                                    <% coupons.forEach(coupon=> { %>
-                                        <option value="<%= coupon.code %>">
-                                            <%= coupon.code %> - <%= coupon.discountValue %>
-                                                    <%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
-                                        </option>
-                                        <% }) %>
-                                            <% } %>
-                            </select>
-                            <div
-                                class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <div class="flex gap-3">
+                            <div class="relative flex-1">
+                                <select id="couponSelect"
+                                    class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 pl-4 pr-10 rounded-xl appearance-none focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer">
+                                    <option value="">Select a coupon</option>
+                                    <% if (coupons && coupons.length> 0) { %>
+                                        <% coupons.forEach(coupon=> { %>
+                                            <option value="<%= coupon.code %>">
+                                                <%= coupon.code %> - <%= coupon.discountValue %>
+                                                        <%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
+                                            </option>
+                                            <% }) %>
+                                                <% } %>
+                                </select>
+                                <div
+                                    class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
                             </div>
+                            <button type="button" onclick="applyCoupon()"
+                                class="bg-brand-500 text-white px-6 rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">
+                                Apply
+                            </button>
                         </div>
                     </div>
 
@@ -245,9 +251,9 @@
                                 item.quantity), 0)
                                 : 0;
                                 const shipping = 50;
-                                const tax = 15.60; // Mock tax for visual match
+                                const tax = 0;
                                 const couponDiscount = 0; // Dynamic later
-                                const total = subtotal - offerDiscount + shipping + tax - couponDiscount;
+                                const total = subtotal - offerDiscount + shipping - couponDiscount;
                                 %>
 
                                 <div class="space-y-3 mb-6">
@@ -259,28 +265,27 @@
                                         <span>Shipping</span>
                                         <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
                                     </div>
-                                    <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                                        <span>Tax</span>
-                                        <span class="text-gray-600">₹<%= tax.toFixed(2) %></span>
-                                    </div>
+                                    <!-- Tax Removed -->
                                     <div class="flex justify-between items-center text-xs font-bold text-gray-400">
                                         <span>Offer discount</span>
                                         <span class="text-brand-500">-₹<%= offerDiscount.toFixed(2) %></span>
                                     </div>
                                     <!-- Coupon applied row (hidden by default) -->
-                                    <!--
-                        <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                            <span>Coupon applied (TRYNEW85)</span>
-                            <span class="text-brand-500">-₹85.00</span>
-                        </div>
-                        -->
+                                    <!-- Coupon applied row -->
+                                    <div id="couponRow"
+                                        class="hidden justify-between items-center text-xs font-bold text-gray-400">
+                                        <span id="couponCodeDisplay">Coupon applied</span>
+                                        <span id="couponDiscountDisplay" class="text-brand-500">-₹0.00</span>
+                                        <input type="hidden" name="couponCode" id="appliedCouponCode" value="">
+                                    </div>
                                 </div>
 
                                 <div class="border-t border-gray-100 my-6"></div>
 
                                 <div class="flex justify-between items-end mb-8">
                                     <span class="font-bold text-lg text-accent-navy">Total to Pay</span>
-                                    <span class="text-3xl font-black text-brand-500">₹<%= total.toFixed(2) %></span>
+                                    <span id="totalAmountDisplay" class="text-3xl font-black text-brand-500">₹<%=
+                                            total.toFixed(2) %></span>
                                 </div>
 
                                 <button
@@ -406,7 +411,7 @@
 <script>
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <% - JSON.stringify(addresses || []) %>;
+    const allAddresses = <%- JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {
@@ -693,6 +698,78 @@
         });
     });
 
+    async function applyCoupon() {
+        const couponResult = document.getElementById("couponSelect").value;
+
+        if (!couponResult) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Coupon Selected',
+                text: 'Please select a coupon to apply.',
+                confirmButtonColor: '#F59E0B'
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/checkout/apply-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ couponCode: couponResult })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update UI
+                document.getElementById("couponRow").classList.remove("hidden");
+                document.getElementById("couponRow").classList.add("flex");
+
+                document.getElementById("couponCodeDisplay").innerText = `Coupon applied (${data.couponCode})`;
+                document.getElementById("couponDiscountDisplay").innerText = `-₹${data.discount.toFixed(2)}`;
+                document.getElementById("appliedCouponCode").value = data.couponCode;
+
+                // Recalculate Total
+                // Total = Subtotal (from server) + Shipping (50) - Discount
+                const shipping = 50;
+                const newTotal = data.subtotal + shipping - data.discount;
+
+                document.getElementById("totalAmountDisplay").innerText = `₹${newTotal.toFixed(2)}`;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Coupon Applied!',
+                    text: `You saved ₹${data.discount.toFixed(2)}`,
+                    confirmButtonColor: '#10B981'
+                });
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Coupon Failed',
+                    text: data.message || 'Could not apply coupon.',
+                    confirmButtonColor: '#EF4444'
+                });
+
+                // Reset UI if needed
+                document.getElementById("couponRow").classList.add("hidden");
+                document.getElementById("couponRow").classList.remove("flex");
+                document.getElementById("appliedCouponCode").value = "";
+                // Reset total not strictly needed as it remains same, but we could fetch/reset
+            }
+
+        } catch (error) {
+            console.error("Error applying coupon:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'System Error',
+                text: 'Something went wrong. Please try again.',
+                confirmButtonColor: '#EF4444'
+            });
+        }
+    }
 </script>
 
 </html>
