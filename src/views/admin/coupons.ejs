@@ -26,6 +26,21 @@
             }
         }
     </script>
+
+    <style>
+        .field-error {
+            border-color: #ef4444 !important;
+            /* red-500 */
+            background-color: #fff1f2;
+        }
+
+        .error-text {
+            font-size: 11px;
+            color: #ef4444;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 font-sans text-accent-navy">
@@ -80,26 +95,16 @@
 
                         <!-- Filters -->
                         <div class="flex items-center gap-3">
-                            <div class="flex items-center bg-gray-50 rounded-xl border border-gray-100 px-3 py-1.5">
-                                <i class="fa-regular fa-calendar text-gray-400 mr-2"></i>
-                                <input type="text" placeholder="Start Date"
-                                    class="bg-transparent w-24 text-xs font-bold outline-none datepicker">
-                                <span class="text-gray-400 mx-2">-</span>
-                                <input type="text" placeholder="End Date"
-                                    class="bg-transparent w-24 text-xs font-bold outline-none datepicker">
-                            </div>
-
                             <select
                                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer">
-                                <option>Status</option>
+                                <option value="">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
-                                <option value="pending">Pending</option>
                             </select>
 
                             <select
                                 class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer">
-                                <option>Sort By</option>
+                                <option value="">Sort By</option>
                                 <option value="newest">Newest</option>
                                 <option value="oldest">Oldest</option>
                                 <option value="usage">Usage</option>
@@ -117,130 +122,25 @@
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
                                 <tr>
-                                    <th class="px-8 py-5">Coupon</th>
+                                    <th class="px-8 py-5">Coupon Code</th>
                                     <th class="px-6 py-5">Discount</th>
                                     <th class="px-6 py-5">Min. Amount</th>
-                                    <th class="px-6 py-5">Expiry Date</th>
+                                    <th class="px-6 py-5">Max Discount</th>
+                                    <th class="px-6 py-5">Validity Period</th>
                                     <th class="px-6 py-5">Usage</th>
                                     <th class="px-6 py-5">Status</th>
                                     <th class="px-8 py-5">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                <% if (typeof coupons !=='undefined' && coupons.length> 0) { %>
-                                    <% coupons.forEach(coupon=> { %>
-                                        <tr class="hover:bg-gray-50/50 transition">
-                                            <!-- Coupon -->
-                                            <td class="px-8 py-5">
-                                                <div class="flex items-center gap-4">
-                                                    <div
-                                                        class="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center border border-purple-100">
-                                                        <i class="fa-solid fa-ticket-simple"></i>
-                                                    </div>
-                                                    <div>
-                                                        <p class="font-bold text-sm text-accent-navy">
-                                                            <%= coupon.code %>
-                                                        </p>
-                                                        <p
-                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                            <%= coupon.name || 'CPN-00' +
-                                                                coupon._id.toString().substr(-3) %>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <!-- Discount -->
-                                            <td class="px-6 py-5">
-                                                <span class="font-bold text-brand-500 text-sm">
-                                                    <%= coupon.discountType==='percentage' ? coupon.discountValue + '%'
-                                                        : '$' + coupon.discountValue %>
-                                                </span>
-                                            </td>
-
-                                            <!-- Min Amount -->
-                                            <td class="px-6 py-5 text-sm font-bold text-gray-600">
-                                                ₹<%= coupon.minPurchaseAmount %>
-                                            </td>
-
-                                            <!-- Expiry -->
-                                            <td class="px-6 py-5 text-sm font-medium text-gray-500">
-                                                <%= new Date(coupon.expiryDate).toLocaleDateString('en-US', {
-                                                    year: 'numeric' , month: 'short' , day: 'numeric' }) %>
-                                            </td>
-
-                                            <!-- Usage -->
-                                            <td class="px-6 py-5 text-xs font-bold text-gray-500">
-                                                <%= coupon.usageCount || 0 %> times
-                                            </td>
-
-                                            <!-- Status -->
-                                            <td class="px-6 py-5">
-                                                <% let statusClass='' ; let statusText=coupon.isActive ? 'Active'
-                                                    : 'Inactive' ; if (new Date(coupon.expiryDate) < new Date()) {
-                                                    statusText='Expired' ; statusClass='bg-gray-100 text-gray-500' ; }
-                                                    else if (coupon.isActive) { statusClass='bg-green-50 text-green-600'
-                                                    ; } else { statusClass='bg-orange-50 text-orange-600' ; } %>
-                                                    <span
-                                                        class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide <%= statusClass %>">
-                                                        <%= statusText %>
-                                                    </span>
-                                            </td>
-
-                                            <!-- Actions -->
-                                            <td class="px-8 py-5">
-                                                <div class="flex items-center gap-3">
-                                                    <button onclick="openEditCouponModal(this)"
-                                                        data-id="<%= coupon._id %>" data-code="<%= coupon.code %>"
-                                                        data-name="<%= coupon.name %>"
-                                                        data-discount-type="<%= coupon.discountType %>"
-                                                        data-discount-value="<%= coupon.discountValue %>"
-                                                        data-min-amount="<%= coupon.minPurchaseAmount %>"
-                                                        data-expiry="<%= new Date(coupon.expiryDate).toISOString().split('T')[0] %>"
-                                                        data-limit="<%= coupon.usageLimit %>"
-                                                        data-status="<%= coupon.isActive %>"
-                                                        class="flex items-center gap-2 bg-pink-50 text-pink-500 px-4 py-1.5 rounded-lg text-[10px] font-bold hover:bg-pink-500 hover:text-white transition">
-                                                        <i class="fa-solid fa-pen"></i> Edit
-                                                    </button>
-                                                    <button
-                                                        onclick="openDeleteModal('<%= coupon._id %>', '<%= coupon.code %>')"
-                                                        class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-lg text-xs hover:bg-red-500 hover:text-white transition">
-                                                        <i class="fa-solid fa-trash-can"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                            <% } else { %>
-                                                <tr>
-                                                    <td colspan="7" class="px-8 py-16 text-center">
-                                                        <div
-                                                            class="flex flex-col items-center justify-center gap-3 text-gray-400">
-                                                            <i class="fa-solid fa-ticket text-4xl"></i>
-                                                            <p class="text-sm font-semibold">No coupons found</p>
-                                                            <p class="text-xs">Create a coupon to see it listed here</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <% } %>
+                            <tbody id="couponsTableBody" class="divide-y divide-gray-50">
+                                <!-- Rendered via JS -->
                             </tbody>
                         </table>
                     </div>
-                    <!-- Pagination (Mock) -->
-                    <div class="p-6 border-t border-gray-50 flex justify-between items-center">
-                        <p class="text-xs font-bold text-gray-400">Showing 1-10 of 84 coupons</p>
-                        <div class="flex gap-2">
-                            <button
-                                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50"><i
-                                    class="fa-solid fa-chevron-left text-xs"></i></button>
-                            <button
-                                class="w-8 h-8 rounded-lg bg-brand-500 text-white flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-500/20">1</button>
-                            <button
-                                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50">2</button>
-                            <button
-                                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50"><i
-                                    class="fa-solid fa-chevron-right text-xs"></i></button>
-                        </div>
+
+                    <!-- Pagination -->
+                    <div class="p-6 border-t border-gray-50 flex justify-between items-center" id="paginationControls">
+                        <!-- Rendered via JS -->
                     </div>
                 </div>
             </main>
@@ -257,76 +157,88 @@
 
             <h3 class="text-2xl font-bold text-accent-navy mb-6">Create Coupon</h3>
 
-            <form action="/admin/coupons/add" method="POST">
+            <form id="addCouponForm" onsubmit="handleAddCoupon(event)">
                 <div class="space-y-5 mb-8">
-                    <!-- Code & Name -->
+                    <!-- Code & Discount Type -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Code</label>
-                            <input type="text" name="code" placeholder="e.g. SUMMER20" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Coupon
+                                Code</label>
+                            <input type="text" id="addCode" name="code" placeholder="e.g. SUMMER20"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-accent-navy uppercase">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Name</label>
-                            <input type="text" name="name" placeholder="e.g. Summer Sale"
-                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
-                        </div>
-                    </div>
-
-                    <!-- Discount Type & Value -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Type</label>
-                            <select name="discountType"
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount
+                                Type</label>
+                            <select id="addDiscountType" name="discountType" onchange="toggleMaxDiscount('add')"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
                                 <option value="percentage">Percentage (%)</option>
                                 <option value="fixed">Fixed Amount ($)</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Value & Max Discount -->
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Value</label>
-                            <input type="number" name="discountValue" placeholder="20" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount
+                                Amount</label>
+                            <input type="number" id="addDiscountValue" name="discountValue" placeholder="20"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Maximum
+                                Discount</label>
+                            <input type="number" id="addMaxDiscount" name="maximumDiscount" placeholder="Optional"
+                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
                         </div>
                     </div>
 
                     <!-- Min Amount & Usage Limit -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Min.
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Min. Purchase
                                 Amount</label>
-                            <input type="number" name="minPurchaseAmount" placeholder="50.00"
+                            <input type="number" id="addMinimumPurchase" name="minimumPurchase" placeholder="0"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Limit
-                                (Optional)</label>
-                            <input type="number" name="usageLimit" placeholder="Start empty for unlimited"
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Total Usage
+                                Limit</label>
+                            <input type="number" id="addUsageLimit" name="usageLimit" placeholder="Unlimited"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
                         </div>
                     </div>
 
-                    <!-- Date & Status -->
+                    <!-- Start Date & End Date -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Expiry
-                                Date</label>
-                            <input type="text" name="expiryDate" placeholder="Select Date" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Valid
+                                From</label>
+                            <input type="text" id="addStartDate" name="startDate" placeholder="Select Date"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium datepicker">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
-                            <select name="isActive"
-                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
-                                <option value="true">Active</option>
-                                <option value="false">Inactive</option>
-                            </select>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Valid
+                                Until</label>
+                            <input type="text" id="addExpiryDate" name="expiryDate" placeholder="Select Date"
+                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium datepicker">
                         </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
+                        <select id="addStatus" name="isActive"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button type="submit"
+                    <button type="submit" id="addSubmitBtn"
                         class="w-full py-4 bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/20 hover:-translate-y-1 transition-all">
                         Create Coupon
                     </button>
@@ -350,75 +262,89 @@
 
             <h3 class="text-2xl font-bold text-accent-navy mb-6">Edit Coupon</h3>
 
-            <form id="editForm" method="POST">
+            <form id="editCouponForm" onsubmit="handleEditCoupon(event)">
+                <input type="hidden" id="editCouponId">
                 <div class="space-y-5 mb-8">
-                    <!-- Code & Name -->
+                    <!-- Code & Discount Type -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Code</label>
-                            <input type="text" id="editCode" name="code" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Coupon
+                                Code</label>
+                            <input type="text" id="editCode" name="code"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-bold text-accent-navy uppercase">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Name</label>
-                            <input type="text" id="editName" name="name"
-                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
-                        </div>
-                    </div>
-
-                    <!-- Discount Type & Value -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Type</label>
-                            <select id="editDiscountType" name="discountType"
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount
+                                Type</label>
+                            <select id="editDiscountType" name="discountType" onchange="toggleMaxDiscount('edit')"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
                                 <option value="percentage">Percentage (%)</option>
                                 <option value="fixed">Fixed Amount ($)</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Value & Max Discount -->
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Value</label>
-                            <input type="number" id="editDiscountValue" name="discountValue" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount
+                                Amount</label>
+                            <input type="number" id="editDiscountValue" name="discountValue"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Maximum
+                                Discount</label>
+                            <input type="number" id="editMaxDiscount" name="maximumDiscount"
+                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
                         </div>
                     </div>
 
                     <!-- Min Amount & Usage Limit -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Min.
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Min. Purchase
                                 Amount</label>
-                            <input type="number" id="editMinAmount" name="minPurchaseAmount"
+                            <input type="number" id="editMinimumPurchase" name="minimumPurchase"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Limit</label>
-                            <input type="number" id="editLimit" name="usageLimit"
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Total Usage
+                                Limit</label>
+                            <input type="number" id="editUsageLimit" name="usageLimit"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
                         </div>
                     </div>
 
-                    <!-- Date & Status -->
+                    <!-- Start Date & End Date -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Expiry
-                                Date</label>
-                            <input type="text" id="editExpiry" name="expiryDate" required
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Valid
+                                From</label>
+                            <input type="text" id="editStartDate" name="startDate" placeholder="Select Date"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium datepicker">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
-                            <select id="editStatus" name="isActive"
-                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
-                                <option value="true">Active</option>
-                                <option value="false">Inactive</option>
-                            </select>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Valid
+                                Until</label>
+                            <input type="text" id="editExpiryDate" name="expiryDate" placeholder="Select Date"
+                                class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium datepicker">
                         </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Status</label>
+                        <select id="editStatus" name="isActive"
+                            class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-medium">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button type="submit"
+                    <button type="submit" id="editSubmitBtn"
                         class="w-full py-4 bg-pink-500 text-white rounded-2xl font-bold shadow-lg shadow-pink-500/20 hover:-translate-y-1 transition-all">
                         Save Changes
                     </button>
@@ -431,101 +357,488 @@
         </div>
     </div>
 
-    <!-- Delete Modal -->
-    <div id="deleteModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm">
-        <div
-            class="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl text-center border-4 border-white/50 relative overflow-hidden">
-            <div
-                class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-60">
-            </div>
-            <div
-                class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                <i class="fa-solid fa-trash-can"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-accent-navy mb-2">Delete Coupon?</h3>
-            <p class="text-gray-500 text-sm mb-8 leading-relaxed">Are you sure you want to delete <span
-                    id="deleteCouponCode" class="font-bold"></span>? This action cannot be undone.</p>
-
-            <div class="flex flex-col gap-3">
-                <form id="deleteForm" method="POST">
-                    <button type="submit"
-                        class="w-full py-4 bg-red-500 text-white rounded-2xl font-bold shadow-lg shadow-red-500/20 hover:-translate-y-1 transition-all">Confirm
-                        Delete</button>
-                </form>
-                <button type="button" onclick="closeModal('deleteModal')"
-                    class="w-full py-4 bg-white border border-gray-100 text-gray-400 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-
+    <!-- SCRIPTS -->
     <script>
-        // Init Flatpickr
-        flatpickr(".datepicker", {
-            dateFormat: "Y-m-d",
-            minDate: "today"
+        const couponsData = <%- JSON.stringify(typeof coupons !== 'undefined' ? coupons : []) %>;
+
+        let filteredCoupons = [...couponsData];
+        let currentPage = 1;
+        const itemsPerPage = 7;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            flatpickr(".datepicker", {
+                dateFormat: "Y-m-d",
+                minDate: "today"
+            });
+            renderTable();
+            setupSearchAndFilter();
         });
 
-        // Modals
-        const addModal = document.getElementById('addCouponModal');
-        const editModal = document.getElementById('editCouponModal');
-        const deleteModal = document.getElementById('deleteModal');
+        // --- RENDER TABLE ---
+        function renderTable() {
+            const tbody = document.getElementById('couponsTableBody');
+            tbody.innerHTML = '';
 
-        function openAddCouponModal() {
-            addModal.classList.remove('hidden');
-            addModal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredCoupons.slice(start, end);
 
-        function openEditCouponModal(btn) {
-            // Populate data
-            document.getElementById('editForm').action = `/admin/coupons/edit/${btn.dataset.id}`;
-            document.getElementById('editCode').value = btn.dataset.code;
-            document.getElementById('editName').value = btn.dataset.name;
-            document.getElementById('editDiscountType').value = btn.dataset.discountType;
-            document.getElementById('editDiscountValue').value = btn.dataset.discountValue;
-            document.getElementById('editMinAmount').value = btn.dataset.minAmount;
+            // Time-safe format helper
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-            // Fix Flatpickr update
-            const fp = document.getElementById('editExpiry')._flatpickr;
-            if (fp) {
-                fp.setDate(btn.dataset.expiry);
-            } else {
-                document.getElementById('editExpiry').value = btn.dataset.expiry;
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-8 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center gap-3 text-gray-400">
+                                <i class="fa-solid fa-ticket text-4xl"></i>
+                                <p class="text-sm font-semibold">No coupons found</p>
+                            </div>
+                        </td>
+                    </tr>
+                 `;
+                renderPagination();
+                return;
             }
 
-            document.getElementById('editLimit').value = btn.dataset.limit || '';
-            document.getElementById('editStatus').value = btn.dataset.status;
+            pageData.forEach(coupon => {
+                const startDate = new Date(coupon.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                const expiryDate = new Date(coupon.expiryDate);
+                expiryDate.setHours(0, 0, 0, 0);
 
-            editModal.classList.remove('hidden');
-            editModal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
+                const isExpired = expiryDate < today;
+                const isPending = startDate > today;
+
+                let statusClass = '';
+                let statusText = '';
+
+                if (isExpired) {
+                    statusText = 'Expired';
+                    statusClass = 'bg-gray-100 text-gray-500';
+                } else if (isPending) {
+                    statusText = 'Pending';
+                    statusClass = 'bg-yellow-50 text-yellow-600';
+                } else if (coupon.isActive) {
+                    statusText = 'Active';
+                    statusClass = 'bg-green-50 text-green-600';
+                } else {
+                    statusText = 'Inactive';
+                    statusClass = 'bg-orange-50 text-orange-600';
+                }
+
+                const discountDisplay = coupon.discountType === 'percentage'
+                    ? `${coupon.discountValue}%`
+                    : `₹${coupon.discountValue}`;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/50 transition';
+                tr.innerHTML = `
+                    <td class="px-8 py-5">
+                         <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center border border-purple-100">
+                                <i class="fa-solid fa-ticket-simple"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-accent-navy">${coupon.code}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="font-extrabold text-brand-500 text-sm">${discountDisplay}</span>
+                    </td>
+                    <td class="px-6 py-5 text-sm font-bold text-gray-600">₹${coupon.minimumPurchase}</td>
+                    <td class="px-6 py-5 text-sm font-bold text-gray-600">${coupon.maximumDiscount ? '₹' + coupon.maximumDiscount : '-'}</td>
+                    <td class="px-6 py-5 text-sm font-medium text-gray-500">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase text-gray-400">Valid: ${new Date(coupon.startDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</span>
+                            <span class="font-bold text-gray-600">Until: ${new Date(coupon.expiryDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5 text-xs font-bold text-gray-500">${coupon.usageCount || 0} times</td>
+                    <td class="px-6 py-5">
+                         <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5">
+                         <div class="flex items-center gap-3">
+                            <button onclick="openEditCouponModal('${coupon._id}')" 
+                                class="flex items-center gap-2 bg-pink-50 text-pink-500 px-4 py-1.5 rounded-lg text-[10px] font-bold hover:bg-pink-500 hover:text-white transition">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                             <button onclick="confirmDelete('${coupon._id}', '${coupon.code}')" 
+                                class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-lg text-xs hover:bg-red-500 hover:text-white transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderPagination();
         }
 
-        function openDeleteModal(id, code) {
-            document.getElementById('deleteForm').action = `/admin/coupons/delete/${id}`;
-            document.getElementById('deleteCouponCode').innerText = code;
-            deleteModal.classList.remove('hidden');
-            deleteModal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
+        // --- FILTER & SEARCH ---
+        function setupSearchAndFilter() {
+            const searchInput = document.querySelector('input[placeholder="Search coupons by code..."]');
+            const statusFilter = document.querySelector('select:nth-of-type(1)'); // Status select
+            const sortFilter = document.querySelector('select:nth-of-type(2)');   // Sort select
+
+            function applyFilters() {
+                const query = searchInput.value.toLowerCase();
+                const status = statusFilter.value;
+                const sort = sortFilter.value;
+
+                filteredCoupons = couponsData.filter(c => {
+                    const matchesSearch = c.code.toLowerCase().includes(query);
+                    let matchesStatus = true;
+                    if (status === 'active') matchesStatus = c.isActive;
+                    if (status === 'inactive') matchesStatus = !c.isActive;
+
+                    return matchesSearch && matchesStatus;
+                });
+
+                // Sort
+                if (sort === 'newest') {
+                    filteredCoupons.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                } else if (sort === 'oldest') {
+                    filteredCoupons.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                } else if (sort === 'usage') {
+                    filteredCoupons.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+                }
+
+                currentPage = 1;
+                renderTable();
+            }
+
+            searchInput.addEventListener('input', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+            sortFilter.addEventListener('change', applyFilters);
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
+            const controls = document.getElementById('paginationControls');
+
+            if (filteredCoupons.length === 0) {
+                controls.innerHTML = '';
+                return;
+            }
+
+            // Calculate range
+            const startItem = (currentPage - 1) * itemsPerPage + 1;
+            const endItem = Math.min(currentPage * itemsPerPage, filteredCoupons.length);
+
+            let buttons = '';
+
+            // Prev Button
+            buttons += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
+                    class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+            `;
+
+            // Page Numbers Logic
+            const pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (currentPage > 3) pages.push('...');
+
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(totalPages - 1, currentPage + 1);
+
+                if (currentPage <= 3) {
+                    end = 4;
+                }
+                if (currentPage >= totalPages - 2) {
+                    start = totalPages - 3;
+                }
+
+                for (let i = start; i <= end; i++) {
+                    if (i > 1 && i < totalPages) pages.push(i);
+                }
+
+                if (currentPage < totalPages - 2) pages.push('...');
+                pages.push(totalPages);
+            }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    buttons += `<span class="w-8 h-8 flex items-center justify-center text-gray-400 font-bold select-none">...</span>`;
+                } else {
+                    const isActive = p === currentPage;
+                    const classes = isActive
+                        ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
+                        : 'border border-gray-100 text-gray-400 hover:bg-gray-50 hover:text-accent-navy';
+
+                    buttons += `
+                        <button onclick="changePage(${p})" 
+                            class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition ${classes}">
+                            ${p}
+                        </button>
+                    `;
+                }
+            });
+
+            // Next Button
+            buttons += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
+                    class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            `;
+
+            controls.innerHTML = `
+                <p class="text-xs font-bold text-gray-400">Showing ${startItem}-${endItem} of ${filteredCoupons.length} coupons</p>
+                <div class="flex gap-2 items-center">
+                    ${buttons}
+                </div>
+            `;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+        }
+
+
+        // --- MODAL & API HANDLERS ---
+        const addModal = document.getElementById('addCouponModal');
+        const editModal = document.getElementById('editCouponModal');
+
+        function openAddCouponModal() {
+            document.getElementById('addCouponForm').reset();
+            toggleMaxDiscount('add');
+            addModal.classList.remove('hidden');
+            addModal.classList.add('flex');
+        }
+
+        function openEditCouponModal(id) {
+            const coupon = couponsData.find(c => c._id === id);
+            if (!coupon) return;
+
+            document.getElementById('editCouponId').value = coupon._id;
+            document.getElementById('editCode').value = coupon.code;
+            document.getElementById('editDiscountType').value = coupon.discountType;
+            document.getElementById('editDiscountValue').value = coupon.discountValue;
+            document.getElementById('editMinimumPurchase').value = coupon.minimumPurchase;
+            document.getElementById('editMaxDiscount').value = coupon.maximumDiscount || '';
+            document.getElementById('editUsageLimit').value = coupon.usageLimit || '';
+            document.getElementById('editStartDate').value = new Date(coupon.startDate).toISOString().split('T')[0];
+            document.getElementById('editExpiryDate').value = new Date(coupon.expiryDate).toISOString().split('T')[0];
+            document.getElementById('editStatus').value = coupon.isActive.toString();
+
+            toggleMaxDiscount('edit');
+            editModal.classList.remove('hidden');
+            editModal.classList.add('flex');
         }
 
         function closeModal(modalId) {
-            const targetModal = document.getElementById(modalId);
-            targetModal.classList.add('hidden');
-            targetModal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
+            const m = document.getElementById(modalId);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
         }
 
-        // Close on backdrop click
-        window.onclick = function (event) {
-            if (event.target.classList.contains('backdrop-blur-sm')) {
-                event.target.classList.add('hidden');
-                event.target.classList.remove('flex');
-                document.body.style.overflow = 'auto';
+        function toggleMaxDiscount(prefix) {
+            const typeSelect = document.getElementById(`${prefix}DiscountType`);
+            const maxDiscountInput = document.getElementById(`${prefix}MaxDiscount`);
+            const maxDiscountContainer = maxDiscountInput.parentElement;
+
+            if (typeSelect.value === 'fixed') {
+                maxDiscountInput.value = '';
+                maxDiscountInput.disabled = true;
+                maxDiscountContainer.style.opacity = '0.5';
+                maxDiscountInput.placeholder = "Not Applicable";
+            } else {
+                maxDiscountInput.disabled = false;
+                maxDiscountContainer.style.opacity = '1';
+                maxDiscountInput.placeholder = "Optional";
             }
         }
+
+        function validateCouponData(data) {
+            const errors = [];
+
+            if (!data.code || data.code.trim().length < 4) errors.push("Coupon Code must be at least 4 characters.");
+            if (!data.discountValue || data.discountValue <= 0) errors.push("Discount Amount must be positive.");
+            if (data.discountType === 'percentage' && data.discountValue > 100) errors.push("Percentage cannot exceed 100%.");
+
+            // Validate Max Discount only if provided AND type is percentage
+            if (data.discountType === 'percentage') {
+                if (data.maximumDiscount && data.maximumDiscount <= 0) {
+                    errors.push("Maximum Discount must be positive.");
+                }
+            }
+
+            if (!data.minimumPurchase || data.minimumPurchase < 0) errors.push("Min. Purchase Amount cannot be negative.");
+
+            if (!data.startDate) errors.push("Valid From date is required.");
+            if (!data.expiryDate) errors.push("Valid Until date is required.");
+
+            if (data.startDate && data.expiryDate) {
+                const start = new Date(data.startDate);
+                const end = new Date(data.expiryDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (end < today) errors.push("Valid Until date cannot be in the past.");
+                if (start > end) errors.push("Valid From date must be before Valid Until date.");
+            }
+
+            return errors;
+        }
+
+        async function handleAddCoupon(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addSubmitBtn');
+
+            const formData = {
+                code: document.getElementById('addCode').value,
+                discountType: document.getElementById('addDiscountType').value,
+                discountValue: document.getElementById('addDiscountValue').value,
+                minimumPurchase: document.getElementById('addMinimumPurchase').value,
+                maximumDiscount: document.getElementById('addMaxDiscount').value,
+                usageLimit: document.getElementById('addUsageLimit').value,
+                startDate: document.getElementById('addStartDate').value,
+                expiryDate: document.getElementById('addExpiryDate').value,
+                isActive: document.getElementById('addStatus').value
+            };
+
+            const errors = validateCouponData(formData);
+            if (errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: errors.join('<br>'),
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = 'Creating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/admin/coupons/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => location.reload());
+                } else {
+                    throw new Error(data.message || 'Validation Failed');
+                }
+            } catch (err) {
+                Swal.fire('Error', err.message, 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function handleEditCoupon(e) {
+            e.preventDefault();
+            const id = document.getElementById('editCouponId').value;
+            const btn = document.getElementById('editSubmitBtn');
+
+            const formData = {
+                code: document.getElementById('editCode').value,
+                discountType: document.getElementById('editDiscountType').value,
+                discountValue: document.getElementById('editDiscountValue').value,
+                minimumPurchase: document.getElementById('editMinimumPurchase').value,
+                maximumDiscount: document.getElementById('editMaxDiscount').value,
+                usageLimit: document.getElementById('editUsageLimit').value,
+                startDate: document.getElementById('editStartDate').value,
+                expiryDate: document.getElementById('editExpiryDate').value,
+                isActive: document.getElementById('editStatus').value
+            };
+
+            const errors = validateCouponData(formData);
+            if (errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: errors.join('<br>'),
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/admin/coupons/edit/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => location.reload());
+                } else {
+                    throw new Error(data.message || 'Update Failed');
+                }
+            } catch (err) {
+                Swal.fire('Error', err.message, 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function confirmDelete(id, code) {
+            Swal.fire({
+                title: 'Delete Coupon?',
+                text: `Are you sure you want to delete ${code}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch(`/admin/coupons/delete/${id}`, { method: 'DELETE' });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire('Deleted!', 'Coupon has been deleted.', 'success')
+                                .then(() => location.reload());
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    } catch (err) {
+                        Swal.fire('Error', err.message, 'error');
+                    }
+                }
+            });
+        }
+
     </script>
 </body>
 

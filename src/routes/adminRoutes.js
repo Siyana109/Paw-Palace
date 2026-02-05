@@ -67,7 +67,7 @@ router.delete("/offers/delete/:id", adminMiddleware.adminSession, offerControlle
 router.get('/coupons', adminMiddleware.adminSession, couponController.loadCoupons)
 router.post('/coupons/add', adminMiddleware.adminSession, couponController.addCoupon)
 router.put("/coupons/edit/:id", adminMiddleware.adminSession, couponController.editCoupon);
-router.post("/coupons/delete/:id", adminMiddleware.adminSession, couponController.deleteCoupon);
+router.delete("/coupons/delete/:id", adminMiddleware.adminSession, couponController.deleteCoupon);
 
 
 
