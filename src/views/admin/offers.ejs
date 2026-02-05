@@ -238,7 +238,7 @@
                             <div class="col-span-2">
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Offer
                                     Name</label>
-                                <input type="text" id="offerName" placeholder="e.g. Summer Sale" required
+                                <input type="text" id="offerName" placeholder="e.g. Summer Sale" 
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm text-accent-navy">
                             </div>
                             <div>
@@ -304,7 +304,7 @@
                             <div>
                                 <label
                                     class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Value</label>
-                                <input type="number" id="discountValue" placeholder="0" required min="1"
+                                <input type="number" id="discountValue" placeholder="0" 
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm">
                             </div>
                         </div>
@@ -314,13 +314,13 @@
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Start
                                     Date</label>
-                                <input type="text" id="startDate" placeholder="Select" required
+                                <input type="text" id="startDate" placeholder="Select" 
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">End
                                     Date</label>
-                                <input type="text" id="endDate" placeholder="Select" required
+                                <input type="text" id="endDate" placeholder="Select" 
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
                             </div>
                         </div>
@@ -344,9 +344,9 @@
 
     <!-- SCRIPTS -->
     <script>
-        const offersData = <%- JSON.stringify(offers) %>;
-        const categoriesData = <%- JSON.stringify(categories) %>;
-        const productsData = <%- JSON.stringify(products) %>;
+        const offersData = <% - JSON.stringify(offers) %>;
+        const categoriesData = <% - JSON.stringify(categories) %>;
+        const productsData = <% - JSON.stringify(products) %>;
 
         // State for Pagination & Filtering
         let currentPage = 1;
@@ -404,6 +404,9 @@
                 prodDiv.classList.remove('hidden');
             }
         }
+
+        document.getElementById('offerCategory').value = "";
+        document.getElementById('offerProduct').value = "";
 
         // --- CORE LOGIC ---
 
@@ -648,75 +651,112 @@
             }, 300);
         }
 
-        async function handleOfferSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('offerId').value;
-            const offerName = document.getElementById('offerName').value;
-            const discountType = document.getElementById('discountType').value;
-            const discount = document.getElementById('discountValue').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const status = document.getElementById('offerStatus').value;
-
-            const scope = document.querySelector('input[name="offerScope"]:checked').value;
-            let categoryId = null;
-            let productId = null;
-            let offerType = scope; // 'category' or 'product'
-
-            if (scope === 'category') {
-                categoryId = document.getElementById('offerCategory').value;
-                if (!categoryId) return Swal.fire('Error', 'Please select a category', 'error');
-            } else {
-                const pVal = document.getElementById('offerProduct').value;
-                if (!pVal) return Swal.fire('Error', 'Please select a product', 'error');
-                productId = [pVal]; // Model expects array
+        function validateOfferForm(data) {
+            if (!data.offerName || data.offerName.trim().length < 3) {
+                return "Offer name must be at least 3 characters";
             }
 
-            const url = id ? `/admin/offers/edit/${id}` : '/admin/offers/add';
-            const method = id ? 'PUT' : 'POST';
+            if (!data.discount || data.discount <= 0) {
+                return "Discount must be greater than 0";
+            }
 
-            try {
-                const response = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        offerName,
-                        discount,
-                        discountType,
-                        startDate,
-                        endDate,
-                        status,
-                        offerType,
-                        categoryId,
-                        productId
-                    })
-                });
+            if (data.discountType === "percentage" && data.discount > 100) {
+                return "Percentage discount cannot exceed 100%";
+            }
 
-                const data = await response.json();
+            if (!data.startDate || !data.endDate) {
+                return "Start and end dates are required";
+            }
 
-                if (response.ok && data.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: id ? 'Offer Updated' : 'Offer Created',
-                        text: data.message,
-                        timer: 1500,
-                        showConfirmButton: false,
-                        customClass: { popup: 'rounded-2xl' }
-                    });
-                    window.location.reload();
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message,
+            if (new Date(data.endDate) <= new Date(data.startDate)) {
+                return "End date must be after start date";
+            }
+
+            if (data.offerType === "category" && !data.categoryId) {
+                return "Please select a category";
+            }
+
+            if (data.offerType === "product" && (!data.productId || data.productId.length === 0)) {
+                return "Please select a product";
+            }
+
+            return null; // ✅ valid
+        }
+
+        async function handleOfferSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('offerId').value;
+
+            const data = {
+                offerName: document.getElementById('offerName').value.trim(),
+                discountType: document.getElementById('discountType').value,
+                discount: Number(document.getElementById('discountValue').value),
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                status: document.getElementById('offerStatus').value
+            };
+
+            const scope = document.querySelector('input[name="offerScope"]:checked').value;
+            data.offerType = scope;
+
+            if (scope === "category") {
+                data.categoryId = document.getElementById('offerCategory').value;
+                data.productId = [];
+            } else {
+                const pid = document.getElementById('offerProduct').value;
+                data.productId = pid ? [pid] : [];
+                data.categoryId = null;
+            }
+
+            // 🔴 VALIDATION
+            const errorMsg = validateOfferForm(data);
+            if (errorMsg) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Validation Error",
+                    text: errorMsg,
                     customClass: { popup: 'rounded-2xl' }
                 });
             }
 
-            closeOfferModal();
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Saving...";
+
+            const url = id ? `/admin/offers/edit/${id}` : `/admin/offers/add`;
+            const method = id ? "PUT" : "POST";
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (!res.ok || !result.success) {
+                    throw new Error(result.message || "Something went wrong");
+                }
+
+                await Swal.fire({
+                    icon: "success",
+                    title: id ? "Offer Updated" : "Offer Created",
+                    timer: 1200,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-2xl' }
+                });
+
+                window.location.reload();
+
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: err.message,
+                    customClass: { popup: 'rounded-2xl' }
+                });
+            }
         }
 
         function confirmDelete(id) {

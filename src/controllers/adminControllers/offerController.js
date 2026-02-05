@@ -108,6 +108,34 @@ const createOffer = async (req, res) => {
             });
         }
 
+        if (!offerName || offerName.length < 3) {
+            return res.status(400).json({ success: false, message: "Invalid offer name" });
+        }
+
+        if (!discount || discount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid discount value" });
+        }
+
+        if (discountType === "percentage" && discount > 100) {
+            return res.status(400).json({ success: false, message: "Percentage discount cannot exceed 100" });
+        }
+
+        if (!offerType || !["product", "category"].includes(offerType)) {
+            return res.status(400).json({ success: false, message: "Invalid offer type" });
+        }
+
+        if (offerType === "category" && !categoryId) {
+            return res.status(400).json({ success: false, message: "Category required" });
+        }
+
+        if (offerType === "product" && (!productId || productId.length === 0)) {
+            return res.status(400).json({ success: false, message: "Product required" });
+        }
+
+        if (new Date(endDate) <= new Date(startDate)) {
+            return res.status(400).json({ success: false, message: "End date must be after start date" });
+        }
+
         const newOffer = new Offer({
             offerName,
             discount,
