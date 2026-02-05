@@ -4,6 +4,9 @@ import Wishlist from "../../model/wishlistModel.js";
 import Cart from "../../model/cartModel.js";
 import Offer from "../../model/offerModel.js";
 
+import { applyOfferToPrice } from "../../../utils/applyOffer.js";
+
+
 
 const getProductDetails = async (req, res) => {
   try {
@@ -92,37 +95,20 @@ const getProductDetails = async (req, res) => {
     });
 
     // 1️⃣ Product offer wins
-    const productOffer = activeOffers.find(o =>
-      o.offerType === "product" &&
-      o.productId.some(id => id.toString() === productId.toString())
-    );
-
-    // 2️⃣ Category offer only if no product offer
-    const categoryOffer = !productOffer
-      ? activeOffers.find(o =>
-        o.offerType === "category" &&
-        o.categoryId?.toString() === product.categoryId._id.toString()
-      )
-      : null;
-
-    const appliedOffer = productOffer || categoryOffer;
-
-    // Apply to variants
     variants.forEach(variant => {
-      if (!appliedOffer) {
-        variant.offerApplied = false;
-        return;
+      const { offerApplied, finalPrice } = applyOfferToPrice({
+        price: variant.price,
+        productId: product._id,
+        categoryId: product.categoryId._id,
+        activeOffers
+      });
+
+      variant.offerApplied = offerApplied;
+      if (offerApplied) {
+        variant.offerPrice = finalPrice;
       }
-
-      let discountAmount =
-        appliedOffer.discountType === "fixed"
-          ? appliedOffer.discount
-          : Math.round((variant.price * appliedOffer.discount) / 100);
-
-      variant.offerApplied = true;
-      variant.offerPrice = Math.max(0, variant.price - discountAmount);
-      variant.activeOffer = appliedOffer;
     });
+
 
     /* 8️⃣ Render */
     res.render("user/productDetails", {
@@ -253,11 +239,37 @@ const getCartPage = async (req, res) => {
     const userId = req.session.user.id;
 
     const cart = await Cart.findOne({ user: userId })
-      .populate('items.product')
+      .populate({
+        path: 'items.product',
+        populate: { path: 'categoryId' }
+      })
       .populate('items.variant');
 
-    // 🔴 Check if any item is out of stock
-    const hasOutOfStock = cart?.items?.some(
+    if (!cart) {
+      return res.render('user/cart', { cart: null, hasOutOfStock: false });
+    }
+
+    // 🔥 Fetch active offers ONCE
+    const activeOffers = await Offer.find({
+      status: "active",
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    });
+
+    // 🔥 Apply offers to each cart item
+    cart.items.forEach(item => {
+      const { finalPrice, offerApplied } = applyOfferToPrice({
+        price: item.variant.price,
+        productId: item.product._id,
+        categoryId: item.product.categoryId._id,
+        activeOffers
+      });
+
+      item.variant.offerApplied = offerApplied;
+      item.variant.offerPrice = finalPrice;
+    });
+
+    const hasOutOfStock = cart.items.some(
       item => item.variant.stock === 0
     );
 
@@ -348,10 +360,33 @@ const getWishlist = async (req, res) => {
     const userId = req.session.user.id;
 
     const wishlistDoc = await Wishlist.findOne({ user: userId })
-      .populate("items.product")
+      .populate({
+        path: "items.product",
+        populate: { path: "categoryId" }
+      })
       .populate("items.variant");
 
     const wishlistItems = wishlistDoc ? wishlistDoc.items : [];
+
+    // 🔥 Active offers
+    const activeOffers = await Offer.find({
+      status: "active",
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    });
+
+    // 🔥 Apply offers
+    wishlistItems.forEach(item => {
+      const { finalPrice, offerApplied } = applyOfferToPrice({
+        price: item.variant.price,
+        productId: item.product._id,
+        categoryId: item.product.categoryId._id,
+        activeOffers
+      });
+
+      item.variant.offerApplied = offerApplied;
+      item.variant.offerPrice = finalPrice;
+    });
 
     res.render("user/wishlist", {
       wishlist: wishlistItems

@@ -1,6 +1,9 @@
 import Address from "../../model/addressModel.js";
 import Cart from "../../model/cartModel.js";
 import Coupon from "../../model/couponModel.js";
+import Offer from "../../model/offerModel.js"
+
+import { applyOfferToPrice } from "../../../utils/applyOffer.js";
 
 const getCheckoutPage = async (req, res) => {
     try {
@@ -9,7 +12,10 @@ const getCheckoutPage = async (req, res) => {
         const addresses = await Address.find({ userId }).sort({ isDefault: -1 });
 
         const cart = await Cart.findOne({ user: userId })
-            .populate("items.product")
+            .populate({
+                path: "items.product",
+                populate: { path: "categoryId" }
+            })
             .populate("items.variant");
 
         const coupons = await Coupon.find({
@@ -29,6 +35,28 @@ const getCheckoutPage = async (req, res) => {
             return res.redirect('/cart');
         }
 
+        // 🔥 Fetch active offers ONCE
+        const activeOffers = await Offer.find({
+            status: "active",
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() }
+        });
+
+        // 🔥 Recalculate offers for each cart item
+        cart.items.forEach(item => {
+            const { offerApplied, finalPrice } = applyOfferToPrice({
+                price: item.variant.price,
+                productId: item.product._id,
+                categoryId: item.product.categoryId._id,
+                activeOffers
+            });
+
+            item.variant.offerApplied = offerApplied;
+            if (offerApplied) {
+                item.variant.offerPrice = finalPrice;
+            }
+        });
+
         res.render("user/checkout", {
             addresses,
             cart,
@@ -37,7 +65,7 @@ const getCheckoutPage = async (req, res) => {
 
     } catch (error) {
         console.error("Checkout page error:", error);
-        res.status(500).render("error/500");
+        res.status(500).send("Server Error in checkout controller");
     }
 };
 

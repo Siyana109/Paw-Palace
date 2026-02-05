@@ -214,8 +214,23 @@
                                                         <%= item.variant.color ? ' / ' + item.variant.color : '' %>
                                                 </p>
                                             </div>
-                                            <span class="font-bold text-sm text-accent-navy">₹<%=
-                                                    (item.variant.offerPrice || item.variant.price).toFixed(2) %></span>
+                                            <span class="font-bold text-sm text-accent-navy">
+                                                <div class="text-right">
+                                                    <% if (item.variant.offerApplied) { %>
+                                                        <span
+                                                            class="block text-xs text-gray-400 line-through font-bold">
+                                                            ₹<%= item.variant.price.toFixed(2) %>
+                                                        </span>
+                                                        <span class="block text-sm font-bold text-brand-500">
+                                                            ₹<%= item.variant.offerPrice.toFixed(2) %>
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="text-sm font-bold text-accent-navy">
+                                                                ₹<%= item.variant.price.toFixed(2) %>
+                                                            </span>
+                                                            <% } %>
+                                                </div>
+                                            </span>
                                         </div>
                                         <% }) %>
                                             <% } %>
@@ -391,7 +406,7 @@
 <script>
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <%- JSON.stringify(addresses || []) %>;
+    const allAddresses = <% - JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {

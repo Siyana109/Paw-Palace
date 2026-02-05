@@ -2,6 +2,8 @@ import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
 import Offer from "../../model/offerModel.js";
 
+import { applyOfferToPrice } from "../../../utils/applyOffer.js";
+
 import mongoose from "mongoose";
 
 const homePage = async (req, res) => {
@@ -121,38 +123,24 @@ const homePage = async (req, res) => {
     });
 
     products = products.map(product => {
+      const { offerApplied, finalPrice, discountType, discountValue } =
+        applyOfferToPrice({
+          price: product.price,
+          productId: product._id,
+          categoryId: product.category,
+          activeOffers
+        });
 
-      // 1️⃣ Product-level offer
-      const productOffer = activeOffers.find(o =>
-        o.offerType === "product" &&
-        o.productId.some(id => id.toString() === product._id.toString())
-      );
-
-      // 2️⃣ Category-level offer (ONLY if no product offer)
-      const categoryOffer = !productOffer
-        ? activeOffers.find(o =>
-          o.offerType === "category" &&
-          o.categoryId?.toString() === product.category?.toString()
-        )
-        : null;
-
-      const appliedOffer = productOffer || categoryOffer;
-
-      if (!appliedOffer) {
+      if (!offerApplied) {
         return { ...product, offerApplied: false };
       }
-
-      let offerPrice =
-        appliedOffer.discountType === "percentage"
-          ? product.price - (product.price * appliedOffer.discount) / 100
-          : product.price - appliedOffer.discount;
 
       return {
         ...product,
         offerApplied: true,
-        offerDiscountVal: appliedOffer.discount,
-        offerDiscountType: appliedOffer.discountType,
-        offerPrice: Math.max(offerPrice, 0)
+        offerPrice: finalPrice,
+        offerDiscountType: discountType,
+        offerDiscountVal: discountValue
       };
     });
 
