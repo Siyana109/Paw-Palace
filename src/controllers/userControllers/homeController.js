@@ -1,5 +1,7 @@
 import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
+import Offer from "../../model/offerModel.js";
+
 import mongoose from "mongoose";
 
 const homePage = async (req, res) => {
@@ -111,6 +113,48 @@ const homePage = async (req, res) => {
     ];
 
     let products = await Product.aggregate(pipeline);
+
+    const activeOffers = await Offer.find({
+      status: "active",
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    });
+
+    products = products.map(product => {
+
+      // 1️⃣ Product-level offer
+      const productOffer = activeOffers.find(o =>
+        o.offerType === "product" &&
+        o.productId.some(id => id.toString() === product._id.toString())
+      );
+
+      // 2️⃣ Category-level offer (ONLY if no product offer)
+      const categoryOffer = !productOffer
+        ? activeOffers.find(o =>
+          o.offerType === "category" &&
+          o.categoryId?.toString() === product.category?.toString()
+        )
+        : null;
+
+      const appliedOffer = productOffer || categoryOffer;
+
+      if (!appliedOffer) {
+        return { ...product, offerApplied: false };
+      }
+
+      let offerPrice =
+        appliedOffer.discountType === "percentage"
+          ? product.price - (product.price * appliedOffer.discount) / 100
+          : product.price - appliedOffer.discount;
+
+      return {
+        ...product,
+        offerApplied: true,
+        offerDiscountVal: appliedOffer.discount,
+        offerDiscountType: appliedOffer.discountType,
+        offerPrice: Math.max(offerPrice, 0)
+      };
+    });
 
     // COUNT
     const countPipeline = [

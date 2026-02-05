@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Management | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy">
+
+    <div class="flex min-h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8 h-screen overflow-y-auto custom-scrollbar">
+                <!-- HEADER -->
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-accent-navy">Offers</h1>
+                        <p class="text-gray-400 font-medium text-sm mt-1">Create and manage all special offers</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="bg-teal-50 text-teal-600 p-2 rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-sm">
+                            A
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-accent-navy">Admin User</p>
+                            <p class="text-xs text-gray-400 font-semibold">Super Admin</p>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- STATS CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Active Offers -->
+                    <div
+                        class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Active Offers
+                            </p>
+                            <h3 class="text-3xl font-extrabold text-brand-500" id="statActive">0</h3>
+                        </div>
+                        <div
+                            class="w-12 h-12 bg-brand-50 text-brand-500 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                    </div>
+
+                    <!-- Pending -->
+                    <!-- <div
+                        class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Pending</p>
+                            <h3 class="text-3xl font-extrabold text-orange-400" id="statPending">0</h3>
+                        </div>
+                        <div
+                            class="w-12 h-12 bg-orange-50 text-orange-400 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                    </div> -->
+
+                    <!-- Expired -->
+                    <div
+                        class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Expired</p>
+                            <h3 class="text-3xl font-extrabold text-gray-400" id="statExpired">0</h3>
+                        </div>
+                        <div
+                            class="w-12 h-12 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <i class="fa-solid fa-archive"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLS & FILTERS -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden mb-8">
+                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
+
+                        <!-- Search -->
+                        <div class="relative w-full max-w-md group">
+                            <i
+                                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition"></i>
+                            <input type="text" id="searchInput" placeholder="Search offers..."
+                                class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-brand-50 rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 transition font-medium text-sm">
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0">
+                            <!-- Date Filter -->
+                            <div class="flex items-center bg-gray-50 rounded-xl border border-gray-100 px-3 py-2">
+                                <i class="fa-regular fa-calendar text-gray-400 mr-2 text-xs"></i>
+                                <input type="text" id="filterStartDate" placeholder="Start"
+                                    class="bg-transparent w-20 text-xs font-bold outline-none text-gray-600 datepicker">
+                                <span class="text-gray-300 mx-2">|</span>
+                                <input type="text" id="filterEndDate" placeholder="End"
+                                    class="bg-transparent w-20 text-xs font-bold outline-none text-gray-600 datepicker">
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="relative">
+                                <select id="statusFilter" onchange="applyFilters()"
+                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <i
+                                    class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
+                            </div>
+
+                            <!-- Sort -->
+                            <div class="relative">
+                                <select id="sortFilter" onchange="applyFilters()"
+                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
+                                    <option value="newest">Sort: Newest</option>
+                                    <option value="discount_high">Sort: Discount (High)</option>
+                                    <option value="discount_low">Sort: Discount (Low)</option>
+                                    <option value="name_asc">Sort: Name (A-Z)</option>
+                                </select>
+                                <i
+                                    class="fa-solid fa-arrow-up-wide-short absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
+                            </div>
+
+                            <div class="w-px h-8 bg-gray-100 mx-1"></div>
+
+                            <button onclick="openAddOfferModal()"
+                                class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-brand-500/20 flex items-center gap-2 hover:-translate-y-0.5 transition-all">
+                                <i class="fa-solid fa-plus"></i> Add Offer
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TABLE -->
+                    <div class="overflow-x-auto min-h-[400px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-50/50 sticky top-0 z-10">
+                                <tr
+                                    class="text-gray-400 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 text-left">
+                                    <th class="px-8 py-5">Offer</th>
+                                    <th class="px-6 py-5">Discount</th>
+                                    <th class="px-6 py-5">Validity Period</th>
+                                    <th class="px-6 py-5">Status</th>
+                                    <th class="px-8 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="offersTableBody" class="divide-y divide-gray-50">
+                                <!-- Rows rendered by JS -->
+                            </tbody>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+                            <div
+                                class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-3xl text-gray-300 mb-4">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900">No offers found</h3>
+                            <p class="text-sm text-gray-400">Try adjusting your search or filters</p>
+                        </div>
+                    </div>
+
+                    <!-- PAGINATION -->
+                    <div
+                        class="p-6 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p class="text-xs font-bold text-gray-400" id="paginationInfo">Showing 0-0 of 0 offers</p>
+                        <div class="flex items-center gap-2" id="paginationControls">
+                            <!-- Buttons rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+    </div>
+
+    <!-- ADD/EDIT MODAL -->
+    <div id="offerModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-accent-navy/40 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-[2rem] p-6 max-w-lg w-full shadow-2xl border-4 border-white/50 relative overflow-hidden transform transition-all scale-95 duration-300 flex flex-col max-h-[90vh]"
+            id="offerModalContent">
+
+            <!-- Header -->
+            <div class="mb-5 flex-shrink-0">
+                <h3 class="text-xl font-bold text-accent-navy mb-0.5" id="modalTitle">Add Offer</h3>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Enter details below</p>
+            </div>
+
+            <!-- Scrollable Form Body -->
+            <div class="overflow-y-auto custom-scrollbar pr-2 flex-1">
+                <form id="offerForm" onsubmit="handleOfferSubmit(event)">
+                    <input type="hidden" id="offerId">
+
+                    <div class="space-y-4 mb-6">
+                        <!-- Row 1: Name & Status -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Offer
+                                    Name</label>
+                                <input type="text" id="offerName" placeholder="e.g. Summer Sale" required
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm text-accent-navy">
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Status</label>
+                                <select id="offerStatus"
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm cursor-pointer">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Scope -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Apply
+                                To</label>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-3">
+                                    <label
+                                        class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-gray-50 px-2 py-2 rounded-xl border-2 border-transparent has-[:checked]:border-brand-500 has-[:checked]:bg-white transition">
+                                        <input type="radio" name="offerScope" value="category" checked
+                                            onchange="toggleScope()" class="accent-brand-500">
+                                        <span class="text-xs font-bold text-gray-600">Category</span>
+                                    </label>
+                                    <label
+                                        class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-gray-50 px-2 py-2 rounded-xl border-2 border-transparent has-[:checked]:border-brand-500 has-[:checked]:bg-white transition">
+                                        <input type="radio" name="offerScope" value="product" onchange="toggleScope()"
+                                            class="accent-brand-500">
+                                        <span class="text-xs font-bold text-gray-600">Product</span>
+                                    </label>
+                                </div>
+
+                                <!-- Dynamic Selects -->
+                                <div id="categorySelectDiv">
+                                    <select id="offerCategory"
+                                        class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm text-accent-navy">
+                                        <option value="">Select Category</option>
+                                        <!-- Populated by JS -->
+                                    </select>
+                                </div>
+                                <div id="productSelectDiv" class="hidden">
+                                    <select id="offerProduct"
+                                        class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm text-accent-navy">
+                                        <option value="">Select Product</option>
+                                        <!-- Populated by JS -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Discount -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Discount
+                                    Type</label>
+                                <select id="discountType"
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm cursor-pointer">
+                                    <option value="percentage">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Value</label>
+                                <input type="number" id="discountValue" placeholder="0" required min="1"
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Date Range -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Start
+                                    Date</label>
+                                <input type="text" id="startDate" placeholder="Select" required
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">End
+                                    Date</label>
+                                <input type="text" id="endDate" placeholder="Select" required
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Buttons -->
+                    <div class="flex flex-col gap-2 mt-auto">
+                        <button type="submit" id="submitBtn"
+                            class="w-full py-3 bg-brand-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-brand-500/20 hover:-translate-y-0.5 transition-all">
+                            Save Offer
+                        </button>
+                        <button type="button" onclick="closeOfferModal()"
+                            class="w-full py-3 bg-white border border-gray-100 text-gray-400 rounded-xl font-bold text-sm hover:bg-gray-50 transition">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        const offersData = <%- JSON.stringify(offers) %>;
+        const categoriesData = <%- JSON.stringify(categories) %>;
+        const productsData = <%- JSON.stringify(products) %>;
+
+        // State for Pagination & Filtering
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let filteredOffers = [...offersData];
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            flatpickr(".datepicker", { dateFormat: "Y-m-d" });
+
+            // Search Listener
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                applyFilters();
+            });
+
+            // Date Filters Listener
+            document.getElementById('filterStartDate').addEventListener('change', applyFilters);
+            document.getElementById('filterEndDate').addEventListener('change', applyFilters);
+
+            updateStats();
+            renderTable(); // Render provided data
+            renderPagination();
+            populateDropdowns();
+        });
+
+        function populateDropdowns() {
+            const catSelect = document.getElementById('offerCategory');
+            const prodSelect = document.getElementById('offerProduct');
+
+            categoriesData.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c._id;
+                opt.textContent = c.name;
+                catSelect.appendChild(opt);
+            });
+
+            productsData.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p._id;
+                opt.textContent = p.productName;
+                prodSelect.appendChild(opt);
+            });
+        }
+
+        function toggleScope() {
+            const scope = document.querySelector('input[name="offerScope"]:checked').value;
+            const catDiv = document.getElementById('categorySelectDiv');
+            const prodDiv = document.getElementById('productSelectDiv');
+
+            if (scope === 'category') {
+                catDiv.classList.remove('hidden');
+                prodDiv.classList.add('hidden');
+            } else {
+                catDiv.classList.add('hidden');
+                prodDiv.classList.remove('hidden');
+            }
+        }
+
+        // --- CORE LOGIC ---
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            // Filter
+            filteredOffers = offersData.filter(offer => {
+                const matchesSearch = offer.offerName.toLowerCase().includes(query)
+                const matchesStatus = status ? offer.status === status : true;
+
+                let matchesDate = true;
+                if (startDate) matchesDate = matchesDate && new Date(offer.startDate) >= new Date(startDate);
+                if (endDate) matchesDate = matchesDate && new Date(offer.endDate) <= new Date(endDate);
+
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+
+            // Sort
+            filteredOffers.sort((a, b) => {
+                if (sort === 'newest') return new Date(b.startDate) - new Date(a.startDate);
+                if (sort === 'discount_high') return b.value - a.value;
+                if (sort === 'discount_low') return a.value - b.value;
+                if (sort === 'name_asc') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            currentPage = 1; // Reset to page 1
+            renderTable();
+            renderPagination();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('offersTableBody');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (filteredOffers.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                document.getElementById('paginationContainer')?.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredOffers.slice(start, end);
+
+            pageData.forEach(offer => {
+                const statusColor = getStatusColor(offer.status);
+                const formattedStartDate = formatDate(offer.startDate);
+                const formattedEndDate = formatDate(offer.endDate);
+                const discountDisplay = offer.discountType === 'percentage' ? `${offer.discount}%` : `₹${offer.discount}`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition group border-b border-gray-50 last:border-0";
+                tr.innerHTML = `
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100 group-hover:bg-orange-500 group-hover:text-white transition shadow-sm">
+                                <i class="fa-solid fa-percent"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-accent-navy cursor-pointer hover:text-brand-500 transition">${offer.offerName}</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">${offer.code || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="font-extrabold text-brand-500 text-sm">${discountDisplay}</span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-gray-600">${formattedStartDate}</span>
+                            <span class="text-[10px] text-gray-400 font-bold">to ${formattedEndDate}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusColor}">
+                            ${offer.status}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openEditOfferModal('${offer._id}')" 
+                                class="w-8 h-8 rounded-lg bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white transition flex items-center justify-center" title="Edit">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="confirmDelete('${offer._id}')"
+                                class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center" title="Delete">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredOffers.length / itemsPerPage);
+            const paginationControls = document.getElementById('paginationControls');
+            const info = document.getElementById('paginationInfo');
+
+            // Info
+            const start = filteredOffers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredOffers.length);
+            info.textContent = `Showing ${start}-${end} of ${filteredOffers.length} offers`;
+
+            // Controls
+            let btns = '';
+
+            // Prev
+            btns += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-50 cursor-not-allowed"' : ''} 
+                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>`;
+
+            // Pages
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    btns += `<button class="w-8 h-8 rounded-lg bg-brand-500 text-white flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-500/20">${i}</button>`;
+                } else {
+                    btns += `<button onclick="changePage(${i})" class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50 transition">${i}</button>`;
+                }
+            }
+
+            // Next
+            btns += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages || totalPages === 0 ? 'disabled class="opacity-50 cursor-not-allowed"' : ''} 
+                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>`;
+
+            paginationControls.innerHTML = btns;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredOffers.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            renderPagination();
+        }
+
+        function updateStats() {
+            const active = offersData.filter(o => o.status === 'active').length;
+            // const pending = offersData.filter(o => o.status === 'pending').length;
+            const expired = offersData.filter(o => o.status === 'expired').length;
+
+            document.getElementById('statActive').innerText = active;
+            // document.getElementById('statPending').innerText = pending;
+            document.getElementById('statExpired').innerText = expired;
+        }
+
+        // --- HELPERS ---
+        function getStatusColor(status) {
+            switch (status) {
+                case 'active': return 'bg-green-50 text-green-600';
+                case 'inactive': return 'bg-gray-100 text-gray-500';
+                // case 'pending': return 'bg-orange-50 text-orange-600';
+                case 'expired': return 'bg-red-50 text-red-500';
+                default: return 'bg-gray-50 text-gray-500';
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // --- MODAL HANDLERS ---
+        const modal = document.getElementById('offerModal');
+        const modalContent = document.getElementById('offerModalContent');
+
+        function openAddOfferModal() {
+            document.getElementById('offerForm').reset();
+            document.getElementById('offerId').value = '';
+            document.getElementById('modalTitle').innerText = 'Add Offer';
+            document.getElementById('submitBtn').innerText = 'Save Offer';
+            toggleScope(); // Ensure UI syncs with reset form (defaults to Category)
+            showModal();
+        }
+
+        function openEditOfferModal(id) {
+            const offer = offersData.find(o => o._id === id);
+            if (!offer) return;
+
+            document.getElementById('offerId').value = offer._id;
+            document.getElementById('offerName').value = offer.offerName;
+            document.getElementById('discountType').value = offer.discountType || "percentage";
+            document.getElementById('discountValue').value = offer.discount;
+
+            // Set Scope
+            if (offer.categoryId) {
+                document.querySelector('input[name="offerScope"][value="category"]').checked = true;
+                document.getElementById('offerCategory').value = offer.categoryId._id || offer.categoryId;
+            } else if (offer.productId && offer.productId.length > 0) {
+                document.querySelector('input[name="offerScope"][value="product"]').checked = true;
+                const pId = Array.isArray(offer.productId) ? (offer.productId[0]._id || offer.productId[0]) : (offer.productId._id || offer.productId);
+                document.getElementById('offerProduct').value = pId;
+            }
+            toggleScope();
+
+            // Set Dates in Flatpickr
+            const startPicker = document.getElementById('startDate')._flatpickr;
+            const endPicker = document.getElementById('endDate')._flatpickr;
+            if (startPicker) startPicker.setDate(offer.startDate);
+            if (endPicker) endPicker.setDate(offer.endDate);
+
+            document.getElementById('offerStatus').value = offer.status;
+
+            document.getElementById('modalTitle').innerText = 'Edit Offer';
+            document.getElementById('submitBtn').innerText = 'Update Offer';
+
+            showModal();
+        }
+
+        function showModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeOfferModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        async function handleOfferSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('offerId').value;
+            const offerName = document.getElementById('offerName').value;
+            const discountType = document.getElementById('discountType').value;
+            const discount = document.getElementById('discountValue').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const status = document.getElementById('offerStatus').value;
+
+            const scope = document.querySelector('input[name="offerScope"]:checked').value;
+            let categoryId = null;
+            let productId = null;
+            let offerType = scope; // 'category' or 'product'
+
+            if (scope === 'category') {
+                categoryId = document.getElementById('offerCategory').value;
+                if (!categoryId) return Swal.fire('Error', 'Please select a category', 'error');
+            } else {
+                const pVal = document.getElementById('offerProduct').value;
+                if (!pVal) return Swal.fire('Error', 'Please select a product', 'error');
+                productId = [pVal]; // Model expects array
+            }
+
+            const url = id ? `/admin/offers/edit/${id}` : '/admin/offers/add';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        offerName,
+                        discount,
+                        discountType,
+                        startDate,
+                        endDate,
+                        status,
+                        offerType,
+                        categoryId,
+                        productId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: id ? 'Offer Updated' : 'Offer Created',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-2xl' }
+                    });
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    customClass: { popup: 'rounded-2xl' }
+                });
+            }
+
+            closeOfferModal();
+        }
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f43f5e',
+                cancelButtonColor: '#cbd5e1',
+                confirmButtonText: 'Yes, delete it!',
+                customClass: {
+                    popup: 'rounded-3xl p-6',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+                    cancelButton: 'rounded-xl px-6 py-2.5 font-bold text-gray-600'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    confirmDeleteAction(id);
+                }
+            })
+        }
+
+        async function confirmDeleteAction(id) {
+            try {
+                const response = await fetch(`/admin/offers/delete/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'The offer has been deleted.',
+                        icon: 'success',
+                        customClass: { popup: 'rounded-2xl' }
+                    }).then(() => window.location.reload());
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    customClass: { popup: 'rounded-2xl' }
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

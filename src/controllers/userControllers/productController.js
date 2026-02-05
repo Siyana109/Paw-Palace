@@ -2,6 +2,7 @@ import Product from "../../model/productModel.js";
 import Variant from "../../model/variantModel.js";
 import Wishlist from "../../model/wishlistModel.js";
 import Cart from "../../model/cartModel.js";
+import Offer from "../../model/offerModel.js";
 
 
 const getProductDetails = async (req, res) => {
@@ -77,6 +78,52 @@ const getProductDetails = async (req, res) => {
 
 
 
+    /* 7.5️⃣ Calculate Offers */
+    const currentDate = new Date();
+
+    const activeOffers = await Offer.find({
+      status: "active",
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate },
+      $or: [
+        { productId: { $in: [productId] } },
+        { categoryId: product.categoryId._id }
+      ]
+    });
+
+    // 1️⃣ Product offer wins
+    const productOffer = activeOffers.find(o =>
+      o.offerType === "product" &&
+      o.productId.some(id => id.toString() === productId.toString())
+    );
+
+    // 2️⃣ Category offer only if no product offer
+    const categoryOffer = !productOffer
+      ? activeOffers.find(o =>
+        o.offerType === "category" &&
+        o.categoryId?.toString() === product.categoryId._id.toString()
+      )
+      : null;
+
+    const appliedOffer = productOffer || categoryOffer;
+
+    // Apply to variants
+    variants.forEach(variant => {
+      if (!appliedOffer) {
+        variant.offerApplied = false;
+        return;
+      }
+
+      let discountAmount =
+        appliedOffer.discountType === "fixed"
+          ? appliedOffer.discount
+          : Math.round((variant.price * appliedOffer.discount) / 100);
+
+      variant.offerApplied = true;
+      variant.offerPrice = Math.max(0, variant.price - discountAmount);
+      variant.activeOffer = appliedOffer;
+    });
+
     /* 8️⃣ Render */
     res.render("user/productDetails", {
       product,
@@ -85,7 +132,8 @@ const getProductDetails = async (req, res) => {
       hasStock,
       inWishlist,
       isInCart,
-      relatedProducts
+      relatedProducts,
+      activeOffers
     });
 
   } catch (err) {
@@ -185,7 +233,7 @@ const addToCart = async (req, res) => {
       removedFromWishlist: true,
       redirect: "/cart"
     });
-    
+
   } catch (err) {
     console.error("Add to cart error:", err);
     res.status(500).json({
@@ -208,8 +256,14 @@ const getCartPage = async (req, res) => {
       .populate('items.product')
       .populate('items.variant');
 
+    // 🔴 Check if any item is out of stock
+    const hasOutOfStock = cart?.items?.some(
+      item => item.variant.stock === 0
+    );
+
     res.render('user/cart', {
-      cart
+      cart,
+      hasOutOfStock
     });
 
   } catch (error) {
@@ -217,6 +271,7 @@ const getCartPage = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 const updateCartQuantity = async (req, res) => {
   try {

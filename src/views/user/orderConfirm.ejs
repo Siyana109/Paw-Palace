@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | PawPalace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#f43f5e', 50: '#fff1f2' },
+                        accent: { navy: '#0f172a', cream: '#fffdf5' }
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen flex flex-col">
+
+    <%- include('../partials/header') %>
+
+        <main class="flex-grow max-w-4xl mx-auto py-12 px-6 w-full flex flex-col items-center justify-center">
+
+            <!-- SUCCESS ANIMATION AREA -->
+            <div class="mb-8 text-center">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                    <i class="fa-solid fa-check text-4xl text-green-500 animate-bounce-slow"></i>
+                    <div class="absolute inset-0 rounded-full border-4 border-green-200 animate-ping opacity-20"></div>
+                </div>
+                <h1 class="text-4xl font-extrabold mb-4 text-accent-navy">Order Placed Successfully!</h1>
+                <p class="text-gray-500 text-lg">Thank you for shopping with PawPalace.</p>
+            </div>
+
+            <!-- ORDER CARD -->
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 w-full relative overflow-hidden">
+
+                <!-- Confetti decoration (static SVG or CSS) -->
+                <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-paw text-9xl transform rotate-12"></i>
+                </div>
+
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-100 pb-6 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wide mb-1">Order ID</p>
+                        <h3 class="text-xl font-black text-brand-500">
+                            <%= order._id %>
+                        </h3>
+                    </div>
+                    <div class="md:text-right">
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wide mb-1">Date</p>
+                        <h3 class="font-bold text-accent-navy">
+                            <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric' , month: 'long'
+                                , day: 'numeric' }) %>
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- DETAILS GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
+                    <!-- Shipping Info -->
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fa-solid fa-truck text-brand-500"></i> Shipping Address
+                        </h4>
+                        <div class="text-sm text-gray-500 leading-relaxed bg-gray-50 p-4 rounded-2xl">
+                            <p class="font-bold text-accent-navy mb-1">
+                                <%= order.address.fullName %>
+                            </p>
+                            <p>
+                                <%= order.address.address %>
+                            </p>
+                            <p>
+                                <%= order.address.city %>, <%= order.address.state %>
+                                        <%= order.address.zipCode %>
+                            </p>
+                            <p class="mt-2"><span class="font-bold">Phone:</span>
+                                <%= order.address.phone %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fa-solid fa-credit-card text-brand-500"></i> Payment Method
+                        </h4>
+                        <div class="text-sm text-gray-500 leading-relaxed bg-gray-50 p-4 rounded-2xl h-full">
+                            <p class="font-bold text-accent-navy">
+                                <%= order.paymentMethod %>
+                            </p>
+                            <p class="text-xs mt-1">Status: <span class="text-green-600 font-bold">Pending / Paid</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORDER ITEMS -->
+                <div class="mb-8">
+                    <h4 class="font-bold text-gray-900 mb-4">Items Ordered</h4>
+                    <div class="space-y-4">
+                        <% if (order.items && order.items.length> 0) { %>
+                            <% order.items.forEach(item=> { %>
+                                <div class="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                                        <!-- Mock Image since realistic paths aren't available in mock data often -->
+                                        <div
+                                            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
+                                            <i class="fa-solid fa-image"></i>
+                                        </div>
+                                        <!-- <img src="<%= item.image %>" class="w-full h-full object-cover"> -->
+                                    </div>
+                                    <div class="flex-1">
+                                        <h5 class="font-bold text-accent-navy text-sm">
+                                            <%= item.productName %>
+                                        </h5>
+                                        <p class="text-xs text-gray-400">
+                                            <%= item.variantDetails %>
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-sm text-accent-navy">₹<%= item.price.toFixed(2) %>
+                                        </p>
+                                        <p class="text-xs text-gray-400">Qty: <%= item.quantity %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } %>
+                    </div>
+                </div>
+
+                <!-- TOTALS -->
+                <div class="bg-brand-50 rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-gray-600">Subtotal</span>
+                        <span class="text-sm font-bold text-gray-900">₹<%= order.subtotal.toFixed(2) %></span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm font-bold text-gray-600">Shipping</span>
+                        <span class="text-sm font-bold text-gray-900">₹<%= order.shipping.toFixed(2) %></span>
+                    </div>
+                    <div class="border-t border-brand-100 my-2"></div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-lg font-extrabold text-brand-500">Total</span>
+                        <span class="text-2xl font-black text-brand-500">₹<%= order.totalAmount.toFixed(2) %></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <a href="/home"
+                    class="bg-brand-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30 text-center">
+                    Continue Shopping
+                </a>
+                <a href="/profile/orders"
+                    class="bg-white text-accent-navy px-8 py-3 rounded-xl font-bold hover:bg-gray-50 transition border border-gray-200 text-center">
+                    View My Orders
+                </a>
+            </div>
+
+        </main>
+
+        <%- include('../partials/footer') %>
+
+</body>
+
+</html>

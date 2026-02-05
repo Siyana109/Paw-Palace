@@ -11,8 +11,9 @@ import productController from "../controllers/adminControllers/productController
 import variantController from "../controllers/adminControllers/variantController.js"
 
 import couponController from "../controllers/adminControllers/couponController.js"
+import offerController from "../controllers/adminControllers/offerController.js"
 
-import { variantUpload, upload} from "../middlewares/upload.js"
+import { variantUpload, upload } from "../middlewares/upload.js"
 
 
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)
@@ -55,10 +56,20 @@ router.post("/products/variants/edit/:variantId", adminMiddleware.adminSession, 
 
 
 
-router.get('/coupons',adminMiddleware.adminSession, couponController.loadCoupons)
+router.get("/offers", adminMiddleware.adminSession, offerController.getOffers);
+router.get("/offers/stats", adminMiddleware.adminSession, offerController.getOfferStats);
+router.post("/offers/add", adminMiddleware.adminSession, offerController.createOffer);
+router.put("/offers/edit/:id", adminMiddleware.adminSession, offerController.updateOffer);
+router.delete("/offers/delete/:id", adminMiddleware.adminSession, offerController.deleteOffer);
+
+
+
+router.get('/coupons', adminMiddleware.adminSession, couponController.loadCoupons)
 router.post('/coupons/add', adminMiddleware.adminSession, couponController.addCoupon)
-router.post("/coupons/edit/:id", adminMiddleware.adminSession, couponController.editCoupon);
+router.put("/coupons/edit/:id", adminMiddleware.adminSession, couponController.editCoupon);
 router.post("/coupons/delete/:id", adminMiddleware.adminSession, couponController.deleteCoupon);
+
+
 
 
 export default router

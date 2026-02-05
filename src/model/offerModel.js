@@ -11,6 +11,17 @@ const offerSchema = new mongoose.Schema({
         min: 0,
         max: 100
     },
+    discountType: {
+        type: String,
+        enum: ['percentage', 'fixed'],
+        default: 'percentage',
+        required: true
+    },
+    offerType: {
+        type: String,
+        enum: ['product', 'category'],
+        required: true
+    },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
@@ -35,13 +46,5 @@ const offerSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
-// Virtual to determine if it's a category or product offer
-// offerSchema.virtual('offerType').get(function () {
-//     return this.categoryId ? 'category' : 'product';
-// });
-
-// offerSchema.set('toJSON', { virtuals: true });
-// offerSchema.set('toObject', { virtuals: true });
 
 export default mongoose.model('Offer', offerSchema); 
