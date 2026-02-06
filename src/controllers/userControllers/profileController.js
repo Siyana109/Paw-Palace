@@ -655,11 +655,40 @@ const getOrderHistory = async (req, res) => {
 };
 
 
+const getOrderDetails = async (req, res) => {
+    try {
+        const userId = req.session.user?.id;
+        const orderId = req.params.id;
+
+        if (!userId) return res.redirect('/login');
+
+        const order = await Order.findOne({ _id: orderId, userId })
+            .populate("items.productId")
+            .populate("items.variantId")
+            .lean();
+
+        if (!order) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        res.render('user/singleOrder', {
+            title: `Order #${order.orderId} | PawPalace`,
+            order,
+            user: req.session.user
+        });
+
+    } catch (error) {
+        console.error("Get Order Details Error:", error);
+        res.status(500).render('error', { message: 'Failed to load order details' });
+    }
+};
+
+
 
 export default {
     getProfile, updateProfile,
     addAddress, editAddress, deleteAddress,
     getChangePassword, postChangePassword,
     getChangeEmail, postChangeEmail, getVerifyEmailOtp, verifyEmailOtp, resendEmailOtp,
-    updateProfileImage, removeProfilePic, getOrderHistory
+    updateProfileImage, removeProfilePic, getOrderHistory, getOrderDetails
 }
