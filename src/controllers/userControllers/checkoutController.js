@@ -281,7 +281,7 @@ const placeOrder = async (req, res) => {
             orderItems.push({
                 productId: item.product._id,
                 variantId: item.variant._id,
-                productName: item.product.productName, // ✅ REQUIRED
+                productName: item.product.productName,
                 variantName: item.variant.size || item.variant.color || "",
                 price,
                 quantity: item.quantity,
@@ -294,9 +294,11 @@ const placeOrder = async (req, res) => {
         let couponId = null;
 
         if (couponCode) {
+            console.log("Checking Coupon:", couponCode);
             const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
 
             if (coupon) {
+                console.log("Coupon Found:", coupon.code);
                 if (coupon.discountType === "percentage") {
                     discount = (subtotal * coupon.discountValue) / 100;
                     if (coupon.maximumDiscount) {
@@ -308,7 +310,12 @@ const placeOrder = async (req, res) => {
 
                 discount = Math.min(discount, subtotal);
                 couponId = coupon._id;
+                console.log("Discount Applied:", discount);
+            } else {
+                console.log("Coupon Not Found or Inactive");
             }
+        } else {
+            console.log("No Coupon Code provided in body");
         }
 
         const shipping = 50;
