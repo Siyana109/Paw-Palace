@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History | PawPalace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#f43f5e', 50: '#fff1f2' },
+                        accent: { navy: '#0f172a', cream: '#fffdf5' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen">
+
+    <%- include('../partials/header') %>
+
+
+        <main class="container mx-auto px-4 py-8 max-w-7xl">
+            <!-- HEADER ROW -->
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-3xl font-bold text-accent-navy text-center mb-2 w-full lg:text-left">Order History</h1>
+                <a href="/profile"
+                    class="hidden lg:flex items-center gap-2 text-gray-500 hover:text-brand-500 transition font-bold">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Profile
+                </a>
+            </div>
+
+            <p class="text-center text-gray-500 mb-8 lg:hidden">Track, return, or buy it all again.</p>
+
+
+            <!-- TABS -->
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-8 custom-scrollbar">
+                <% const tabs=[ { name: 'All Orders' , id: 'All' }, { name: 'In Progress' , id: 'In Progress' }, {
+                    name: 'Delivered' , id: 'Delivered' }, { name: 'Cancelled' , id: 'Cancelled' }, { name: 'Returned' ,
+                    id: 'Returned' }, { name: 'Failed' , id: 'Failed' } ]; const
+                    activeClass="bg-accent-navy text-white shadow-lg" ; const
+                    mobileActiveClass="bg-accent-navy text-white shadow-lg" ; const
+                    inactiveClass="bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-accent-navy"
+                    ; const failedClass="bg-red-50 border border-red-100 text-red-500 hover:bg-red-100" ; %>
+
+                    <% tabs.forEach(tab=> {
+                        let isActive = (locals.currentStatus === tab.id) || (!locals.currentStatus && tab.id === 'All');
+
+                        // Special styling for Failed tab if inactive
+                        let baseClass = (tab.id === 'Failed' && !isActive) ? failedClass : inactiveClass;
+
+                        // Final class logic
+                        let finalClass = isActive ? activeClass : baseClass;
+                        %>
+                        <a href="/orders?status=<%= tab.id %>"
+                            class="px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition <%= finalClass %>">
+                            <%= tab.name %>
+                        </a>
+                        <% }) %>
+            </div>
+
+
+            <!-- ORDERS LIST -->
+            <div class="space-y-6">
+
+                <% if (orders && orders.length> 0) { %>
+                    <% orders.forEach(order=> { %>
+                        <!-- ORDER CARD -->
+                        <!-- Color Coding Logic -->
+                        <% let borderColor='border-l-brand-500' ; // Default Blue (In Progress) let
+                            statusColor='bg-brand-50 text-brand-600' ; let statusIcon='fa-truck-fast' ; if
+                            (['Delivered', 'Completed' ].includes(order.orderStatus)) {
+                            borderColor='border-l-emerald-500' ; statusColor='bg-emerald-50 text-emerald-600' ;
+                            statusIcon='fa-check' ; } else if (['Cancelled', 'Returned' , 'Failed'
+                            ].includes(order.orderStatus)) { borderColor='border-l-rose-500' ;
+                            statusColor='bg-rose-50 text-rose-600' ; statusIcon='fa-xmark' ; } else if
+                            (order.payment.status==='Failed' || order.orderStatus==='Failed' ) {
+                            borderColor='border-l-rose-500' ; statusColor='bg-rose-50 text-rose-600' ;
+                            statusIcon='fa-triangle-exclamation' ; } %>
+
+                            <div
+                                class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 border-l-[6px] <%= borderColor %> relative overflow-hidden group hover:shadow-md transition-all">
+
+                                <!-- CARD HEADER -->
+                                <div
+                                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-50 pb-4">
+                                    <div class="flex gap-6 sm:gap-12">
+                                        <div>
+                                            <p
+                                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
+                                                DATE PLACED</p>
+                                            <p class="text-sm font-bold text-accent-navy">
+                                                <%= new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                    month: 'short' , day: 'numeric' , year: 'numeric' }) %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
+                                                TOTAL</p>
+                                            <p class="text-sm font-bold text-accent-navy">₹<%=
+                                                    order.totalAmount.toFixed(2) %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
+                                                ORDER #</p>
+                                            <p class="text-sm font-bold text-accent-navy">
+                                                <%= order.orderId %>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Badge -->
+                                    <div
+                                        class="px-3 py-1 rounded-lg <%= statusColor %> text-xs font-bold inline-flex items-center gap-2 self-start sm:self-center">
+                                        <i class="fa-solid <%= statusIcon %>"></i>
+                                        <%= order.orderStatus %>
+                                    </div>
+                                </div>
+
+                                <!-- CARD BODY -->
+                                <div
+                                    class="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
+
+                                    <!-- Left: Status Message & Images -->
+                                    <div class="space-y-4 flex-1">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-accent-navy flex items-center gap-2">
+                                                <% if (order.orderStatus==='Delivered' ) { %>
+                                                    Delivered <%= new Date(order.updatedAt).toLocaleDateString('en-US',
+                                                        { month: 'short' , day: 'numeric' }) %>
+                                                        <% } else if (order.orderStatus==='Cancelled' ) { %>
+                                                            Order Cancelled
+                                                            <% } else if (order.orderStatus==='Failed' ) { %>
+                                                                Payment Failed
+                                                                <% } else { %>
+                                                                    Arriving <%= new Date(Date.now() + 7 * 24 * 60 * 60
+                                                                        * 1000).toLocaleDateString('en-US', {
+                                                                        month: 'short' , day: 'numeric' }) %>
+                                                                        <% } %>
+                                            </h3>
+                                            <p class="text-xs text-gray-400">
+                                                <% if (order.orderStatus==='Delivered' ) { %>
+                                                    Package delivered.
+                                                    <% } else if (order.orderStatus==='Cancelled' ) { %>
+                                                        You cancelled this order.
+                                                        <% } else { %>
+                                                            Package is on the way.
+                                                            <% } %>
+                                            </p>
+                                        </div>
+
+                                        <!-- Images -->
+                                        <div class="flex items-center gap-2">
+                                            <% order.items.slice(0, 3).forEach(item=> { %>
+                                                <div class="w-12 h-12 rounded-xl bg-gray-50 p-1 border border-gray-100">
+                                                    <% let imageUrl='/assets/images/default-product.png' ; if
+                                                        (item.variantId && item.variantId.coverImage) {
+                                                        imageUrl=item.variantId.coverImage; } %>
+                                                        <img src="<%= imageUrl %>" alt="Product"
+                                                            class="w-full h-full object-contain mix-blend-multiply">
+                                                </div>
+                                                <% }) %>
+                                                    <% if (order.items.length> 3) { %>
+                                                        <div
+                                                            class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 border border-gray-100">
+                                                            +<%= order.items.length - 3 %>
+                                                        </div>
+                                                        <% } %>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Actions -->
+                                    <div class="flex gap-3 w-full lg:w-auto">
+                                        <% if (['Delivered'].includes(order.orderStatus)) { %>
+                                            <a href="#"
+                                                class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
+                                                View Details
+                                            </a>
+                                            <a href="#"
+                                                class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
+                                                Invoice
+                                            </a>
+                                            <% } else if (['Cancelled', 'Failed' ].includes(order.orderStatus)) { %>
+                                                <!-- For Failed/Cancelled, maybe 'Buy Again' or Retry -->
+                                                <button
+                                                    class="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm text-center hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">
+                                                    Buy Again
+                                                </button>
+                                                <% } else { %>
+                                                    <a href="/order-confirmation/<%= order._id %>"
+                                                        class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
+                                                        View Order
+                                                    </a>
+                                                    <% } %>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <% }) %>
+
+                                <!-- PAGINATION (Simplified) -->
+                                <div class="flex justify-center mt-12 gap-2">
+                                    <% if (currentPage> 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>"
+                                            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition">
+                                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                                        </a>
+                                        <% } %>
+                                            <span class="px-4 py-2 font-bold text-accent-navy">Page <%= currentPage %>
+                                                    of
+                                                    <%= totalPages %></span>
+                                            <% if (currentPage < totalPages) { %>
+                                                <a href="?page=<%= currentPage + 1 %>"
+                                                    class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition">
+                                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                                </a>
+                                                <% } %>
+                                </div>
+
+                                <% } else { %>
+                                    <div class="text-center py-20">
+                                        <div
+                                            class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300 text-3xl">
+                                            <i class="fa-solid fa-box-open"></i>
+                                        </div>
+                                        <h2 class="text-xl font-bold text-accent-navy mb-2">No orders yet</h2>
+                                        <p class="text-gray-400 mb-8">Time to spoil your furry friend!</p>
+                                        <a href="/home"
+                                            class="bg-brand-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">
+                                            Start Shopping
+                                        </a>
+                                    </div>
+                                    <% } %>
+
+            </div>
+
+        </main>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

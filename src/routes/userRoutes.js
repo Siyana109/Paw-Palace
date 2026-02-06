@@ -61,6 +61,7 @@ router.delete('/cart/remove', userMiddleware.checkSession, productController.rem
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
 router.post('/checkout/place-order', userMiddleware.checkSession, checkoutController.placeOrder);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
+router.get('/orders', userMiddleware.checkSession, profileController.getOrderHistory);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
