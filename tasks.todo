@@ -108,8 +108,8 @@ WEEK 10:
     ☐ Disable out-of-stock products and restrict checkout
     ☐ Checkout page
     ✔ Show user addresses with an add/edit option, default address selection @done (2/4/2026, 8:27:10 PM)
-    ☐ Display products with image, quantity, item total, taxes (optional), discounts,
-    ☐ final price (including taxes, discounts, shipping)
+    ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/6/2026, 1:15:42 AM)
+    ✔ final price (including taxes, discounts, shipping) @done (2/6/2026, 1:15:46 AM)
     ☐ Place an order with Cash on Delivery
     ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
     ☐ Order management
@@ -168,6 +168,7 @@ TODO :
         ✔ swal on add/edit products @done (1/31/2026, 2:02:15 AM)
         ✔ sort & search & pagination brand, top brand @done (1/30/2026, 4:38:51 PM)
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
+        ☐ offer filtering sorting pagination
 
 
 

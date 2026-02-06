@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | PawPalace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#f43f5e', 50: '#fff1f2' },
+                        accent: { navy: '#0f172a', cream: '#fffdf5' }
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-accent-cream font-sans text-accent-navy antialiased min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div
+        class="bg-white w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden text-center border-4 border-white">
+
+        <!-- Decoration Gradient -->
+        <div
+            class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-green-50 to-transparent pointer-events-none">
+        </div>
+
+        <!-- Success Icon -->
+        <div class="relative z-10 mb-6">
+            <div
+                class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-500/30 animate-bounce-slow">
+                <i class="fa-solid fa-check text-4xl text-white"></i>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl font-black text-accent-navy mb-2 relative z-10">
+            Purr-fect! <i class="fa-solid fa-paw text-2xl text-gray-400 rotate-12 ml-1"></i>
+        </h1>
+        <p class="text-gray-500 font-medium mb-8 relative z-10">
+            Your order has been placed successfully.
+        </p>
+
+        <!-- Order Card -->
+        <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100 mb-8 relative z-10">
+            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2">Order Number</p>
+            <h2 class="text-2xl font-black text-accent-navy mb-4 tracking-tight">#<%=
+                    order._id.toString().slice(-6).toUpperCase() %>
+            </h2>
+
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-500 font-bold">Estimated Delivery:</span>
+                <span class="text-teal-600 font-bold">
+                    <%= new Date(new Date().setDate(new Date().getDate() + 5)).toLocaleDateString('en-US', {
+                        month: 'short' , day: 'numeric' }) %> -
+                        <%= new Date(new Date().setDate(new Date().getDate() + 7)).toLocaleDateString('en-US', {
+                            month: 'short' , day: 'numeric' }) %>
+                </span>
+            </div>
+        </div>
+
+        <p class="text-gray-400 text-xs mb-8 leading-relaxed px-4">
+            We've sent a confirmation email to <span class="font-bold text-gray-600">
+                <%= user.email %>
+            </span>.
+            We'll let you know when your treats are on the way!
+        </p>
+
+        <!-- Actions -->
+        <div class="flex gap-3">
+            <a href="/profile/orders"
+                class="flex-1 bg-emerald-400 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg shadow-emerald-400/30 text-sm">
+                Track Order
+            </a>
+            <a href="/home"
+                class="flex-1 bg-white text-gray-600 border border-gray-200 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition text-sm">
+                Continue Shopping
+            </a>
+        </div>
+
+    </div>
+
+    <div class="mt-8 text-center text-[10px] text-gray-300">
+        Need to make a change? <a href="/contact" class="text-brand-500 hover:underline">Contact Support</a> within 1
+        hour.<br>
+        © 2025 PawPalace. Spreading joy one wag at a time.
+    </div>
+
+</body>
+
+</html>

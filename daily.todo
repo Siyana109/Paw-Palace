@@ -18,8 +18,23 @@ Tuesday:
 
 Wednesday: 
     ✔ offers @done (2/5/2026, 5:18:45 PM)
-    ☐ coupon
+    ✔ coupon @done (2/6/2026, 1:15:10 AM)
 
 Thursday:
     ☐ Place an order with Cash on Delivery
     ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
+
+Friday:
+    admin:
+    ☐ Order management
+    ☐ List orders in descending order by order date
+    ☐ Show orderID, date, user details, and view detail button
+    ☐ Change order status (pending, shipped, out for delivery, delivered, cancelled)
+    ☐ Search, sort, and filter with clear functionality
+    ☐ Pagination
+    user:
+    ☐ Order management
+    ☐ Order listing with unique, consistent orderID, status, and order date
+    ☐ Return order (mandatory reason) when delivered
+    ☐ Order detail page
+    ☐ Search order

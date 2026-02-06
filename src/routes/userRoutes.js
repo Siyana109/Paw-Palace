@@ -59,6 +59,7 @@ router.patch('/cart/update', userMiddleware.checkSession, productController.upda
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
 
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
+router.post('/checkout/place-order', userMiddleware.checkSession, checkoutController.placeOrder);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 
