@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
         tailwind.config = {
@@ -43,15 +42,28 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #cbd5e1;
         }
+
+        /* Drawer Transition */
+        .drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .drawer-open {
+            transform: translateX(0);
+        }
+
+        .drawer-closed {
+            transform: translateX(100%);
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 font-sans text-accent-navy">
+<body class="bg-gray-50 font-sans text-accent-navy overflow-hidden">
 
-    <div class="flex min-h-screen">
+    <div class="flex h-screen">
         <%- include('../partials/adminSidebar') %>
 
-            <main class="flex-1 p-8 h-screen overflow-y-auto custom-scrollbar">
+            <main class="flex-1 p-8 h-full overflow-y-auto custom-scrollbar relative">
                 <!-- HEADER -->
                 <header class="flex justify-between items-center mb-8">
                     <div>
@@ -78,7 +90,9 @@
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Orders
                             </p>
-                            <h3 class="text-3xl font-extrabold text-accent-navy" id="statTotal">0</h3>
+                            <h3 class="text-3xl font-extrabold text-accent-navy">
+                                <%= stats.total %>
+                            </h3>
                         </div>
                         <div
                             class="w-12 h-12 bg-gray-50 text-gray-400 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -91,7 +105,9 @@
                         class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Completed</p>
-                            <h3 class="text-3xl font-extrabold text-brand-500" id="statCompleted">0</h3>
+                            <h3 class="text-3xl font-extrabold text-brand-500">
+                                <%= stats.completed %>
+                            </h3>
                         </div>
                         <div
                             class="w-12 h-12 bg-brand-50 text-brand-500 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -104,7 +120,9 @@
                         class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Pending</p>
-                            <h3 class="text-3xl font-extrabold text-orange-400" id="statPending">0</h3>
+                            <h3 class="text-3xl font-extrabold text-orange-400">
+                                <%= stats.pending %>
+                            </h3>
                         </div>
                         <div
                             class="w-12 h-12 bg-orange-50 text-orange-400 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -117,7 +135,9 @@
                         class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition">
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cancelled</p>
-                            <h3 class="text-3xl font-extrabold text-red-500" id="statCancelled">0</h3>
+                            <h3 class="text-3xl font-extrabold text-red-500">
+                                <%= stats.cancelled %>
+                            </h3>
                         </div>
                         <div
                             class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -126,72 +146,52 @@
                     </div>
                 </div>
 
-                <!-- CONTROLS & FILTERS -->
+                <!-- FILTERS & TABLE -->
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden mb-8">
-                    <div class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
 
+                    <!-- FILTER BAR -->
+                    <form action="/admin/orders" method="GET"
+                        class="p-6 border-b border-gray-50 flex flex-wrap gap-4 items-center justify-between">
                         <!-- Search -->
                         <div class="relative w-full max-w-sm group">
                             <i
                                 class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition"></i>
-                            <input type="text" id="searchInput" placeholder="Search Filter..."
+                            <input type="text" name="search" value="<%= query.search || '' %>"
+                                placeholder="Search Order ID..."
                                 class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-brand-50 rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 transition font-medium text-sm">
                         </div>
 
-                        <!-- Actions -->
                         <div class="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0">
-
-                            <!-- Date Filter (Optional as per user request, but good to have ui for future) -> Removed Logic but kept UI minimal if needed, user said 'no need of date based sorting', but date filtering is often useful. user request said 'no need of that date based sorting', so I will remove the UI sort option, but maybe keep simple filters. Let's stick to what was asked: User said: "include all functionalities like sorting(no need of that date based sorting) real time search , pagination and everything we need in frontend". -->
-
                             <!-- Status Filter -->
                             <div class="relative">
-                                <i
-                                    class="fa-solid fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs z-10"></i>
-                                <select id="statusFilter" onchange="applyFilters()"
-                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-8 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
+                                <select name="status" onchange="this.form.submit()"
+                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
                                     <option value="">Status: All</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Processing">Processing</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                    <option value="Failed">Failed</option>
+                                    <% ['Placed', 'Pending' , 'Processing' , 'Shipped' , 'Delivered' , 'Cancelled'
+                                        , 'Returned' , 'Failed' ].forEach(s=> { %>
+                                        <option value="<%= s %>" <%=query.status===s ? 'selected' : '' %>><%= s %>
+                                        </option>
+                                        <% }) %>
                                 </select>
                                 <i
                                     class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
                             </div>
-
                             <!-- Payment Filter -->
                             <div class="relative">
-                                <i
-                                    class="fa-regular fa-credit-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs z-10"></i>
-                                <select id="paymentFilter" onchange="applyFilters()"
-                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-8 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
+                                <select name="payment" onchange="this.form.submit()"
+                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
                                     <option value="">Payment: All</option>
-                                    <option value="Online">Online</option>
-                                    <option value="COD">COD</option>
-                                    <option value="Wallet">Wallet</option>
+                                    <option value="Online" <%=query.payment==='Online' ? 'selected' : '' %>>Online
+                                    </option>
+                                    <option value="COD" <%=query.payment==='COD' ? 'selected' : '' %>>COD</option>
+                                    <option value="Wallet" <%=query.payment==='Wallet' ? 'selected' : '' %>>Wallet
+                                    </option>
                                 </select>
                                 <i
                                     class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
                             </div>
-
-                            <!-- Sort -->
-                            <div class="relative">
-                                <i
-                                    class="fa-solid fa-arrow-up-wide-short absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs z-10"></i>
-                                <select id="sortFilter" onchange="applyFilters()"
-                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-8 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
-                                    <option value="newest">Sort By</option>
-                                    <option value="amount_high">Amount (High)</option>
-                                    <option value="amount_low">Amount (Low)</option>
-                                    <option value="status_asc">Status (A-Z)</option>
-                                </select>
-                                <i
-                                    class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
-                            </div>
-
                         </div>
-                    </div>
+                    </form>
 
                     <!-- TABLE -->
                     <div class="overflow-x-auto min-h-[400px]">
@@ -209,284 +209,345 @@
                                     <th class="px-8 py-5 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="ordersTableBody" class="divide-y divide-gray-50">
-                                <!-- Rows rendered by JS -->
+                            <tbody class="divide-y divide-gray-50">
+                                <% if (orders.length> 0) { %>
+                                    <% orders.forEach(order=> {
+                                        let statusColor = 'bg-gray-50 text-gray-500';
+                                        if (['Delivered', 'Completed'].includes(order.orderStatus)) statusColor =
+                                        'bg-teal-50 text-teal-600';
+                                        else if (['Pending', 'Placed'].includes(order.orderStatus)) statusColor =
+                                        'bg-orange-50 text-orange-600';
+                                        else if (order.orderStatus === 'Processing')
+                                        statusColor = 'bg-blue-50 text-blue-600';
+                                        else if (['Cancelled', 'Failed', 'Returned'].includes(order.orderStatus))
+                                        statusColor = 'bg-red-50 text-red-600';
+
+                                        const itemsCount = order.items.reduce((acc, item) => acc + item.quantity, 0);
+                                        const initials = order.userId && order.userId.fullName
+                                        ? order.userId.fullName
+                                        .split(' ')
+                                        .map(n => n[0])
+                                        .join('')
+                                        .substring(0, 2)
+                                        .toUpperCase()
+                                        : '??';
+                                        %>
+                                        <tr class="hover:bg-gray-50/50 transition group">
+                                            <td class="px-8 py-5">
+                                                <span class="font-bold text-brand-500 text-xs">#<%= order.orderId %>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shadow-sm">
+                                                        <%= initials %>
+                                                    </div>
+                                                    <p class="font-bold text-sm text-accent-navy">
+                                                        <%= order.userId?.fullName || 'Unknown User' %>
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-2 text-gray-500">
+                                                    <i class="fa-solid fa-box text-xs"></i>
+                                                    <span class="text-xs font-bold">
+                                                        <%= itemsCount %> items
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="font-extrabold text-accent-navy text-sm">₹<%=
+                                                        order.totalAmount.toFixed(2) %></span>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-xs font-medium text-gray-500 uppercase">
+                                                    <%= order.payment.method %>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide <%= statusColor %>">
+                                                    <%= order.orderStatus %>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-xs font-bold text-gray-500">
+                                                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                                                </span>
+                                            </td>
+                                            <td class="px-8 py-5 text-right">
+                                                <button onclick="openDrawer('<%= order._id %>')"
+                                                    class="text-brand-500 hover:text-brand-600 font-bold text-xs flex items-center justify-end gap-1 transition hover:gap-2 ml-auto">
+                                                    <i class="fa-regular fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="8" class="text-center py-20">
+                                                        <div class="flex flex-col items-center">
+                                                            <div
+                                                                class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-2xl text-gray-300 mb-4">
+                                                                <i class="fa-solid fa-box-open"></i>
+                                                            </div>
+                                                            <h3 class="text-lg font-bold text-gray-900">No orders found
+                                                            </h3>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
                             </tbody>
                         </table>
-
-                        <!-- Empty State -->
-                        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
-                            <div
-                                class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-3xl text-gray-300 mb-4">
-                                <i class="fa-solid fa-box-open"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-900">No orders found</h3>
-                            <p class="text-sm text-gray-400">Try adjusting your search or filters</p>
-                        </div>
                     </div>
 
                     <!-- PAGINATION -->
-                    <div
-                        class="p-6 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p class="text-xs font-bold text-gray-400" id="paginationInfo">Showing 0-0 of 0 orders</p>
-                        <div class="flex items-center gap-2" id="paginationControls">
-                            <!-- Buttons rendered by JS -->
+                    <% if (totalPages> 1) { %>
+                        <div class="p-6 border-t border-gray-50 flex justify-center">
+                            <div class="flex items-center gap-2">
+                                <% if (currentPage> 1) { %>
+                                    <a href="/admin/orders?page=<%= currentPage - 1 %>"
+                                        class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 transition bg-white">
+                                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                    </a>
+                                    <% } %>
+
+                                        <span
+                                            class="px-4 py-1 rounded-full bg-brand-50 text-brand-500 text-xs font-bold">
+                                            Page <%= currentPage %> of <%= totalPages %>
+                                        </span>
+
+                                        <% if (currentPage < totalPages) { %>
+                                            <a href="/admin/orders?page=<%= currentPage + 1 %>"
+                                                class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 transition bg-white">
+                                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                            </a>
+                                            <% } %>
+                            </div>
                         </div>
-                    </div>
+                        <% } %>
                 </div>
 
             </main>
     </div>
 
-    <!-- SCRIPTS -->
+    <!-- SIDE DRAWER & OVERLAY -->
+    <!-- Overlay -->
+    <div id="drawerOverlay" onclick="closeDrawer()"
+        class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Drawer -->
+    <div id="orderDrawer"
+        class="drawer drawer-closed fixed top-0 right-0 w-full md:w-[480px] h-full bg-white shadow-2xl z-50 flex flex-col">
+        <!-- Drawer Header -->
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div>
+                <h2 class="text-xl font-bold text-accent-navy">Order Details</h2>
+                <p id="drawerOrderId" class="text-xs font-bold text-brand-500 mt-1">#LOADING...</p>
+            </div>
+            <button onclick="closeDrawer()"
+                class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Drawer Content -->
+        <div id="drawerContent" class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <!-- Loading Spinner Initially -->
+            <div class="flex items-center justify-center h-40">
+                <i class="fa-solid fa-circle-notch fa-spin text-brand-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <!-- Drawer Footer (Actions) -->
+        <div class="p-6 border-t border-gray-100 bg-gray-50/50">
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Update Order
+                    Status</label>
+                <select id="updateStatusSelect"
+                    class="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl px-4 py-3 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition">
+                    <option value="Placed">Placed</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeDrawer()"
+                    class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+                <button onclick="saveOrderStatus()"
+                    class="flex-1 py-3 rounded-xl bg-brand-500 text-white font-bold text-sm hover:bg-brand-600 shadow-lg shadow-brand-500/20 transition">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
-        // --- MOCK DATA ---
-        // Generating some realistic mock data
-        const generateOrders = () => {
-            const statuses = ['Completed', 'Pending', 'Processing', 'Cancelled', 'Failed'];
-            const payments = ['Online', 'COD', 'Wallet'];
-            const names = ['Sarah Miller', 'John Davis', 'Emily Chen', 'Michael Brown', 'Lisa Wilson', 'David Lee', 'Anna Thompson', 'Robert Garcia', 'James Wilson', 'Maria Rodriguez', 'William Thomas', 'Jessica Martinez'];
+        let currentOrderId = null;
 
-            return Array.from({ length: 45 }, (_, i) => {
-                const id = `#ORD-00${i + 1}`;
-                const user = names[i % names.length];
-                const itemsCount = Math.floor(Math.random() * 5) + 1;
-                const amount = (Math.random() * 200 + 20).toFixed(2);
-                const payment = payments[Math.floor(Math.random() * payments.length)];
-                const status = statuses[Math.floor(Math.random() * statuses.length)];
-                const date = new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString();
+        function openDrawer(orderId) {
+            currentOrderId = orderId;
+            const drawer = document.getElementById('orderDrawer');
+            const overlay = document.getElementById('drawerOverlay');
 
-                return { id, user, itemsCount, amount, payment, status, date };
-            });
-        };
+            // Show UI
+            drawer.classList.remove('drawer-closed');
+            drawer.classList.add('drawer-open');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10); // Fade in
 
-        let ordersData = generateOrders();
-
-        // State for Pagination & Filtering
-        let currentPage = 1;
-        const itemsPerPage = 8;
-        let filteredOrders = [...ordersData];
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Search Listener
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                applyFilters();
-            });
-
-            updateStats();
-            applyFilters(); // Initial render
-        });
-
-        // --- CORE LOGIC ---
-
-        function applyFilters() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const paymentFilter = document.getElementById('paymentFilter').value;
-            const sort = document.getElementById('sortFilter').value;
-
-            // Filter
-            filteredOrders = ordersData.filter(order => {
-                const matchesSearch = order.id.toLowerCase().includes(query) || order.user.toLowerCase().includes(query);
-                const matchesStatus = statusFilter ? order.status === statusFilter : true;
-                const matchesPayment = paymentFilter ? order.payment === paymentFilter : true;
-
-                return matchesSearch && matchesStatus && matchesPayment;
-            });
-
-            // Sort
-            filteredOrders.sort((a, b) => {
-                if (sort === 'newest') return new Date(b.date) - new Date(a.date);
-                if (sort === 'amount_high') return b.amount - a.amount;
-                if (sort === 'amount_low') return a.amount - b.amount;
-                if (sort === 'status_asc') return a.status.localeCompare(b.status);
-                // Default fallback roughly by ID desc if needed, but newest is default
-                return 0;
-            });
-
-            currentPage = 1; // Reset to page 1
-            renderTable();
-            renderPagination();
+            // Fetch Details
+            fetchOrderDetails(orderId);
         }
 
-        function renderTable() {
-            const tbody = document.getElementById('ordersTableBody');
-            const emptyState = document.getElementById('emptyState');
-            tbody.innerHTML = '';
+        function closeDrawer() {
+            const drawer = document.getElementById('orderDrawer');
+            const overlay = document.getElementById('drawerOverlay');
 
-            if (filteredOrders.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-                document.getElementById('paginationControls').style.display = 'none'; // Hide pagination controls
-                document.getElementById('paginationInfo').style.display = 'none';
-                return;
-            }
+            drawer.classList.remove('drawer-open');
+            drawer.classList.add('drawer-closed');
 
-            emptyState.classList.add('hidden');
-            emptyState.classList.remove('flex');
-            document.getElementById('paginationControls').style.display = 'flex';
-            document.getElementById('paginationInfo').style.display = 'block';
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredOrders.slice(start, end);
-
-            pageData.forEach(order => {
-                const statusColor = getStatusColor(order.status);
-                const formattedDate = formatDate(order.date);
-                const initials = order.user.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                const avatarColorClass = getAvatarColor(initials);
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50/50 transition group border-b border-gray-50 last:border-0";
-                tr.innerHTML = `
-                    <td class="px-8 py-5">
-                       <span class="font-bold text-brand-500 text-xs">${order.id}</span>
-                    </td>
-                    <td class="px-6 py-5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full ${avatarColorClass} flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                                ${initials}
-                            </div>
-                            <p class="font-bold text-sm text-accent-navy">${order.user}</p>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5">
-                         <div class="flex items-center gap-2 text-gray-500">
-                            <i class="fa-solid fa-box text-xs"></i>
-                            <span class="text-xs font-bold">${order.itemsCount} items</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5">
-                        <span class="font-extrabold text-accent-navy text-sm">₹${order.amount}</span>
-                    </td>
-                    <td class="px-6 py-5">
-                        <span class="text-xs font-medium text-gray-500">${order.payment}</span>
-                    </td>
-                    <td class="px-6 py-5">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusColor}">
-                            ${order.status}
-                        </span>
-                    </td>
-                     <td class="px-6 py-5">
-                        <span class="text-xs font-bold text-gray-500">${formattedDate}</span>
-                    </td>
-                    <td class="px-8 py-5 text-right">
-                        <button class="text-brand-500 hover:text-brand-600 font-bold text-xs flex items-center justify-end gap-1 transition hover:gap-2">
-                            <i class="fa-regular fa-eye"></i> View
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            // Reset content after anim
+            setTimeout(() => {
+                document.getElementById('drawerContent').innerHTML = '<div class="flex items-center justify-center h-40"><i class="fa-solid fa-circle-notch fa-spin text-brand-500 text-3xl"></i></div>';
+            }, 300);
         }
 
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-            const paginationControls = document.getElementById('paginationControls');
-            const info = document.getElementById('paginationInfo');
+        async function fetchOrderDetails(id) {
+            try {
+                const response = await fetch(`/admin/orders/${id}/details`);
+                const data = await response.json();
 
-            // Info
-            const start = filteredOrders.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-            const end = Math.min(currentPage * itemsPerPage, filteredOrders.length);
-            info.textContent = `Showing ${start}-${end} of ${filteredOrders.length} orders`;
-
-            // Controls
-            let btns = '';
-
-            // Prev
-            btns += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-50 cursor-not-allowed"' : ''} 
-                class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 hover:border-brand-100 transition shadow-sm bg-white">
-                <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                <span class="ml-1 text-xs font-bold hidden md:inline">Previous</span>
-            </button>`;
-
-            // Pages (Simplified: just Show current / Total)
-            btns += `<div class="flex items-center gap-1 mx-2">`;
-            for (let i = 1; i <= totalPages; i++) {
-                // Logic to show limited pages
-                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                    if (i === currentPage) {
-                        btns += `<button class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-500/30 scale-110">${i}</button>`;
-                    } else {
-                        btns += `<button onclick="changePage(${i})" class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50 hover:text-brand-500 transition bg-white">${i}</button>`;
-                    }
-                } else if (i === currentPage - 2 || i === currentPage + 2) {
-                    btns += `<span class="text-gray-300 text-xs text-center w-4">...</span>`;
+                if (data.success) {
+                    renderDrawerContent(data.order);
+                } else {
+                    Swal.fire("Error", "Failed to load order/details", "error");
+                    closeDrawer();
                 }
-            }
-            btns += `</div>`;
-
-            // Next
-            btns += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages || totalPages === 0 ? 'disabled class="opacity-50 cursor-not-allowed"' : ''} 
-                class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 hover:border-brand-100 transition shadow-sm bg-white">
-                <span class="mr-1 text-xs font-bold hidden md:inline">Next</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            </button>`;
-
-            paginationControls.innerHTML = btns;
-        }
-
-        function changePage(page) {
-            const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-            if (page < 1 || page > totalPages) return;
-            currentPage = page;
-            renderTable();
-            renderPagination();
-        }
-
-        function updateStats() {
-            const completed = ordersData.filter(o => o.status === 'Completed').length;
-            const pending = ordersData.filter(o => ['Pending', 'Processing'].includes(o.status)).length;
-            const cancelled = ordersData.filter(o => o.status === 'Cancelled').length;
-
-            // Animate Numbers
-            animateValue("statTotal", 0, ordersData.length, 1000);
-            animateValue("statCompleted", 0, completed, 1000);
-            animateValue("statPending", 0, pending, 1000);
-            animateValue("statCancelled", 0, cancelled, 1000);
-        }
-
-        // --- HELPERS ---
-        function getStatusColor(status) {
-            switch (status) {
-                case 'Completed': return 'bg-teal-50 text-teal-600';
-                case 'Processing': return 'bg-purple-50 text-purple-600';
-                case 'Pending': return 'bg-orange-50 text-orange-600';
-                case 'Cancelled': return 'bg-red-50 text-red-500';
-                case 'Failed': return 'bg-gray-100 text-gray-500';
-                default: return 'bg-gray-50 text-gray-500';
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "Server error", "error");
             }
         }
 
-        function getAvatarColor(initials) {
-            const colors = ['bg-pink-400', 'bg-violet-400', 'bg-blue-400', 'bg-emerald-400', 'bg-amber-400', 'bg-rose-400'];
-            const index = initials.charCodeAt(0) % colors.length;
-            return colors[index];
+        function renderDrawerContent(order) {
+            document.getElementById('drawerOrderId').textContent = `ID: #${order.orderId}`;
+            document.getElementById('updateStatusSelect').value = order.orderStatus;
+
+            const content = document.getElementById('drawerContent');
+
+            // Generate HTML for Items
+            const itemsHtml = order.items.map(item => `
+                <div class="flex gap-4 items-center mb-4 last:mb-0">
+                    <div class="w-16 h-16 bg-gray-50 rounded-xl border border-gray-100 p-1 flex-shrink-0">
+                        <img src="${item.variantId?.coverImage || '/default.png'}" class="w-full h-full object-cover rounded-lg">
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-accent-navy text-sm line-clamp-1">${item.productName}</p>
+                        <p class="text-xs text-gray-500">Qty: ${item.quantity} × ₹${item.price}</p>
+                    </div>
+                    <p class="font-bold text-accent-navy text-sm">₹${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <!-- Customer Info -->
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Customer Information</h4>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold">
+                            ${order.userId?.fullName.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                            <p class="font-bold text-accent-navy text-sm">${order.userId?.fullName}</p>
+                            <p class="text-xs text-gray-500">${order.userId?.email}</p>
+                            <p class="text-xs text-gray-500">${order.address?.phone || '-'}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-500">
+                        <i class="fa-solid fa-location-dot mt-0.5"></i>
+                        <p>${order.address?.addressLine}, ${order.address?.city}, ${order.address?.state} - ${order.address?.zipCode}</p>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                <div>
+                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Ordered Items</h4>
+                     ${itemsHtml}
+                </div>
+
+                <!-- Payment Info -->
+                <div class="bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100/50">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Payment Details</h4>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-gray-500">Method</span>
+                        <span class="text-xs font-bold text-accent-navy uppercase">${order.payment.method}</span>
+                    </div>
+                     <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-gray-500">Status</span>
+                        <span class="text-xs font-bold ${order.payment.status === 'Paid' ? 'text-green-600' : 'text-orange-500'}">${order.payment.status}</span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="pt-4 border-t border-gray-100 space-y-2">
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Subtotal</span>
+                        <span>₹${(order.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Discount</span>
+                        <span class="text-green-500">-₹${(order.discount || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-base font-black text-accent-navy pt-2">
+                        <span>Total Amount</span>
+                        <span>₹${order.totalAmount.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
         }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
+        async function saveOrderStatus() {
+            if (!currentOrderId) return;
 
-        function animateValue(id, start, end, duration) {
-            if (start === end) return;
-            const range = end - start;
-            let current = start;
-            const increment = end > start ? 1 : -1;
-            const stepTime = Math.abs(Math.floor(duration / range));
-            const obj = document.getElementById(id);
-            if (!obj) return;
+            const newStatus = document.getElementById('updateStatusSelect').value;
 
-            const timer = setInterval(function () {
-                current += increment;
-                obj.innerHTML = current;
-                if (current == end) {
-                    clearInterval(timer);
+            try {
+                const response = await fetch(`/admin/orders/${currentOrderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: 'Order status updated successfully',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.reload(); // Reload to reflect changes in list
+                    });
+                } else {
+                    Swal.fire("Error", data.message, "error");
                 }
-            }, stepTime);
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "Failed to update status", "error");
+            }
         }
     </script>
 </body>

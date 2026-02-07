@@ -7,6 +7,7 @@ import homeController from "../controllers/userControllers/homeController.js";
 import productController from "../controllers/userControllers/productController.js";
 import checkoutController from "../controllers/userControllers/checkoutController.js";
 import { upload } from "../middlewares/upload.js";
+import orderController from "../controllers/userControllers/orderController.js";
 
 router.get('/', authController.landingPage)
 
@@ -61,8 +62,8 @@ router.delete('/cart/remove', userMiddleware.checkSession, productController.rem
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
 router.post('/checkout/place-order', userMiddleware.checkSession, checkoutController.placeOrder);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
-router.get('/orders', userMiddleware.checkSession, profileController.getOrderHistory);
-router.get('/orders/:id', userMiddleware.checkSession, profileController.getOrderDetails);
+router.get('/orders', userMiddleware.checkSession, orderController.getOrderHistory);
+router.get('/orders/:id', userMiddleware.checkSession, orderController.getOrderDetails);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
