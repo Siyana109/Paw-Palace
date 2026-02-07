@@ -183,27 +183,24 @@
 
                                     <!-- Right: Actions -->
                                     <div class="flex gap-3 w-full lg:w-auto">
+                                        <!-- View Details (Always Available) -->
+                                        <a href="/orders/<%= order._id %>"
+                                            class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
+                                            View Details
+                                        </a>
+
                                         <% if (['Delivered'].includes(order.orderStatus)) { %>
-                                            <a href="#"
-                                                class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
-                                                View Details
-                                            </a>
                                             <a href="#"
                                                 class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
                                                 Invoice
                                             </a>
-                                            <% } else if (['Cancelled', 'Failed' ].includes(order.orderStatus)) { %>
-                                                <!-- For Failed/Cancelled, maybe 'Buy Again' or Retry -->
+                                            <% } else if (['Cancelled', 'Failed' , 'Returned'
+                                                ].includes(order.orderStatus)) { %>
                                                 <button
                                                     class="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm text-center hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">
                                                     Buy Again
                                                 </button>
-                                                <% } else { %>
-                                                    <a href="/orders/<%= order._id %>"
-                                                        class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition">
-                                                        View Order
-                                                    </a>
-                                                    <% } %>
+                                                <% } %>
                                     </div>
                                 </div>
 
