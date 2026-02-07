@@ -167,8 +167,8 @@
                                 <select name="status" onchange="this.form.submit()"
                                     class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
                                     <option value="">Status: All</option>
-                                    <% ['Placed', 'Pending' , 'Processing' , 'Shipped' , 'Delivered' , 'Cancelled'
-                                        , 'Returned' , 'Failed' ].forEach(s=> { %>
+                                    <% ['Pending' , 'Processing' , 'Shipped' , 'Delivered' , 'Cancelled' , 'Returned'
+                                        , 'Failed' ].forEach(s=> { %>
                                         <option value="<%= s %>" <%=query.status===s ? 'selected' : '' %>><%= s %>
                                         </option>
                                         <% }) %>
@@ -367,11 +367,12 @@
                     Status</label>
                 <select id="updateStatusSelect"
                     class="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl px-4 py-3 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition">
-                    <option value="Placed">Placed</option>
                     <option value="Processing">Processing</option>
                     <option value="Shipped">Shipped</option>
                     <option value="Delivered">Delivered</option>
                     <option value="Cancelled">Cancelled</option>
+                    <option value="Returned">Returned</option>
+                    <option value="Failed">Failed</option>
                 </select>
             </div>
 
@@ -506,11 +507,17 @@
                         <span>₹${(order.subtotal || 0).toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between text-xs text-gray-500">
-                        <span>Discount</span>
+                        <span>Shipping</span>
+                        <span>+₹${(order.totalAmount - order.subtotal + (order.discount || 0)).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Coupon Discount</span>
                         <span class="text-green-500">-₹${(order.discount || 0).toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-between text-base font-black text-accent-navy pt-2">
-                        <span>Total Amount</span>
+                    <!-- Note: Offer discounts are currently applied directly to item prices -->
+                    
+                    <div class="flex justify-between text-base font-black text-accent-navy pt-2 border-t border-dashed border-gray-100">
+                        <span>Grand Total</span>
                         <span>₹${order.totalAmount.toFixed(2)}</span>
                     </div>
                 </div>
