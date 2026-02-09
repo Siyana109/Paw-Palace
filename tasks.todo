@@ -110,8 +110,8 @@ WEEK 10:
     ✔ Show user addresses with an add/edit option, default address selection @done (2/4/2026, 8:27:10 PM)
     ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/6/2026, 1:15:42 AM)
     ✔ final price (including taxes, discounts, shipping) @done (2/6/2026, 1:15:46 AM)
-    ☐ Place an order with Cash on Delivery
-    ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
+    ✔ Place an order with Cash on Delivery @done (2/9/2026, 2:00:25 PM)
+    ✔ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping @done (2/9/2026, 2:00:28 PM)
     ☐ Order management
     ☐ Order listing with unique, consistent orderID, status, and order date
     ☐ Cancel order or specific products (stock increment on cancellation)
@@ -169,6 +169,7 @@ TODO :
         ✔ sort & search & pagination brand, top brand @done (1/30/2026, 4:38:51 PM)
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
         ☐ offer filtering sorting pagination
+        ☐ online filtering in admin order
 
 
 

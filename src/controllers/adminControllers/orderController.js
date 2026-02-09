@@ -19,7 +19,15 @@ const getAllOrders = async (req, res) => {
         }
 
         if (status) query.orderStatus = status;
-        if (payment) query["payment.method"] = payment;
+        if (payment) {
+            if (payment === 'Online') {
+                query["payment.method"] = { $in: ['RAZORPAY', 'WALLET'] };
+            } else if (payment === 'Wallet') {
+                query["payment.method"] = 'WALLET';
+            } else {
+                query["payment.method"] = payment;
+            }
+        }
 
         let sortQuery = { createdAt: -1 };
         if (sort === 'amount_high') sortQuery = { totalAmount: -1 };
@@ -94,8 +102,22 @@ const updateOrderStatus = async (req, res) => {
         order.orderStatus = status;
 
         // If delivered, update payment status if COD
-        if (status === 'Delivered' && order.payment.method === 'COD') {
-            order.payment.status = 'Paid';
+        // If delivered, set dates
+        if (status === 'Delivered') {
+            order.deliveredAt = new Date();
+            if (order.payment.method === 'COD') {
+                order.payment.status = 'Paid';
+                order.payment.paidAt = new Date();
+            }
+        }
+
+        // Sync item statuses with order status
+        if (['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'].includes(status)) {
+            order.items.forEach(item => {
+                if (!['Cancelled', 'Returned'].includes(item.itemStatus)) {
+                    item.itemStatus = status;
+                }
+            });
         }
 
         await order.save();

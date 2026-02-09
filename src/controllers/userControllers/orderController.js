@@ -82,4 +82,53 @@ const getOrderDetails = async (req, res) => {
     }
 };
 
-export default { getOrderHistory, getOrderDetails }
+const requestItemReturn = async (req, res) => {
+    try {
+        const userId = req.session.user?.id;
+        const { orderId, itemId } = req.params;
+        const { reason } = req.body;
+
+        if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+        if (!reason) return res.status(400).json({ success: false, message: 'Return reason is required' });
+
+        const order = await Order.findOne({ _id: orderId, userId });
+        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+        if (order.orderStatus !== 'Delivered' && order.orderStatus !== 'Partially Returned') {
+            return res.status(400).json({ success: false, message: 'Order is not eligible for return' });
+        }
+
+        const item = order.items.id(itemId);
+        if (!item) return res.status(404).json({ success: false, message: 'Item not found in order' });
+
+        if (item.itemStatus !== 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Item is not eligible for return' });
+        }
+
+        if (item.returnRequest?.isRequested) {
+            return res.status(400).json({ success: false, message: 'Return already requested for this item' });
+        }
+
+        // Update item return status
+        item.returnRequest = {
+            isRequested: true,
+            reason: reason,
+            status: 'Pending',
+            requestedAt: new Date()
+        };
+        item.itemStatus = 'Return Requested';
+
+        // Check if all items are returned/cancelled to potentially update main order status
+        // For now, we just update the specific item. The admin will approve/reject.
+
+        await order.save();
+
+        res.json({ success: true, message: 'Return request submitted successfully' });
+
+    } catch (error) {
+        console.error("Request Item Return Error:", error);
+        res.status(500).json({ success: false, message: 'Failed to submit return request' });
+    }
+};
+
+export default { getOrderHistory, getOrderDetails, requestItemReturn }

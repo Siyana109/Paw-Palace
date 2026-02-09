@@ -13,16 +13,14 @@ Tuesday:
     ✔ Show user addresses with an add/edit option, default address selection @done (2/4/2026, 5:38:41 PM)
     ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/3/2026, 3:00:41 PM)
     ✔ final price (including taxes, discounts, shipping) @done (2/3/2026, 3:00:54 PM)
-    ☐ Place an order with Cash on Delivery
-    ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
 
 Wednesday: 
     ✔ offers @done (2/5/2026, 5:18:45 PM)
     ✔ coupon @done (2/6/2026, 1:15:10 AM)
 
 Thursday:
-    ☐ Place an order with Cash on Delivery
-    ☐ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping
+    ✔ Place an order with Cash on Delivery @done (2/9/2026, 1:47:58 PM)
+    ✔ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping @done (2/9/2026, 1:47:57 PM)
 
 Friday:
     admin:
