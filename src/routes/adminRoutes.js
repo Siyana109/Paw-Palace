@@ -58,6 +58,8 @@ router.post("/products/variants/edit/:variantId", adminMiddleware.adminSession, 
 
 
 
+router.post("/products/variants/status/:variantId", adminMiddleware.adminSession, variantController.toggleVariantStatus);
+
 router.get("/offers", adminMiddleware.adminSession, offerController.getOffers);
 router.get("/offers/stats", adminMiddleware.adminSession, offerController.getOfferStats);
 router.post("/offers/add", adminMiddleware.adminSession, offerController.createOffer);

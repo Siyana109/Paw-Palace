@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const variantSchema = new mongoose.Schema ({
+const variantSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -43,6 +43,10 @@ const variantSchema = new mongoose.Schema ({
         type: String,
         enum: ['product', 'category', 'none'],
         default: 'none'
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 },
     { timestamps: true });

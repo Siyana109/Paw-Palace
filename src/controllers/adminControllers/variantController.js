@@ -79,10 +79,10 @@ const deleteVariant = async (req, res) => {
 
     const productId = variant.product;
 
-    // delete variant
+    // Hard delete variant
     await Variant.findByIdAndDelete(req.params.variantId);
 
-    // recalculate total stock
+    // recalculate total stock (active and inactive, but not deleted as they are gone)
     const variants = await Variant.find({ product: productId });
     const totalStock = variants.reduce(
       (sum, v) => sum + v.stock,
@@ -178,4 +178,26 @@ const updateVariant = async (req, res) => {
 };
 
 
-export default { deleteVariant, postAddVariant, getVariantsByProduct, updateVariant }
+// TOGGLE VARIANT STATUS
+const toggleVariantStatus = async (req, res) => {
+  try {
+    const { variantId } = req.params;
+    const variant = await Variant.findById(variantId);
+
+    if (!variant) {
+      return res.json({ success: false, message: "Variant not found" });
+    }
+
+    variant.isActive = !variant.isActive;
+    await variant.save();
+
+    res.json({ success: true, isActive: variant.isActive });
+
+  } catch (error) {
+    console.error("Toggle variant status error:", error);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
+
+export default { deleteVariant, postAddVariant, getVariantsByProduct, updateVariant, toggleVariantStatus }

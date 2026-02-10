@@ -22,7 +22,7 @@ const getProductDetails = async (req, res) => {
     }
 
     /* 2️⃣ Fetch ALL Variants */
-    const variants = await Variant.find({ product: productId });
+    const variants = await Variant.find({ product: productId, isActive: true });
 
     if (!variants.length) {
       // product exists but no variants → admin issue
@@ -71,7 +71,8 @@ const getProductDetails = async (req, res) => {
     for (const p of relatedBaseProducts) {
       const variant = await Variant.findOne({
         product: p._id,
-        stock: { $gt: 0 }
+        stock: { $gt: 0 },
+        isActive: true
       });
 
       if (variant) {
@@ -163,7 +164,7 @@ const addToCart = async (req, res) => {
       });
     }
 
-    if (!variant || !variant.product || !variant.product.isActive) {
+    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive) {
       return res.status(400).json({
         success: false,
         redirect: "/home"
@@ -270,7 +271,7 @@ const getCartPage = async (req, res) => {
     });
 
     const stockIssues = cart.items.filter(item =>
-      item.variant.stock === 0 || item.quantity > item.variant.stock
+      !item.variant || !item.variant.isActive || item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
     res.render('user/cart', {
@@ -305,7 +306,7 @@ const updateCartQuantity = async (req, res) => {
     }
 
     const variant = await Variant.findById(variantId);
-    if (!variant) {
+    if (!variant || !variant.isActive) {
       return res.status(404).json({ success: false });
     }
 
@@ -367,7 +368,7 @@ const getWishlist = async (req, res) => {
       })
       .populate("items.variant");
 
-    const wishlistItems = wishlistDoc ? wishlistDoc.items : [];
+    const wishlistItems = wishlistDoc ? wishlistDoc.items.filter(item => item.variant && item.variant.isActive) : [];
 
     // 🔥 Active offers
     const activeOffers = await Offer.find({
