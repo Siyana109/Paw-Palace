@@ -28,14 +28,6 @@ const getCheckoutPage = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        const hasOutOfStock = cart.items.some(
-            item => item.variant.stock === 0
-        );
-
-        if (hasOutOfStock) {
-            return res.redirect('/cart');
-        }
-
         // 🔥 Fetch active offers ONCE
         const activeOffers = await Offer.find({
             status: "active",
@@ -58,10 +50,32 @@ const getCheckoutPage = async (req, res) => {
             }
         });
 
+        let stockIssues = [];
+
+        cart.items.forEach(item => {
+            if (item.variant.stock === 0) {
+                stockIssues.push({
+                    type: "OOS",
+                    productId: item.product._id,
+                    variantId: item.variant._id,
+                    message: "Out of stock"
+                });
+            } else if (item.quantity > item.variant.stock) {
+                stockIssues.push({
+                    type: "LIMIT_EXCEEDED",
+                    productId: item.product._id,
+                    variantId: item.variant._id,
+                    available: item.variant.stock,
+                    message: `Only ${item.variant.stock} left`
+                });
+            }
+        });
+
         res.render("user/checkout", {
             addresses,
             cart,
-            coupons
+            coupons,
+            stockIssues
         });
 
     } catch (error) {
@@ -321,7 +335,16 @@ const placeOrder = async (req, res) => {
         const shipping = 50;
         const finalTotal = subtotal + shipping - discount;
 
-        /* 6️⃣ Create Order */
+        cart.items.forEach(item => {
+            if (item.variant.stock === 0) {
+                throw new Error("OUT_OF_STOCK");
+            }
+            if (item.quantity > item.variant.stock) {
+                throw new Error(`STOCK_LIMIT_EXCEEDED:${item.variant.stock}`);
+            }
+        });
+
+        // Create Order
         const order = await Order.create({
             userId,
             orderId: "ORD-" + Date.now(),
@@ -371,6 +394,9 @@ const placeOrder = async (req, res) => {
         // If validation error, log details
         if (error.name === 'ValidationError') {
             console.error("Validation Details:", JSON.stringify(error.errors, null, 2));
+        }
+        if (error.message === "OUT_OF_STOCK" || error.message === "STOCK_LIMIT_EXCEEDED") {
+            return res.redirect("/checkout");
         }
         res.redirect("/checkout");
     }

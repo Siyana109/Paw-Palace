@@ -193,116 +193,152 @@
 
                     <form action="/checkout/place-order" method="POST" id="checkoutForm">
                         <input type="hidden" name="paymentDetails" id="paymentDetailsInput">
-                        <!-- ORDER SUMMARY -->
-                        <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 shadow-sm border border-gray-100">
-                            <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                        <% if (stockIssues.length) { %>
+                            <div
+                                class="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold">
+                                <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                                Some items in your cart are unavailable or exceed stock limits.
+                                Please update or remove them to continue.
+                            </div>
+                            <% } %>
+                                <!-- ORDER SUMMARY -->
+                                <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 shadow-sm border border-gray-100">
+                                    <h2 class="text-xl font-bold mb-6">Order Summary</h2>
 
-                            <!-- Items List -->
-                            <div class="space-y-6 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                <% if (cart && cart.items) { %>
-                                    <% cart.items.forEach(item=> { %>
-                                        <div class="flex items-center gap-4">
-                                            <div
-                                                class="w-14 h-14 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden relative">
-                                                <img src="<%= item.variant.coverImage || '/path/to/default.jpg' %>"
-                                                    alt="<%= item.product.productName %>"
-                                                    class="w-full h-full object-cover">
-                                                <span
-                                                    class="absolute top-0 right-0 bg-gray-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-bl-lg">
-                                                    <%= item.quantity %>
-                                                </span>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <h4 class="font-bold text-sm text-accent-navy truncate">
-                                                    <%= item.product.productName %>
-                                                </h4>
-                                                <p class="text-xs text-gray-400">
-                                                    <%= item.variant.size ? item.variant.size : '' %>
-                                                        <%= item.variant.color ? ' / ' + item.variant.color : '' %>
-                                                </p>
-                                            </div>
-                                            <span class="font-bold text-sm text-accent-navy">
-                                                <div class="text-right">
-                                                    <% if (item.variant.offerApplied) { %>
+                                    <!-- Items List -->
+                                    <div class="space-y-6 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                        <% if (cart && cart.items) { %>
+                                            <% cart.items.forEach(item=> { %>
+                                                <div class="flex items-center gap-4">
+                                                    <div
+                                                        class="w-14 h-14 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden relative">
+                                                        <img src="<%= item.variant.coverImage || '/path/to/default.jpg' %>"
+                                                            alt="<%= item.product.productName %>"
+                                                            class="w-full h-full object-cover">
                                                         <span
-                                                            class="block text-xs text-gray-400 line-through font-bold">
-                                                            ₹<%= item.variant.price.toFixed(2) %>
+                                                            class="absolute top-0 right-0 bg-gray-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-bl-lg">
+                                                            <%= item.quantity %>
                                                         </span>
-                                                        <span class="block text-sm font-bold text-brand-500">
-                                                            ₹<%= item.variant.offerPrice.toFixed(2) %>
-                                                        </span>
-                                                        <% } else { %>
-                                                            <span class="text-sm font-bold text-accent-navy">
-                                                                ₹<%= item.variant.price.toFixed(2) %>
-                                                            </span>
-                                                            <% } %>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <h4 class="font-bold text-sm text-accent-navy truncate">
+                                                            <%= item.product.productName %>
+                                                        </h4>
+
+                                                        <% const issue=stockIssues.find(i=>
+                                                            i.variantId.toString() === item.variant._id.toString()
+                                                            );
+                                                            %>
+
+                                                            <% if (issue) { %>
+                                                                <p class="text-xs font-bold text-red-500 mt-1">
+                                                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                                                    <%= issue.message %>
+                                                                </p>
+                                                                <% } %>
+                                                                    <p class="text-xs text-gray-400">
+                                                                        <%= item.variant.size ? item.variant.size : ''
+                                                                            %>
+                                                                            <%= item.variant.color ? ' / ' +
+                                                                                item.variant.color : '' %>
+                                                                    </p>
+                                                    </div>
+                                                    <span class="font-bold text-sm text-accent-navy">
+                                                        <div class="text-right">
+                                                            <% if (item.variant.offerApplied) { %>
+                                                                <span
+                                                                    class="block text-xs text-gray-400 line-through font-bold">
+                                                                    ₹<%= item.variant.price.toFixed(2) %>
+                                                                </span>
+                                                                <span class="block text-sm font-bold text-brand-500">
+                                                                    ₹<%= item.variant.offerPrice.toFixed(2) %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span class="text-sm font-bold text-accent-navy">
+                                                                        ₹<%= item.variant.price.toFixed(2) %>
+                                                                    </span>
+                                                                    <% } %>
+                                                        </div>
+                                                    </span>
                                                 </div>
+                                                <% }) %>
+                                                    <% } %>
+                                    </div>
+
+                                    <!-- Totals -->
+                                    <% const subtotal=cart.items.reduce((acc, item)=> {
+                                        const price = item.variant.offerApplied
+                                        ? item.variant.offerPrice
+                                        : item.variant.price;
+                                        return acc + price * item.quantity;
+                                        }, 0);
+
+                                        const offerDiscount = cart.items.reduce((acc, item) => {
+                                        if (!item.variant.offerApplied) return acc;
+                                        return acc + (item.variant.price - item.variant.offerPrice) * item.quantity;
+                                        }, 0);
+
+                                        const shipping = 50;
+                                        const couponDiscount = 0; // updated via JS
+                                        const total = subtotal + shipping - offerDiscount - couponDiscount;
+                                        %>
+
+                                        <div class="space-y-3 mb-6">
+                                            <div
+                                                class="flex justify-between items-center text-xs font-bold text-gray-400">
+                                                <span>Subtotal</span>
+                                                <span class="text-gray-600">₹<%= subtotal.toFixed(2) %></span>
+                                            </div>
+                                            <div
+                                                class="flex justify-between items-center text-xs font-bold text-gray-400">
+                                                <span>Shipping</span>
+                                                <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
+                                            </div>
+                                            <!-- Tax Removed -->
+                                            <div
+                                                class="flex justify-between items-center text-xs font-bold text-gray-400">
+                                                <span>Offer discount</span>
+                                                <span class="text-brand-500">-₹<%= offerDiscount.toFixed(2) %></span>
+                                            </div>
+                                            <!-- Coupon applied row (hidden by default) -->
+                                            <!-- Coupon applied row -->
+                                            <div id="couponRow" style="display: none;"
+                                                class="justify-between items-center text-xs font-bold text-gray-400">
+                                                <div class="flex items-center gap-2">
+                                                    <span id="couponCodeDisplay">Coupon applied</span>
+                                                    <button type="button" onclick="removeCoupon()"
+                                                        class="text-xs text-red-500 hover:text-red-700 font-bold underline">Remove</button>
+                                                </div>
+                                                <span id="couponDiscountDisplay" class="text-brand-500">-₹0.00</span>
+                                                <input type="hidden" name="couponCode" id="appliedCouponCode" value="">
+                                            </div>
+                                        </div>
+
+                                        <div class="border-t border-gray-100 my-6"></div>
+
+                                        <div class="flex justify-between items-end mb-8">
+                                            <span class="font-bold text-lg text-accent-navy">Total to Pay</span>
+                                            <span id="totalAmountDisplay" class="text-3xl font-black text-brand-500">₹
+                                                <%= total.toFixed(2) %>
                                             </span>
                                         </div>
-                                        <% }) %>
-                                            <% } %>
-                            </div>
 
-                            <!-- Totals -->
-                            <% const subtotal=cart && cart.items ? cart.items.reduce((acc, item)=> acc +
-                                (item.variant.price
-                                * item.quantity), 0) : 0;
-                                const offerDiscount = cart && cart.items ? cart.items.reduce((acc, item) => acc +
-                                ((item.variant.price - (item.variant.offerPrice || item.variant.price)) *
-                                item.quantity), 0)
-                                : 0;
-                                const shipping = 50;
-                                const tax = 0;
-                                const couponDiscount = 0; // Dynamic later
-                                const total = subtotal - offerDiscount + shipping - couponDiscount;
-                                %>
+                                        <button type="button" <%=stockIssues.length ? 'disabled' : '' %>
+                                            onclick="<%= stockIssues.length ? '' : 'openConfirmationModal()' %>"
+                                                class="w-full py-4 rounded-2xl font-bold text-lg
+                                                <%= stockIssues.length
+                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
+                                                    : 'bg-brand-500 text-white hover:bg-brand-600 shadow-xl shadow-brand-500/20 active:scale-95'
+                                                    %>">
+                                                    <%= stockIssues.length ? 'Fix cart items to continue'
+                                                        : 'Place Order' %>
+                                        </button>
 
-                                <div class="space-y-3 mb-6">
-                                    <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                                        <span>Subtotal</span>
-                                        <span class="text-gray-600">₹<%= subtotal.toFixed(2) %></span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                                        <span>Shipping</span>
-                                        <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
-                                    </div>
-                                    <!-- Tax Removed -->
-                                    <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                                        <span>Offer discount</span>
-                                        <span class="text-brand-500">-₹<%= offerDiscount.toFixed(2) %></span>
-                                    </div>
-                                    <!-- Coupon applied row (hidden by default) -->
-                                    <!-- Coupon applied row -->
-                                    <div id="couponRow" style="display: none;"
-                                        class="justify-between items-center text-xs font-bold text-gray-400">
-                                        <div class="flex items-center gap-2">
-                                            <span id="couponCodeDisplay">Coupon applied</span>
-                                            <button type="button" onclick="removeCoupon()"
-                                                class="text-xs text-red-500 hover:text-red-700 font-bold underline">Remove</button>
-                                        </div>
-                                        <span id="couponDiscountDisplay" class="text-brand-500">-₹0.00</span>
-                                        <input type="hidden" name="couponCode" id="appliedCouponCode" value="">
-                                    </div>
+                                        <p class="text-[10px] text-gray-400 text-center mt-4">
+                                            All transactions are secure and encrypted.
+                                        </p>
+
                                 </div>
-
-                                <div class="border-t border-gray-100 my-6"></div>
-
-                                <div class="flex justify-between items-end mb-8">
-                                    <span class="font-bold text-lg text-accent-navy">Total to Pay</span>
-                                    <span id="totalAmountDisplay" class="text-3xl font-black text-brand-500">₹<%=
-                                            total.toFixed(2) %></span>
-                                </div>
-
-                                <button type="button" onclick="openConfirmationModal()"
-                                    class="w-full bg-brand-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-brand-600 transition shadow-xl shadow-brand-500/20 active:scale-95 transform duration-150">
-                                    Place Order
-                                </button>
-
-                                <p class="text-[10px] text-gray-400 text-center mt-4">
-                                    All transactions are secure and encrypted.
-                                </p>
-
-                        </div>
                     </form>
 
                 </div>
@@ -469,7 +505,22 @@
                     </form>
                 </div>
             </div>
+
 </body>
+
+<script>
+    function openConfirmationModal() {
+    <%if (stockIssues.length) {%>
+            Swal.fire({
+                icon: 'error',
+                title: 'Stock issue',
+                text: 'Please fix out-of-stock items before placing order.',
+                confirmButtonColor: '#f43f5e'
+            });
+            return;
+    <%}%>
+    }
+</script>
 
 <script>
     const originalTotal = Number("<%= total.toFixed(2) %>");
@@ -477,7 +528,7 @@
 
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <%- JSON.stringify(addresses || []) %>;
+    const allAddresses = <% - JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {
@@ -636,7 +687,10 @@
             `px-4 py-3 rounded-xl text-sm mb-4 font-medium ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
         messageBox.innerText = msg;
         messageBox.classList.remove("hidden");
+
     }
+
+    const addrTypeInput = document.getElementById("addrType");
 
     function openAddAddressModal() {
         addressForm.reset();
@@ -750,8 +804,6 @@
             }, 700);
         }
     });
-
-    const addrTypeInput = document.getElementById("addrType");
 
     typeButtons.forEach(btn => {
         btn.addEventListener("click", () => {
