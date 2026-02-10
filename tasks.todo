@@ -123,11 +123,11 @@ WEEK 10:
 
     Admin:
     ☐ Order management
-    ☐ List orders in descending order by order date
+    ✔ List orders in descending order by order date @done (2/10/2026, 12:00:46 PM)
     ☐ Show orderID, date, user details, and view detail button
-    ☐ Change order status (pending, shipped, out for delivery, delivered, cancelled)
-    ☐ Search, sort, and filter with clear functionality
-    ☐ Pagination
+    ✔ Change order status (pending, shipped, out for delivery, delivered, cancelled) @done (2/10/2026, 12:01:04 PM)
+    ✔ Search, sort, and filter with clear functionality @done (2/10/2026, 12:01:00 PM)
+    ✔ Pagination @done (2/10/2026, 1:36:05 PM)
     ☐ Inventory/Stock management
 
 
@@ -170,6 +170,8 @@ TODO :
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
         ☐ offer filtering sorting pagination
         ☐ online filtering in admin order
+        ☐ debouncing
+        ☐ offer expiring
 
 
 

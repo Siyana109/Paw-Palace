@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Requests | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy overflow-hidden">
+
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8 h-full overflow-y-auto">
+                <!-- HEADER -->
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-accent-navy">Return Requests</h1>
+                        <p class="text-gray-400 font-medium text-sm mt-1">Manage customer return requests</p>
+                    </div>
+                </header>
+
+                <!-- REQUESTS LIST -->
+                <div class="space-y-6">
+                    <% if (orders.length> 0) { %>
+                        <% orders.forEach(order=> { %>
+                            <% order.items.forEach(item=> { %>
+                                <% if (item.itemStatus==='Return Requested' ) { %>
+                                    <div
+                                        class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow duration-300">
+
+                                        <!-- Header: Order & Date (Very minimal) -->
+                                        <div
+                                            class="flex justify-between items-center mb-4 pb-3 border-b border-gray-50">
+                                            <div class="flex items-center gap-3 text-xs text-gray-500">
+                                                <span class="font-bold text-gray-700">Order #<%= order.orderId %></span>
+                                                <span class="text-gray-300">|</span>
+                                                <span><i class="fa-regular fa-calendar"></i>
+                                                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                                                </span>
+                                                <span class="text-gray-300">|</span>
+                                                <span class="text-brand-500 font-bold">Return Requested <%= new
+                                                        Date(item.returnRequest.requestedAt).toLocaleDateString() %>
+                                                        </span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <div
+                                                    class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-[10px]">
+                                                    <%= order.userId?.fullName.charAt(0).toUpperCase() %>
+                                                </div>
+                                                <span class="font-medium text-gray-600">
+                                                    <%= order.userId?.fullName || 'Unknown User' %>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+                                            <!-- Col 1: Product Details (5 cols) -->
+                                            <div class="md:col-span-5 flex gap-4">
+                                                <div
+                                                    class="w-20 h-20 bg-gray-50 rounded-lg p-2 border border-gray-100 flex-shrink-0">
+                                                    <% const imageUrl=item.variantId?.coverImage
+                                                        || '/assets/images/default-product.png' ; %>
+                                                        <img src="<%= imageUrl %>" alt="Product"
+                                                            class="w-full h-full object-contain mix-blend-multiply">
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-accent-navy text-sm mb-1 line-clamp-1"
+                                                        title="<%= item.productName || item.productId?.name %>">
+                                                        <%= item.productName || item.productId?.name
+                                                            || 'Unknown Product' %>
+                                                    </h3>
+                                                    <% if (item.variantId?.variantName || item.variantName) { %>
+                                                        <p class="text-xs text-gray-500 mb-1">Variant: <span
+                                                                class="font-semibold text-gray-700">
+                                                                <%= item.variantName || item.variantId?.variantName %>
+                                                            </span></p>
+                                                        <% } %>
+                                                            <p class="text-xs text-gray-500">Qty: <b>
+                                                                    <%= item.quantity %>
+                                                                </b> • Price: <b>₹<%= item.price %></b></p>
+                                                            <p class="text-xs text-gray-400 mt-1">Payment: <%=
+                                                                    order.payment.method %>
+                                                            </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Col 2: Reason (4 cols) -->
+                                            <div class="md:col-span-4 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">
+                                                    Return Reason</p>
+                                                <p class="text-sm text-gray-700 italic leading-snug line-clamp-2"
+                                                    title="<%= item.returnRequest.reason %>">"<%=
+                                                        item.returnRequest.reason %>"</p>
+                                            </div>
+
+                                            <!-- Col 3: Amount & Actions (3 cols) -->
+                                            <div class="md:col-span-3 flex flex-col items-end gap-3">
+                                                <div class="text-right">
+                                                    <p class="text-[10px] text-gray-400 uppercase font-bold">Refund
+                                                        Amount</p>
+                                                    <p class="text-lg font-bold text-brand-500">₹<%= (item.price *
+                                                            item.quantity).toFixed(2) %>
+                                                    </p>
+                                                </div>
+                                                <div class="flex gap-2 w-full justify-end">
+                                                    <button
+                                                        onclick="handleReturn('<%= order._id %>', '<%= item._id %>', 'reject')"
+                                                        class="px-3 py-2 rounded-lg border border-gray-200 text-gray-500 font-bold text-xs hover:bg-white hover:border-gray-300 transition flex-1 md:flex-none justify-center">
+                                                        Reject
+                                                    </button>
+                                                    <button
+                                                        onclick="handleReturn('<%= order._id %>', '<%= item._id %>', 'approve')"
+                                                        class="px-3 py-2 rounded-lg bg-brand-500 text-white font-bold text-xs hover:bg-brand-600 shadow-sm transition flex items-center justify-center gap-1.5 flex-1 md:flex-none">
+                                                        <i class="fa-solid fa-check"></i> Approve
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                        <% }) %>
+                                            <% }) %>
+
+                                                <!-- Pagination -->
+                                                <% if (totalPages> 1) { %>
+                                                    <div class="flex justify-center mt-8 gap-2">
+                                                        <% if (currentPage> 1) { %>
+                                                            <a href="?page=<%= currentPage - 1 %>"
+                                                                class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                                                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                                                            </a>
+                                                            <% } %>
+                                                                <span class="px-4 py-2 font-bold text-brand-500">Page
+                                                                    <%= currentPage %>
+                                                                </span>
+                                                                <% if (currentPage < totalPages) { %>
+                                                                    <a href="?page=<%= currentPage + 1 %>"
+                                                                        class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                                                                        <i
+                                                                            class="fa-solid fa-chevron-right text-xs"></i>
+                                                                    </a>
+                                                                    <% } %>
+                                                    </div>
+                                                    <% } %>
+
+                                                        <% } else { %>
+                                                            <div class="text-center py-20">
+                                                                <div
+                                                                    class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
+                                                                    <i class="fa-solid fa-check-double"></i>
+                                                                </div>
+                                                                <h3 class="text-lg font-bold text-accent-navy">No
+                                                                    Pending Requests</h3>
+                                                                <p class="text-gray-400">All caught up!</p>
+                                                            </div>
+                                                            <% } %>
+                </div>
+
+            </main>
+    </div>
+
+    <script>
+        async function handleReturn(orderId, itemId, action) {
+            const actionText = action === 'approve' ? 'Approve' : 'Reject';
+
+            const result = await Swal.fire({
+                title: `${actionText} Request?`,
+                text: action === 'approve' ? "This will mark item as returned." : "This will revert item status to Delivered.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: action === 'approve' ? '#f43f5e' : '#64748b',
+                confirmButtonText: `Yes, ${actionText}`
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/orders/${orderId}/items/${itemId}/return-action`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire("Success", data.message, "success").then(() => window.location.reload());
+                    } else {
+                        Swal.fire("Error", data.message, "error");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire("Error", "Something went wrong", "error");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

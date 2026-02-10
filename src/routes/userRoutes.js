@@ -64,6 +64,10 @@ router.post('/checkout/place-order', userMiddleware.checkSession, checkoutContro
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 router.get('/orders', userMiddleware.checkSession, orderController.getOrderHistory);
 router.get('/orders/:id', userMiddleware.checkSession, orderController.getOrderDetails);
+router.post('/orders/:orderId/items/:itemId/return', userMiddleware.checkSession, orderController.requestItemReturn);
+router.post('/orders/:orderId/items/:itemId/return/cancel', userMiddleware.checkSession, orderController.cancelReturnRequest);
+router.post('/orders/:orderId/reorder', userMiddleware.checkSession, orderController.reorder);
+router.post('/orders/:orderId/cancel', userMiddleware.checkSession, orderController.cancelOrder);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);

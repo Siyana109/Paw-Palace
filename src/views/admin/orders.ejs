@@ -157,8 +157,15 @@
                             <i
                                 class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition"></i>
                             <input type="text" name="search" value="<%= query.search || '' %>"
-                                placeholder="Search Order ID..."
-                                class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-brand-50 rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 transition font-medium text-sm">
+                                placeholder="Order ID, User, or Product..."
+                                class="w-full pl-12 pr-10 py-3 bg-gray-50 border-2 border-transparent focus:border-brand-50 rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 transition font-medium text-sm">
+                            <% if (query.search) { %>
+                                <a href="/admin/orders"
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition"
+                                    title="Clear Search">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </a>
+                                <% } %>
                         </div>
 
                         <div class="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0">
@@ -186,6 +193,22 @@
                                     <option value="COD" <%=query.payment==='COD' ? 'selected' : '' %>>COD</option>
                                     <option value="Wallet" <%=query.payment==='Wallet' ? 'selected' : '' %>>Wallet
                                     </option>
+                                </select>
+                                <i
+                                    class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
+                            </div>
+                            <!-- Sort Filter -->
+                            <div class="relative">
+                                <select name="sort" onchange="this.form.submit()"
+                                    class="appearance-none bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-500 outline-none cursor-pointer hover:bg-gray-100 transition focus:border-brand-200">
+                                    <option value="newest" <%=(!query.sort || query.sort==='newest' ) ? 'selected' : ''
+                                        %>>Date: Newest</option>
+                                    <option value="oldest" <%=query.sort==='oldest' ? 'selected' : '' %>>Date: Oldest
+                                    </option>
+                                    <option value="amount_high" <%=query.sort==='amount_high' ? 'selected' : '' %>
+                                        >Amount: High to Low</option>
+                                    <option value="amount_low" <%=query.sort==='amount_low' ? 'selected' : '' %>>Amount:
+                                        Low to High</option>
                                 </select>
                                 <i
                                     class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
@@ -303,30 +326,73 @@
                     </div>
 
                     <!-- PAGINATION -->
-                    <% if (totalPages> 1) { %>
-                        <div class="p-6 border-t border-gray-50 flex justify-center">
+                    <!-- PAGINATION -->
+                    <div
+                        class="p-6 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <!-- Info Text -->
+                        <div class="text-xs text-gray-400 font-bold">
+                            Showing <%= (currentPage - 1) * 10 + 1 %>-<%= Math.min(currentPage * 10, stats.total) %> of
+                                    <%= stats.total %> results
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        <% if (totalPages> 0) { %>
                             <div class="flex items-center gap-2">
-                                <% if (currentPage> 1) { %>
-                                    <a href="/admin/orders?page=<%= currentPage - 1 %>"
-                                        class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 transition bg-white">
+                                <% const getPageUrl=(page)=> {
+                                    const params = new URLSearchParams();
+                                    Object.keys(query).forEach(key => {
+                                    if (query[key] && key !== 'page') {
+                                    params.append(key, query[key]);
+                                    }
+                                    });
+                                    params.append('page', page);
+                                    return `/admin/orders?${params.toString()}`;
+                                    };
+                                    %>
+
+                                    <!-- Previous Button -->
+                                    <a href="<%= currentPage > 1 ? getPageUrl(currentPage - 1) : '#' %>"
+                                        class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center transition bg-white <%= currentPage > 1 ? 'text-brand-500 hover:bg-brand-50' : 'text-gray-300 pointer-events-none' %>">
                                         <i class="fa-solid fa-chevron-left text-[10px]"></i>
                                     </a>
-                                    <% } %>
 
-                                        <span
-                                            class="px-4 py-1 rounded-full bg-brand-50 text-brand-500 text-xs font-bold">
-                                            Page <%= currentPage %> of <%= totalPages %>
-                                        </span>
-
-                                        <% if (currentPage < totalPages) { %>
-                                            <a href="/admin/orders?page=<%= currentPage + 1 %>"
-                                                class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-brand-500 hover:bg-brand-50 transition bg-white">
-                                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                                            </a>
+                                    <!-- Page Numbers -->
+                                    <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages,
+                                        startPage + 4); if (endPage - startPage < 4) { startPage=Math.max(1, endPage -
+                                        4); } if (startPage> 1) { %>
+                                        <a href="<%= getPageUrl(1) %>"
+                                            class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition bg-white text-xs font-bold">1</a>
+                                        <% if (startPage> 2) { %>
+                                            <span class="text-xs text-gray-400">...</span>
                                             <% } %>
+                                                <% } %>
+
+                                                    <% for(let i=startPage; i <=endPage; i++) { %>
+                                                        <a href="<%= getPageUrl(i) %>"
+                                                            class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition <%= currentPage === i ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'bg-white border border-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-500' %>">
+                                                            <%= i %>
+                                                        </a>
+                                                        <% } %>
+
+                                                            <% if (endPage < totalPages) { %>
+                                                                <% if (endPage < totalPages - 1) { %>
+                                                                    <span class="text-xs text-gray-400">...</span>
+                                                                    <% } %>
+                                                                        <a href="<%= getPageUrl(totalPages) %>"
+                                                                            class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition bg-white text-xs font-bold">
+                                                                            <%= totalPages %>
+                                                                        </a>
+                                                                        <% } %>
+
+                                                                            <!-- Next Button -->
+                                                                            <a href="<%= currentPage < totalPages ? getPageUrl(currentPage + 1) : '#' %>"
+                                                                                class="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center transition bg-white <%= currentPage < totalPages ? 'text-brand-500 hover:bg-brand-50' : 'text-gray-300 pointer-events-none' %>">
+                                                                                <i
+                                                                                    class="fa-solid fa-chevron-right text-[10px]"></i>
+                                                                            </a>
                             </div>
-                        </div>
-                        <% } %>
+                            <% } %>
+                    </div>
                 </div>
 
             </main>
@@ -369,10 +435,8 @@
                     class="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl px-4 py-3 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition">
                     <option value="Processing">Processing</option>
                     <option value="Shipped">Shipped</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
                     <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Returned">Returned</option>
-                    <option value="Failed">Failed</option>
                 </select>
             </div>
 

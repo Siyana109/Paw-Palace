@@ -76,5 +76,9 @@ router.get('/orders', adminMiddleware.adminSession, orderController.getAllOrders
 router.get('/orders/:id/details', adminMiddleware.adminSession, orderController.getOrderDetails);
 router.put('/orders/:id/status', adminMiddleware.adminSession, orderController.updateOrderStatus);
 
+// Return Management
+router.get('/returns', adminMiddleware.adminSession, orderController.getReturnRequests);
+router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.adminSession, orderController.handleReturnRequest);
+
 
 export default router

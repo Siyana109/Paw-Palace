@@ -44,7 +44,9 @@ export const orderItemSchema = new mongoose.Schema({
       "Ordered",
       "Processing",
       "Shipped",
+      "Out for Delivery",
       "Delivered",
+      "Return Requested",
       "Cancelled",
       "Returned"
     ],

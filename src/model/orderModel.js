@@ -77,6 +77,7 @@ const orderSchema = new mongoose.Schema({
             "Processing",
             "Partially Shipped",
             "Shipped",
+            "Out for Delivery",
             "Delivered",
             "Partially Cancelled",
             "Cancelled",

@@ -234,10 +234,16 @@
                                         Go to Cart
                                     </a>
                                     <% } else { %>
-                                        <button type="submit" id="addToCartBtn"
-                                            class="w-full h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600">
-                                            Add to Cart
-                                        </button>
+                                        <div class="flex-1 flex gap-3">
+                                            <button type="submit" id="addToCartBtn"
+                                                class="flex-1 h-12 bg-white border-2 border-brand-500 text-brand-500 rounded-xl font-bold hover:bg-brand-50 transition">
+                                                Add to Cart
+                                            </button>
+                                            <button type="button" onclick="buyNow()"
+                                                class="flex-1 h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
+                                                Buy Now
+                                            </button>
+                                        </div>
                                         <% } %>
 
 
@@ -366,8 +372,8 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <%- JSON.stringify(variants) %>;
-                let activeVariant = <%- JSON.stringify(defaultVariant) %>;
+                const variants = <% - JSON.stringify(variants) %>;
+                let activeVariant = <% - JSON.stringify(defaultVariant) %>;
 
                 // Color Mapping Helper
                 const colorMap = {
@@ -406,7 +412,7 @@
                     if (!variants.length || !activeVariant) return;
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
@@ -474,7 +480,7 @@
                     updateStock(activeVariant);
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size ).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
