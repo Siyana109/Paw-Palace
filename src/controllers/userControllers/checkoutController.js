@@ -3,7 +3,7 @@ import Cart from "../../model/cartModel.js";
 import Coupon from "../../model/couponModel.js";
 import Offer from "../../model/offerModel.js";
 import Order from "../../model/orderModel.js";
-
+import Variant from "../../model/variantModel.js";
 import { applyOfferToPrice } from "../../../utils/applyOffer.js";
 
 const getCheckoutPage = async (req, res) => {
@@ -148,16 +148,6 @@ const applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
         }
 
-        // Validate Per User Usage
-        /* 
-           REMOVED RESTRICTION: The user requested to allow using the coupon multiple times 
-           as long as the global usageLimit is not reached. 
-           Previously, valid usage was blocked by a strict check here.
-        */
-        // const userUsed = coupon.usedBy.some(u => u.userId.toString() === userId);
-        // if (userUsed) {
-        //     return res.status(400).json({ success: false, message: "You have already used this coupon" });
-        // }
 
         // --- Calculate Cart Total (Securely) ---
         const cart = await Cart.findOne({ user: userId })
@@ -238,7 +228,7 @@ const placeOrder = async (req, res) => {
 
         console.log("REQ BODY:", req.body);
 
-        /* 1️⃣ Validate payment method */
+        /* 1️ Validate payment method */
         const allowedMethods = ["COD", "ONLINE", "WALLET"];
 
         if (!allowedMethods.includes(paymentDetails)) {
@@ -246,7 +236,7 @@ const placeOrder = async (req, res) => {
             return res.redirect("/checkout");
         }
 
-        /* ❌ FIX: Map 'ONLINE' to 'RAZORPAY' if needed by Schema, or 'COD' to 'COD' */
+        //  FIX: Map 'ONLINE' to 'RAZORPAY' if needed by Schema, or 'COD' to 'COD' 
         // Schema Enum: ["COD", "RAZORPAY", "WALLET"]
         let paymentMethodCheck = paymentDetails;
         if (paymentDetails === "ONLINE") {
@@ -255,7 +245,7 @@ const placeOrder = async (req, res) => {
 
         const paymentMethod = paymentMethodCheck;
 
-        /* 2️⃣ Fetch Cart */
+        /* 2️ Fetch Cart */
         const cart = await Cart.findOne({ user: userId })
             .populate("items.product")
             .populate("items.variant");
@@ -264,13 +254,13 @@ const placeOrder = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        /* 3️⃣ Fetch Address */
+        /* 3️ Fetch Address */
         const addressDoc = await Address.findOne({ _id: addressId, userId });
         if (!addressDoc) {
             return res.redirect("/checkout");
         }
 
-        /* 4️⃣ Fetch active offers */
+        /* 4️ Fetch active offers */
         const activeOffers = await Offer.find({
             status: "active",
             startDate: { $lte: new Date() },
@@ -304,7 +294,7 @@ const placeOrder = async (req, res) => {
             });
         });
 
-        /* 5️⃣ Apply Coupon (calculation only) */
+        //  Apply Coupon (calculation only) 
         let discount = 0;
         let couponId = null;
 
@@ -342,18 +332,33 @@ const placeOrder = async (req, res) => {
         } else {
             console.log("No Coupon Code provided in body");
         }
-
         const shipping = 50;
         const finalTotal = subtotal + shipping - discount;
 
-        cart.items.forEach(item => {
+        cart.items.forEach(async item => {
             if (!item.variant || !item.variant.isActive || item.variant.stock === 0) {
-                throw new Error("OUT_OF_STOCK");
+                // throw new Error("OUT_OF_STOCK"); // Async issue if throwing here
             }
             if (item.quantity > item.variant.stock) {
-                throw new Error(`STOCK_LIMIT_EXCEEDED:${item.variant.stock}`);
+                // throw new Error...
             }
         });
+
+        for (const item of cart.items) {
+            const variant = await Variant.findById(item.variant._id);
+
+            if (!variant || !variant.isActive || variant.stock < item.quantity) {
+                throw new Error("OUT_OF_STOCK");
+            }
+        }
+
+        // Deduct stock AFTER validation
+        for (const item of cart.items) {
+            await Variant.findByIdAndUpdate(
+                item.variant._id,
+                { $inc: { stock: -item.quantity } }
+            );
+        }
 
         // Create Order
         const order = await Order.create({
@@ -382,7 +387,7 @@ const placeOrder = async (req, res) => {
             orderStatus: "Pending"
         });
 
-        /* 7️⃣ Update coupon usage ONLY AFTER order success */
+        //  Update coupon usage ONLY AFTER order success 
         if (couponId) {
             await Coupon.updateOne(
                 { _id: couponId },
@@ -393,10 +398,10 @@ const placeOrder = async (req, res) => {
             );
         }
 
-        /* 8️⃣ Clear cart */
+        // Clear cart 
         await Cart.deleteOne({ user: userId });
 
-        /* 9️⃣ Redirect */
+        // Redirect
         res.redirect(`/order-confirmation/${order._id}`);
 
     } catch (error) {
@@ -412,6 +417,7 @@ const placeOrder = async (req, res) => {
         res.redirect("/checkout");
     }
 };
+
 
 export default {
     getCheckoutPage,
