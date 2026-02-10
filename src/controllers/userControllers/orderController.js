@@ -1,16 +1,18 @@
 import Order from "../../model/orderModel.js";
 import Cart from "../../model/cartModel.js";
 import Wallet from "../../model/walletModel.js";
-import creditWallet from "../userControllers/walletController.js";
+import walletController from "../userControllers/walletController.js";
+import PDFDocument from 'pdfkit';
 
 
 const getOrderHistory = async (req, res) => {
     try {
-        const userId = req.session.user?._id;
+        const userId = req.session.user?.id;
         if (!userId) return res.redirect('/login');
 
         const page = parseInt(req.query.page) || 1;
         const status = req.query.status || 'All';
+        const search = req.query.search || '';
         const limit = 10;
         const skip = (page - 1) * limit;
 
@@ -20,14 +22,39 @@ const getOrderHistory = async (req, res) => {
             if (status === 'In Progress') {
                 query.orderStatus = { $nin: ['Delivered', 'Cancelled', 'Returned', 'Failed'] };
             } else if (status === 'Failed') {
-                // Check for either Order Failed OR Payment Failed
                 query.$or = [
                     { orderStatus: 'Failed' },
                     { 'payment.status': 'Failed' }
                 ];
             } else {
-                // Delivered, Cancelled, Returned
                 query.orderStatus = status;
+            }
+        }
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            // We need to look up orders where orderId matches OR any item matches
+            // Note: items.productName is inside the items array.
+            // But we are not joining tables here, basic find.
+            // We populated productId? No, items array has productId ref.
+            // Wait, the schema stores product details in items array?
+            // Let's check orderItemSchema. Usually yes for snapshots.
+            // Assuming items has productName.
+
+            // If we already have $or (from 'Failed' status), we need to be careful.
+            // $and: [ { original_query }, { $or: [ { orderId }, { 'items.productName' } ] } ]
+
+            const searchQuery = {
+                $or: [
+                    { orderId: searchRegex },
+                    { 'items.productName': searchRegex }
+                ]
+            };
+
+            if (query.$or) {
+                query = { $and: [query, searchQuery] };
+            } else {
+                Object.assign(query, searchQuery);
             }
         }
 
@@ -48,6 +75,7 @@ const getOrderHistory = async (req, res) => {
             currentPage: page,
             totalPages,
             currentStatus: status,
+            searchQuery: search,
             user: req.session.user
         });
 
@@ -60,7 +88,7 @@ const getOrderHistory = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
-        const userId = req.session.user?._id;
+        const userId = req.session.user?.id;
         const orderId = req.params.id;
 
         if (!userId) return res.redirect('/login');
@@ -91,7 +119,7 @@ const requestReturnItem = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
         const { reason } = req.body;
-        const userId = req.session.user._id;
+        const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
         if (!order) {
@@ -125,7 +153,7 @@ const requestReturnItem = async (req, res) => {
 const cancelReturnRequest = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
-        const userId = req.session.user._id;
+        const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
@@ -159,7 +187,7 @@ const cancelReturnRequest = async (req, res) => {
 const reorder = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const userId = req.session.user._id;
+        const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId }).populate('items.variantId');
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
@@ -211,7 +239,7 @@ const cancelOrderOrItem = async (req, res) => {
     try {
         const { orderId } = req.params;
         const { itemId, reason } = req.body;
-        const userId = req.session.user._id;
+        const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
         if (!order) {
@@ -251,9 +279,30 @@ const cancelOrderOrItem = async (req, res) => {
 
                 if (item.refund?.status === "Completed") continue;
 
-                await creditWallet({
+                let refundAmount = item.totalAmount;
+
+                // 💰 Deduct proportional coupon discount if applied
+                if (order.couponId) {
+                    const orderDiscount = Number(order.discount) || 0;
+
+                    // Priority 1: Use pre-calculated discount from DB
+                    if (item.couponDiscount && item.couponDiscount > 0) {
+                        refundAmount = item.totalAmount - item.couponDiscount;
+                    }
+                    // Priority 2: Fallback to dynamic calculation
+                    else if (orderDiscount > 0) {
+                        const originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+                        if (originalSubtotal > 0) {
+                            const itemProportion = item.totalAmount / originalSubtotal;
+                            const itemDiscountShare = orderDiscount * itemProportion;
+                            refundAmount = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
+                        }
+                    }
+                }
+
+                await walletController.creditWallet({
                     userId,
-                    amount: item.totalAmount,
+                    amount: refundAmount,
                     description: "Item Cancelled Refund",
                     orderId: order._id
                 });
@@ -268,7 +317,7 @@ const cancelOrderOrItem = async (req, res) => {
 
             // 📉 Adjust order totals
             order.subtotal -= item.totalAmount;
-            order.totalAmount -= item.totalAmount;
+            order.totalAmount -= refundAmount;
         }
 
         // 🔁 Update order status
@@ -290,11 +339,285 @@ const cancelOrderOrItem = async (req, res) => {
 };
 
 
+const downloadInvoice = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const userId = req.session.user?.id;
+
+        const order = await Order.findOne({ _id: orderId, userId })
+            .populate("items.productId")
+            .populate("items.variantId")
+            .lean();
+
+        if (!order) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        const doc = new PDFDocument({ margin: 50 });
+
+        const filename = `invoice-${order.orderId}.pdf`;
+
+        res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-type', 'application/pdf');
+
+        doc.pipe(res);
+
+        // --- Header ---
+        doc.fontSize(20).text('INVOICE', { align: 'center' });
+        doc.moveDown();
+
+        doc.fontSize(12).text('Paw Palace', { align: 'right' });
+        doc.text('123 Pet Street', { align: 'right' });
+        doc.text('City, State, ZIP', { align: 'right' });
+        doc.moveDown();
+
+        // --- Order & Customer Info ---
+        doc.text(`Order ID: ${order.orderId}`, 50, doc.y);
+        doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`);
+        doc.text(`Status: ${order.orderStatus}`);
+        doc.text(`Payment Method: ${order.payment.method} (${order.payment.status})`);
+        if (order.payment.transactionId) {
+            doc.text(`Transaction ID: ${order.payment.transactionId}`);
+        }
+        doc.moveDown();
+
+        doc.text(`Bill To:`, 50, doc.y);
+        doc.font('Helvetica-Bold').text(order.address.fullName);
+        doc.font('Helvetica').text(order.address.addressLine);
+        doc.text(`${order.address.city}, ${order.address.state} - ${order.address.zipCode}`);
+        doc.text(order.address.country);
+        doc.text(`Phone: ${order.address.phone}`);
+        doc.moveDown();
+
+        // --- Divider ---
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+        doc.moveDown();
+
+        // --- Items Table Header ---
+        const tableTop = doc.y + 10;
+        const itemX = 50;
+        const qtyX = 300;
+        const priceX = 370;
+        const totalX = 450;
+
+        doc.font('Helvetica-Bold');
+        doc.text('Item', itemX, tableTop);
+        doc.text('Qty', qtyX, tableTop);
+        doc.text('Price', priceX, tableTop);
+        doc.text('Total', totalX, tableTop);
+        doc.moveDown(); // Helps set next y correctly
+
+        // Draw line below header
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+        doc.font('Helvetica');
+
+        let y = doc.y + 10;
+
+        // --- Items ---
+        order.items.forEach(item => {
+            // Check status: Only charge for non-cancelled/returned items?
+            // Usually invoices show what was billed. If returned later, it's a credit note.
+            // But if it's "Cancelled" before invoice is effectively final or if it's "Delivered" we show it.
+            // Since this is for delivered orders, we show delivered items.
+            // If some items were cancelled, maybe exclude them or show as cancelled?
+            // User request is "download invoice of delivered order".
+            // I'll filter out Cancelled items for clarity or show them with status.
+            // I'll show only valid items for now to keep it clean, or all items.
+            // Let's stick to active items for the "Bill".
+
+            if (item.itemStatus !== 'Cancelled') {
+                const productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
+
+                doc.text(productName, itemX, y, { width: 240, continued: false });
+                doc.text(item.quantity.toString(), qtyX, y);
+                // Pricing Logic
+                const currentMRP = item.variantId ? item.variantId.price : item.price;
+                const sellingPrice = item.price;
+                const couponDisc = item.couponDiscount || 0;
+
+                let priceY = y;
+
+                if (currentMRP > sellingPrice) {
+                    doc.fontSize(9).text(`MRP: Rs.${currentMRP}`, priceX, priceY, { strike: true });
+                    priceY += 10;
+                    doc.fontSize(10).fillColor('green').text(`Offer: Rs.${sellingPrice}`, priceX, priceY);
+                    doc.fillColor('black');
+                } else {
+                    doc.text(`Rs.${sellingPrice.toFixed(2)}`, priceX, priceY);
+                }
+
+                if (couponDisc > 0) {
+                    priceY += 12;
+                    doc.fontSize(8).fillColor('blue').text(`Cpn Disc: -Rs.${couponDisc}`, priceX, priceY);
+                    doc.fontSize(10).fillColor('black');
+                }
+
+                doc.text(`Rs.${(item.price * item.quantity).toFixed(2)}`, totalX, y);
+
+                y = Math.max(y + 20, priceY + 20);
+            }
+        });
+
+        doc.moveDown();
+        doc.moveTo(50, y).lineTo(550, y).stroke();
+        y += 10;
+
+        // --- Summary ---
+        // Aligning to the right
+        const summaryX = 350;
+        const valueX = 450;
+
+        doc.text('Subtotal:', summaryX, y);
+        doc.text(`Rs.${(order.subtotal || 0).toFixed(2)}`, valueX, y);
+        y += 15;
+
+        doc.text('Discount:', summaryX, y);
+        doc.text(`- Rs.${(order.discount || 0).toFixed(2)}`, valueX, y);
+        y += 15;
+
+        doc.text('Shipping:', summaryX, y);
+        doc.text(`Rs.50.00`, valueX, y); // Hardcoded per UI
+        y += 15;
+
+        doc.font('Helvetica-Bold');
+        doc.text('Total Amount:', summaryX, y);
+        doc.text(`Rs.${order.totalAmount.toFixed(2)}`, valueX, y);
+
+        // --- Footer ---
+        doc.fontSize(10).text('Thank you for shopping with Paw Palace!', 50, 700, { align: 'center', width: 500 });
+
+        doc.end();
+
+    } catch (error) {
+        console.error("Download Invoice Error:", error);
+        res.status(500).render('error', { message: 'Failed to generate invoice' });
+    }
+};
+
+const downloadRefundReceipt = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const userId = req.session.user.id; // Ensure user is authenticated
+
+        const order = await Order.findOne({ _id: orderId, userId })
+            .populate("items.productId")
+            .populate("items.variantId");
+
+        if (!order) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        // Check if there are any returned items or a refund summary
+        const refundedItems = order.items.filter(item =>
+            item.itemStatus === 'Returned' || (item.returnRequest && item.returnRequest.status === 'Approved')
+        );
+
+        if (refundedItems.length === 0 && (!order.refundSummary || order.refundSummary.totalRefunded === 0)) {
+            return res.status(400).render('error', { message: 'No refunds found for this order' });
+        }
+
+        const doc = new PDFDocument({ margin: 50 });
+        const filename = `refund-receipt-${order.orderId}.pdf`;
+
+        res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-type', 'application/pdf');
+
+        doc.pipe(res);
+
+        // --- Header ---
+        doc.fontSize(20).text('REFUND RECEIPT', { align: 'center' });
+        doc.moveDown();
+
+        doc.fontSize(12).text('Paw Palace', { align: 'right' });
+        doc.text('Support: support@pawpalace.com', { align: 'right' });
+        doc.moveDown();
+
+        // --- Refund Info ---
+        doc.text(`Refund Date: ${new Date().toLocaleDateString()}`); // Or refund date from DB if available per item
+        doc.text(`Original Order ID: ${order.orderId}`);
+        doc.moveDown();
+
+        doc.text(`Refund To:`, 50, doc.y);
+        doc.font('Helvetica-Bold').text(order.address.fullName);
+        doc.font('Helvetica').text('Wallet / Original Payment Method'); // Generic as per current logic
+        doc.moveDown();
+
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+        doc.moveDown();
+
+        // --- Items Table ---
+        const tableTop = doc.y + 10;
+        const itemX = 50;
+        const qtyX = 350;
+        const amountX = 450;
+
+        doc.font('Helvetica-Bold');
+        doc.text('Refunded Item', itemX, tableTop);
+        doc.text('Qty', qtyX, tableTop);
+        doc.text('Refund Amount', amountX, tableTop);
+        doc.moveDown();
+
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+        doc.font('Helvetica');
+
+        let y = doc.y + 10;
+        let totalRefundCalculated = 0;
+
+        refundedItems.forEach(item => {
+            const productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
+
+            // Calculate refund amount for this item
+            // Logic: (Price - CouponDiscountProportion) * Qty
+            // Using item.price (which is selling price) and item.couponDiscount
+            // But wait, if item.itemStatus is Returned, usually we store refund amount somewhere?
+            // item.refund.amount exists in schema?
+            // Checking schema: item.refund { amount, method, status, refundedAt }
+
+            const refundAmount = item.refund && item.refund.amount ? item.refund.amount : 0;
+            totalRefundCalculated += refundAmount;
+
+            doc.text(productName, itemX, y, { width: 280 });
+            doc.text(item.quantity.toString(), qtyX, y);
+            doc.text(`Rs.${refundAmount.toFixed(2)}`, amountX, y);
+
+            y += 20;
+        });
+
+        doc.moveDown();
+        doc.moveTo(50, y).lineTo(550, y).stroke();
+        y += 10;
+
+        // --- Summary ---
+        const summaryX = 350;
+        const valueX = 450;
+
+        doc.font('Helvetica-Bold');
+        doc.text('Total Refunded:', summaryX, y);
+        // Use summarized total from schema if available, else calculated
+        const finalRefundTotal = (order.refundSummary && order.refundSummary.totalRefunded > 0)
+            ? order.refundSummary.totalRefunded
+            : totalRefundCalculated;
+
+        doc.text(`Rs.${finalRefundTotal.toFixed(2)}`, valueX, y);
+
+        // --- Footer ---
+        doc.fontSize(10).text('This amount has been credited to your wallet/account.', 50, 700, { align: 'center', width: 500 });
+
+        doc.end();
+
+    } catch (error) {
+        console.error("Download Refund Receipt Error:", error);
+        res.status(500).render('error', { message: 'Failed to generate refund receipt' });
+    }
+};
+
 export default {
     getOrderHistory,
     getOrderDetails,
     requestReturnItem,
     cancelReturnRequest,
     reorder,
-    cancelOrderOrItem
+    cancelOrderOrItem,
+    downloadInvoice,
+    downloadRefundReceipt
 };

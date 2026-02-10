@@ -76,21 +76,34 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                    <% if (order.orderStatus==='Delivered' ) { %>
-                        <button
+                    <% if (['Delivered', 'Returned' , 'Partially Returned' ].includes(order.orderStatus)) { %>
+                        <a href="/orders/<%= order._id %>/invoice"
                             class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-white border border-gray-200 font-bold text-sm hover:bg-gray-50 hover:border-gray-300 text-slate-700 transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-file-invoice"></i> Download Invoice
-                        </button>
-                        <button onclick="reorderItems('<%= order._id %>')"
-                            class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm hover:bg-rose-600 transition flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-95 transform duration-200">
-                            <i class="fa-solid fa-cart-plus"></i> Buy Again
-                        </button>
-                        <% } else if (['Placed', 'Pending' , 'Processing' ].includes(order.orderStatus)) { %>
-                            <button onclick="openCancelModal('<%= order._id %>')"
-                                class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold text-sm hover:bg-rose-50 transition flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
-                                <i class="fa-regular fa-circle-xmark"></i> Cancel Order
-                            </button>
-                            <% } %>
+                        </a>
+                        <% } %>
+
+                            <% if (['Returned', 'Partially Returned' ].includes(order.orderStatus)) { %>
+                                <a href="/orders/<%= order._id %>/refund-receipt"
+                                    class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-white border border-rose-200 font-bold text-sm hover:bg-rose-50 text-rose-600 transition flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i> Refund Receipt
+                                </a>
+                                <% } %>
+
+                                    <% if (order.orderStatus==='Delivered' || ['Returned', 'Partially Returned'
+                                        , 'Cancelled' ].includes(order.orderStatus)) { %>
+                                        <button onclick="reorderItems('<%= order._id %>')"
+                                            class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm hover:bg-rose-600 transition flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-95 transform duration-200">
+                                            <i class="fa-solid fa-cart-plus"></i> Buy Again
+                                        </button>
+                                        <% } %>
+                                            <% if (['Placed', 'Pending' , 'Processing' ].includes(order.orderStatus)) {
+                                                %>
+                                                <button onclick="openCancelModal('<%= order._id %>')"
+                                                    class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold text-sm hover:bg-rose-50 transition flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                                    <i class="fa-regular fa-circle-xmark"></i> Cancel Order
+                                                </button>
+                                                <% } %>
                 </div>
             </div>
 
