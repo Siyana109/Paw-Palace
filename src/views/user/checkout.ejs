@@ -528,7 +528,7 @@
 
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <% - JSON.stringify(addresses || []) %>;
+    const allAddresses = <%- JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {
