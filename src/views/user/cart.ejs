@@ -74,12 +74,11 @@
                                     <!-- QUANTITY CONTROLS -->
                                     <div class="flex flex-col items-center sm:items-start gap-1">
                                         <div class="flex items-center bg-gray-50 rounded-xl p-1">
-                                            <button onclick="updateQuantity('<%= item.variant._id %>', -1)"
-                                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
-                                                    <%= item.quantity <= 1 
-                                                        ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
-                                                        : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>" <%=item.quantity <=1 ? 'disabled'
-                                                : '' %>>
+                                            <button onclick="updateQuantity('<%= item.variant._id %>', -1)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
+        <%= item.quantity <= 1 
+            ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
+            : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>"
+                                                <%=item.variant.stock===0 || item.quantity <=1 ? 'disabled' : '' %>>
                                                 <i class="fa-solid fa-minus text-xs"></i>
                                             </button>
 
@@ -88,23 +87,26 @@
                                                 <%= item.quantity %>
                                             </span>
 
-                                            <button id="plus-<%= item.variant._id %>"
-                                                onclick="updateQuantity('<%= item.variant._id %>', 1)"
-                                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
-                                                    <%= item.quantity >= item.variant.stock 
-                                                        ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
-                                                        : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>" <%=item.quantity>=
-                                                item.variant.stock ? 'disabled' : '' %>>
+                                            <button onclick="updateQuantity('<%= item.variant._id %>', 1)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
+        <%= item.quantity >= item.variant.stock 
+            ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
+            : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>"
+                                                <%=item.variant.stock===0 || item.quantity>= item.variant.stock ?
+                                                'disabled' : '' %>>
                                                 <i class="fa-solid fa-plus text-xs"></i>
                                             </button>
                                         </div>
 
                                         <!-- Stock Limit Message -->
-                                        <% if (item.quantity>= item.variant.stock) { %>
-                                            <p class="text-[10px] font-bold text-red-400">
-                                                Max limit reached
+                                        <% if (item.variant.stock===0) { %>
+                                            <p class="text-[10px] font-bold text-red-500">
+                                                Out of stock
                                             </p>
-                                            <% } %>
+                                            <% } else if (item.quantity===item.variant.stock) { %>
+                                                <p class="text-[10px] font-bold text-red-400">
+                                                    Max limit reached
+                                                </p>
+                                                <% } %>
                                     </div>
                                 </div>
 
@@ -191,12 +193,22 @@
                                         50).toFixed(2) %></span>
                             </div>
 
-                            <a href="/checkout">
-                            <button
-                                class="w-full bg-brand-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-brand-600 transition shadow-xl shadow-brand-500/20 active:scale-95 transform duration-150">
-                                Checkout
-                            </button>
-                            </a>
+                            <% if (hasStockIssues) { %>
+                                <div
+                                    class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold mb-4">
+                                    <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                                    Some items are out of stock or exceed available quantity.
+                                    Please update your cart to continue.
+                                </div>
+                                <% } %>
+
+                                    <button <% if (hasStockIssues) { %> disabled <% } %>
+                                            onclick="<%= hasStockIssues ? '' : `window.location.href='/checkout' ` %>"
+                                                class="w-full py-4 rounded-xl font-bold
+                                                <%= hasStockIssues ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                    : 'bg-brand-500 text-white hover:bg-brand-600' %>">
+                                                    Proceed to Checkout
+                                    </button>
 
                         </div>
                     </div>

@@ -269,13 +269,14 @@ const getCartPage = async (req, res) => {
       item.variant.offerPrice = finalPrice;
     });
 
-    const hasOutOfStock = cart.items.some(
-      item => item.variant.stock === 0
+    const stockIssues = cart.items.filter(item =>
+      item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
     res.render('user/cart', {
       cart,
-      hasOutOfStock
+      hasStockIssues: stockIssues.length > 0,
+      stockIssues
     });
 
   } catch (error) {
