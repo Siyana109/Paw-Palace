@@ -150,6 +150,13 @@ const addToCart = async (req, res) => {
       });
     }
 
+    if (qty > 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum quantity per item is 10"
+      });
+    }
+
     const userId =
       typeof req.session.user === "object"
         ? req.session.user.id
@@ -192,6 +199,13 @@ const addToCart = async (req, res) => {
 
       if (index > -1) {
         const newQty = cart.items[index].quantity + qty;
+
+        if (newQty > 5) {
+          return res.status(400).json({
+            success: false,
+            message: `Maximum quantity per item is 5`
+          });
+        }
 
         if (newQty > variant.stock) {
           return res.status(400).json({

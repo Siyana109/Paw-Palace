@@ -53,12 +53,12 @@ const getCheckoutPage = async (req, res) => {
         let stockIssues = [];
 
         cart.items.forEach(item => {
-            if (item.variant.stock === 0) {
+            if (!item.variant || !item.variant.isActive || item.variant.stock === 0) {
                 stockIssues.push({
                     type: "OOS",
                     productId: item.product._id,
-                    variantId: item.variant._id,
-                    message: "Out of stock"
+                    variantId: item.variant?._id,
+                    message: "Out of stock or unavailable"
                 });
             } else if (item.quantity > item.variant.stock) {
                 stockIssues.push({
@@ -299,7 +299,8 @@ const placeOrder = async (req, res) => {
                 variantName: item.variant.size || item.variant.color || "",
                 price,
                 quantity: item.quantity,
-                totalAmount: totalItemAmount
+                totalAmount: totalItemAmount,
+                couponDiscount: 0 // Will be updated if coupon applied
             });
         });
 
@@ -325,6 +326,16 @@ const placeOrder = async (req, res) => {
                 discount = Math.min(discount, subtotal);
                 couponId = coupon._id;
                 console.log("Discount Applied:", discount);
+
+                // 🌟 Distribute discount to items for refund accuracy
+                if (discount > 0 && subtotal > 0) {
+                    orderItems.forEach(item => {
+                        const itemProportion = item.totalAmount / subtotal;
+                        const itemDiscountShare = discount * itemProportion;
+                        item.couponDiscount = Math.round(itemDiscountShare);
+                    });
+                }
+
             } else {
                 console.log("Coupon Not Found or Inactive");
             }
@@ -336,7 +347,7 @@ const placeOrder = async (req, res) => {
         const finalTotal = subtotal + shipping - discount;
 
         cart.items.forEach(item => {
-            if (item.variant.stock === 0) {
+            if (!item.variant || !item.variant.isActive || item.variant.stock === 0) {
                 throw new Error("OUT_OF_STOCK");
             }
             if (item.quantity > item.variant.stock) {

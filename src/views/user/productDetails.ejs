@@ -236,11 +236,11 @@
                                     <% } else { %>
                                         <div class="flex-1 flex gap-3">
                                             <button type="submit" id="addToCartBtn"
-                                                class="flex-1 h-12 bg-white border-2 border-brand-500 text-brand-500 rounded-xl font-bold hover:bg-brand-50 transition">
+                                                class="flex-1 h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
                                                 Add to Cart
                                             </button>
                                             <button type="button" onclick="buyNow()"
-                                                class="flex-1 h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
+                                                class="flex-1 h-12 bg-accent-navy text-white rounded-xl font-bold hover:bg-black transition shadow-lg shadow-accent-navy/30">
                                                 Buy Now
                                             </button>
                                         </div>
@@ -372,8 +372,8 @@
 
             <!-- CLIENT SIDE LOGIC -->
             <script>
-                const variants = <% - JSON.stringify(variants) %>;
-                let activeVariant = <% - JSON.stringify(defaultVariant) %>;
+                const variants = <%- JSON.stringify(variants) %>;
+                let activeVariant = <%- JSON.stringify(defaultVariant) %>;
 
                 // Color Mapping Helper
                 const colorMap = {
@@ -479,6 +479,11 @@
                     updateImages(activeVariant);
                     updateStock(activeVariant);
 
+                    // Reset Quantity
+                    document.getElementById('quantityInput').value = 1;
+                    document.getElementById('formQuantity').value = 1;
+                    updateQuantity(0); // Trigger button state update
+
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
                     const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
 
@@ -576,40 +581,50 @@
                 }
 
                 function updateQuantity(change) {
-
                     if (activeVariant.stock === 0) return;
 
                     const input = document.getElementById('quantityInput');
                     const formInput = document.getElementById('formQuantity');
                     const stockMsg = document.getElementById('stockMessage');
                     const stockCount = document.getElementById('stockCount');
-
-                    let val = parseInt(input.value) + change;
-                    const maxStock = activeVariant.stock;
-
                     const plusBtn = document.getElementById('qtyPlusBtn');
 
-                    if (val >= maxStock) {
-                        plusBtn.classList.add('text-gray-300', 'cursor-not-allowed');
-                    } else {
-                        plusBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
-                    }
+                    let val = parseInt(input.value) + change;
+                    const maxStock = Math.min(activeVariant.stock, 10); // Limit to 10 or stock
 
+                    // Helper to update button states
+                    const updateButtons = (currentVal) => {
+                        // Disable + if we reached limit
+                        if (currentVal >= maxStock) {
+                            plusBtn.classList.add('text-gray-300', 'cursor-not-allowed');
+                            plusBtn.disabled = true;
+                        } else {
+                            plusBtn.classList.remove('text-gray-300', 'cursor-not-allowed');
+                            plusBtn.disabled = false;
+                        }
+                    };
 
                     if (val < 1) val = 1;
+                    if (val > maxStock) val = maxStock;
 
-                    if (val > maxStock) {
-                        val = maxStock;
+                    // Update UI
+                    input.value = val;
+                    formInput.value = val;
+                    updateButtons(val);
 
-                        // Show stock warning
-                        stockCount.innerText = maxStock;
+                    // Show messages
+                    if (activeVariant.stock < 10 && val >= activeVariant.stock) {
+                        // Near stock limit
+                        stockCount.innerText = activeVariant.stock;
+                        stockMsg.innerHTML = `Only <span id="stockCount">${activeVariant.stock}</span> items left!`;
+                        stockMsg.classList.remove('hidden');
+                    } else if (val === 10 && activeVariant.stock >= 10) {
+                        // Hit max per order limit
+                        stockMsg.innerHTML = "Maximum limit is 10 items";
                         stockMsg.classList.remove('hidden');
                     } else {
                         stockMsg.classList.add('hidden');
                     }
-
-                    input.value = val;
-                    formInput.value = val;
                 }
 
 
