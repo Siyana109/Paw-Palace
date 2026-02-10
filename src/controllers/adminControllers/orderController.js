@@ -1,5 +1,6 @@
 import Order from "../../model/orderModel.js";
 import User from "../../model/userModel.js";
+import Wallet from "../../model/walletModel.js";
 
 // GET /admin/orders
 const getAllOrders = async (req, res) => {
@@ -143,97 +144,9 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-// GET /admin/returns - Get all return requests
-const getReturnRequests = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 10;
-        const skip = (page - 1) * limit;
-
-        // Find orders that have at least one item with status 'Return Requested'
-        const query = { 'items.itemStatus': 'Return Requested' };
-
-        const totalOrders = await Order.countDocuments(query);
-        const totalPages = Math.ceil(totalOrders / limit);
-
-        const orders = await Order.find(query)
-            .populate('userId', 'fullName email phone')
-            .populate('items.productId', 'name')
-            .populate('items.variantId', 'coverImage variantName price')
-            .sort({ 'items.returnRequest.requestedAt': -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean();
-
-        // Process orders to extract only relevant items for the view if needed, 
-        // OR just pass orders and let EJS filter items. Passing orders is easier.
-
-        res.render('admin/returnRequests', {
-            orders,
-            currentPage: page,
-            totalPages
-        });
-
-    } catch (error) {
-        console.error("Get Return Requests Error:", error);
-        res.status(500).render('error', { message: 'Failed to fetch return requests' });
-    }
-};
-
-// POST /admin/orders/:orderId/items/:itemId/return-action
-const handleReturnRequest = async (req, res) => {
-    try {
-        const { orderId, itemId } = req.params;
-        const { action } = req.body; // 'approve' or 'reject'
-
-        const order = await Order.findById(orderId);
-        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-
-        const item = order.items.id(itemId);
-        if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
-
-        if (item.itemStatus !== 'Return Requested') {
-            return res.status(400).json({ success: false, message: 'Item is not waiting for return approval' });
-        }
-
-        if (action === 'approve') {
-            item.itemStatus = 'Returned';
-            item.returnRequest.status = 'Approved';
-            item.returnRequest.resolvedAt = new Date();
-
-            // TODO: Implement Refund Logic (Wallet/Gateway) here
-            // item.price * item.quantity refund...
-
-            // Check if all items are now returned/cancelled -> Update Order Status
-            const allItemsProcessed = order.items.every(i => ['Returned', 'Cancelled'].includes(i.itemStatus));
-            if (allItemsProcessed) {
-                order.orderStatus = 'Returned';
-            } else {
-                order.orderStatus = 'Partially Returned';
-            }
-
-        } else if (action === 'reject') {
-            item.itemStatus = 'Delivered'; // Revert to delivered
-            item.returnRequest.status = 'Rejected';
-            item.returnRequest.resolvedAt = new Date();
-            // Optional: item.returnRequest.adminComment = req.body.comment;
-        } else {
-            return res.status(400).json({ success: false, message: 'Invalid action' });
-        }
-
-        await order.save();
-        res.json({ success: true, message: `Return request ${action}d successfully` });
-
-    } catch (error) {
-        console.error("Handle Return Request Error:", error);
-        res.status(500).json({ success: false, message: 'Failed to process return request' });
-    }
-};
 
 export default {
     getAllOrders,
     getOrderDetails,
-    updateOrderStatus,
-    getReturnRequests,
-    handleReturnRequest
+    updateOrderStatus
 };

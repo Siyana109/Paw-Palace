@@ -49,7 +49,7 @@ WEEK - 9
     ✔ Breadcrumbs, @done (1/30/2026, 4:22:47 PM)
     ✔ ratings, @done (1/30/2026, 9:00:27 PM)
     ✔ price, @done (1/30/2026, 4:23:26 PM)
-    ☐ discounts/coupons, 
+    ✔ discounts/coupons, @done (2/10/2026, 5:42:44 PM)
     ✔ reviews, @done (1/30/2026, 4:23:21 PM)
     ☐ stock info
     ✔ Error handling for sold out/unavailable/out of stock @done (1/30/2026, 3:26:55 PM)
@@ -98,15 +98,15 @@ WEEK-9 PENDINGS:
 
 WEEK 10:
     User:
-    ☐ Cart management
+    ✔ Cart management @done (2/10/2026, 7:09:57 PM)
     ✔ Add to cart, remove products, list cart products @done (2/4/2026, 8:26:40 PM)
     ☐ Prevent adding blocked/unlisted products
-    ☐ Increase the quantity if the product is already in the cart
+    ✔ Increase the quantity if the product is already in the cart @done (2/10/2026, 5:52:43 PM)
     ✔ Remove product from wishlist when added to cart @done (2/4/2026, 8:27:00 PM)
     ✔ Increment/decrement quantity with stock validations @done (2/4/2026, 8:27:03 PM)
     ☐ Maximum quantity limits
-    ☐ Disable out-of-stock products and restrict checkout
-    ☐ Checkout page
+    ✔ Disable out-of-stock products and restrict checkout @done (2/10/2026, 4:53:33 PM)
+    ✔ Checkout page @done (2/10/2026, 4:53:36 PM)
     ✔ Show user addresses with an add/edit option, default address selection @done (2/4/2026, 8:27:10 PM)
     ✔ Display products with image, quantity, item total, taxes (optional), discounts, @done (2/6/2026, 1:15:42 AM)
     ✔ final price (including taxes, discounts, shipping) @done (2/6/2026, 1:15:46 AM)
@@ -117,14 +117,14 @@ WEEK 10:
     ☐ Cancel order or specific products (stock increment on cancellation)
     ☐ Reason (optional) for cancellation
     ☐ Return order (mandatory reason) when delivered
-    ☐ Order detail page
+    ✔ Order detail page @done (2/10/2026, 5:50:25 PM)
     ☐ Download invoice (PDF)
     ☐ Search order
 
     Admin:
-    ☐ Order management
+    ✔ Order management @done (2/10/2026, 5:34:24 PM)
     ✔ List orders in descending order by order date @done (2/10/2026, 12:00:46 PM)
-    ☐ Show orderID, date, user details, and view detail button
+    ✔ Show orderID, date, user details, and view detail button @done (2/10/2026, 5:34:26 PM)
     ✔ Change order status (pending, shipped, out for delivery, delivered, cancelled) @done (2/10/2026, 12:01:04 PM)
     ✔ Search, sort, and filter with clear functionality @done (2/10/2026, 12:01:00 PM)
     ✔ Pagination @done (2/10/2026, 1:36:05 PM)
@@ -137,10 +137,10 @@ WEEK 10:
 
 
 WEEK-8 PENDINGS:
-    Try to use appropriate HTTP methods for apis
-    Object destructuring
+    ☐ Try to use appropriate HTTP methods for apis
+    ☐ Object destructuring
     ✔ Fix the css issue in products list page @done (2/2/2026, 12:41:36 PM)
-    Only use soft delete for product variants 
+    ☐ Only use soft delete for product variants
 
 
 
@@ -156,12 +156,14 @@ TODO :
         ☐ otp resent and submitting attempt limit
         ✔ confirm logout @done (1/31/2026, 2:26:10 AM)
         ✔ edit phone no: @done (1/31/2026, 2:42:48 AM)
-        ☐ product detailing page (wishlist)
+        ☐ product detailing page
         ✔ manage out of stock profucts (display it in last and low transparency) @done (2/3/2026, 11:45:49 AM)
         ☐ filter products based on size in shop page
         ☐ show selected variant highlighted
         ☐ wishlist cart Count in header
-        ☐ 
+        ☐ delivery date
+        ☐ free deliver above .....
+        ☐ check order number jusst after placing an order and orderaId in history
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

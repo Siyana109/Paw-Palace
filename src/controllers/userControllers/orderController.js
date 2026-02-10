@@ -1,8 +1,12 @@
 import Order from "../../model/orderModel.js";
+import Cart from "../../model/cartModel.js";
+import Wallet from "../../model/walletModel.js";
+import creditWallet from "../userControllers/walletController.js";
+
 
 const getOrderHistory = async (req, res) => {
     try {
-        const userId = req.session.user?.id;
+        const userId = req.session.user?._id;
         if (!userId) return res.redirect('/login');
 
         const page = parseInt(req.query.page) || 1;
@@ -56,7 +60,7 @@ const getOrderHistory = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
-        const userId = req.session.user?.id;
+        const userId = req.session.user?._id;
         const orderId = req.params.id;
 
         if (!userId) return res.redirect('/login');
@@ -82,50 +86,80 @@ const getOrderDetails = async (req, res) => {
     }
 };
 
-const requestItemReturn = async (req, res) => {
+
+const requestReturnItem = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
         const { reason } = req.body;
-        const userId = req.session.user.id;
+        const userId = req.session.user._id;
+
+        const order = await Order.findOne({ _id: orderId, userId });
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const item = order.items.id(itemId);
+        if (!item || item.itemStatus !== "Delivered") {
+            return res.status(400).json({ success: false, message: "Invalid return request" });
+        }
+
+        item.itemStatus = "Return Requested";
+        item.returnRequest = {
+            isRequested: true,
+            reason,
+            status: "Pending",
+            requestedAt: new Date()
+        };
+
+        await order.save();
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error("Return Request Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+const cancelReturnRequest = async (req, res) => {
+    try {
+        const { orderId, itemId } = req.params;
+        const userId = req.session.user._id;
 
         const order = await Order.findOne({ _id: orderId, userId });
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-        if (order.orderStatus !== 'Delivered' && order.orderStatus !== 'Partially Returned') {
-            return res.status(400).json({ success: false, message: 'Order is not eligible for return' });
-        }
-
         const item = order.items.id(itemId);
-        if (!item) return res.status(404).json({ success: false, message: 'Item not found in order' });
+        if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
-        if (item.itemStatus !== 'Delivered') {
-            return res.status(400).json({ success: false, message: 'Item is not eligible for return' });
+        if (item.itemStatus !== 'Return Requested') {
+            return res.status(400).json({ success: false, message: 'No return request found to cancel' });
         }
 
-        if (item.returnRequest?.isRequested) {
-            return res.status(400).json({ success: false, message: 'Return already requested for this item' });
-        }
-
+        // Revert status
+        item.itemStatus = 'Delivered';
         item.returnRequest = {
-            isRequested: true,
-            reason: reason,
-            status: 'Pending',
-            requestedAt: new Date()
+            isRequested: false,
+            reason: null,
+            status: null,
+            requestedAt: null
         };
-        item.itemStatus = 'Return Requested';
 
         await order.save();
+        res.json({ success: true, message: 'Return request cancelled successfully' });
 
     } catch (error) {
-        console.error("Return Request Error:", error);
-        res.status(500).json({ success: false, message: 'Failed to request return' });
+        console.error("Cancel Return Request Error:", error);
+        res.status(500).json({ success: false, message: 'Failed to cancel return request' });
     }
 };
+
 
 const reorder = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const userId = req.session.user.id;
+        const userId = req.session.user._id;
 
         const order = await Order.findOne({ _id: orderId, userId }).populate('items.variantId');
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
@@ -171,42 +205,96 @@ const reorder = async (req, res) => {
     }
 };
 
-const cancelOrder = async (req, res) => {
-    // Implementation needed if it was missing or imports need to be checked.
-    // Wait, cancelOrder was imported or defined? 
-    // Looking at previous file content, cancelOrder WAS NOT DEFINED in the viewed snippet but was in export.
-    // I must have overwritten it or it's missing.
-    // Checking the file content again... cancelOrder IS NOT in the file content 1-124.
-    // It seems I might have accidentally deleted it or it wasn't there.
-    // Re-checking lines 1-124... 
-    // I see `export default { getOrderHistory, cancelOrder, ... }` at the end.
-    // But `cancelOrder` function definition is missing in lines 1-124.
-    // Secure approach: Only add `reorder` and fix export. 
-    // If `cancelOrder` is missing, I should check if it was imported or if I need to find it.
-    // Ah, I see `getOrderHistory`, `getOrderDetails`, `requestItemReturn`.
-    // `cancelOrder` is referenced in export but not defined.
-    // I will assume it might be further down or I missed it.
-    // Wait, I viewed the *whole* file (lines 1-124) and `cancelOrder` is NOT defined.
-    // This means `cancelOrder` is likely missing or broken.
-    // However, my task is `reorder`.
-    // I will define `reorder` and use `export default { ... }` correctly.
-    // I will NOT add `cancelOrder` to export if it's not defined, OR I will define a placeholder if needed, 
-    // but likely it was deleted in previous edits. 
-    // Actually, `cancelOrder` might be imported? No, imports are only models.
-    // I will remove `cancelOrder` from export to avoid crash, UNLESS I find it.
-    // A safer bet: I will search for `cancelOrder` in the file content I have. It is ONLY in the export.
-    // I will remove it from export for now to fix the syntax error, or if I find it I'll keep it.
-    // Steps:
-    // 1. Close `requestItemReturn` properly.
-    // 2. Add `reorder`.
-    // 3. Export `getOrderHistory`, `getOrderDetails`, `requestItemReturn`, `reorder`.
-    // 4. (I will omit `cancelOrder` from export if not defined to prevent ReferenceError).
 
+
+const cancelOrderOrItem = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { itemId, reason } = req.body;
+        const userId = req.session.user._id;
+
+        const order = await Order.findOne({ _id: orderId, userId });
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+
+        console.log("orderId:", orderId);
+        console.log("userId:", userId);
+
+        // Decide which items to cancel
+        const itemsToCancel = itemId
+            ? [order.items.id(itemId)]
+            : order.items.filter(
+                i => !["Cancelled", "Returned"].includes(i.itemStatus)
+            );
+
+        if (!itemsToCancel.length) {
+            return res.json({ success: false, message: "No cancellable items" });
+        }
+
+        for (const item of itemsToCancel) {
+            if (!item) continue;
+
+            // ⛔ Safety: prevent double cancel/refund
+            if (["Cancelled", "Returned"].includes(item.itemStatus)) continue;
+
+            item.itemStatus = "Cancelled";
+            item.cancelRequest = {
+                isRequested: true,
+                reason,
+                status: "Approved",
+                processedAt: new Date()
+            };
+
+            // 💰 Refund only if already paid (ONLINE / WALLET)
+            if (order.payment.method !== "COD") {
+
+                if (item.refund?.status === "Completed") continue;
+
+                await creditWallet({
+                    userId,
+                    amount: item.totalAmount,
+                    description: "Item Cancelled Refund",
+                    orderId: order._id
+                });
+
+                item.refund = {
+                    amount: item.totalAmount,
+                    method: "Wallet",
+                    status: "Completed",
+                    refundedAt: new Date()
+                };
+            }
+
+            // 📉 Adjust order totals
+            order.subtotal -= item.totalAmount;
+            order.totalAmount -= item.totalAmount;
+        }
+
+        // 🔁 Update order status
+        const remaining = order.items.filter(
+            i => !["Cancelled", "Returned"].includes(i.itemStatus)
+        );
+
+        order.orderStatus =
+            remaining.length === 0 ? "Cancelled" : "Partially Cancelled";
+
+        await order.save();
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error("Cancel Error:", error);
+        res.json({ success: false, message: "Server error" });
+    }
 };
+
 
 export default {
     getOrderHistory,
     getOrderDetails,
-    requestItemReturn,
-    reorder
+    requestReturnItem,
+    cancelReturnRequest,
+    reorder,
+    cancelOrderOrItem
 };

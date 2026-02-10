@@ -8,6 +8,7 @@ import productController from "../controllers/userControllers/productController.
 import checkoutController from "../controllers/userControllers/checkoutController.js";
 import { upload } from "../middlewares/upload.js";
 import orderController from "../controllers/userControllers/orderController.js";
+import walletController from "../controllers/userControllers/walletController.js";
 
 router.get('/', authController.landingPage)
 
@@ -41,6 +42,8 @@ router.post('/profile/address/:id/delete', userMiddleware.checkSession, profileC
 router.post('/profile/image/update', userMiddleware.checkSession, upload.single('profilePic'), profileController.updateProfileImage)
 router.post('/profile/image/remove', userMiddleware.checkSession, profileController.removeProfilePic);
 
+router.get('/wallet', userMiddleware.checkSession, walletController.getWalletPage);
+
 router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);
 router.post('/change-password', userMiddleware.checkSession, profileController.postChangePassword);
 
@@ -60,15 +63,22 @@ router.patch('/cart/update', userMiddleware.checkSession, productController.upda
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
 
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
+router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 router.post('/checkout/place-order', userMiddleware.checkSession, checkoutController.placeOrder);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
+
+
 router.get('/orders', userMiddleware.checkSession, orderController.getOrderHistory);
 router.get('/orders/:id', userMiddleware.checkSession, orderController.getOrderDetails);
-router.post('/orders/:orderId/items/:itemId/return', userMiddleware.checkSession, orderController.requestItemReturn);
+
+
+router.post('/orders/:orderId/items/:itemId/return', userMiddleware.checkSession, orderController.requestReturnItem);
 router.post('/orders/:orderId/items/:itemId/return/cancel', userMiddleware.checkSession, orderController.cancelReturnRequest);
+router.post('/orders/:orderId/cancel', userMiddleware.checkSession, orderController.cancelOrderOrItem);
+
+
 router.post('/orders/:orderId/reorder', userMiddleware.checkSession, orderController.reorder);
-router.post('/orders/:orderId/cancel', userMiddleware.checkSession, orderController.cancelOrder);
-router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
+
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 router.get('/wishlist', userMiddleware.checkSession, productController.getWishlist);

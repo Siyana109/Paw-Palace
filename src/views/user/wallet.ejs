@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wallet | PawPalace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#f43f5e', 50: '#fff1f2' },
+                        accent: { teal: '#2dd4bf', tealDark: '#0d9488', navy: '#0f172a', cream: '#fffdf5' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-gray-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col selection:bg-rose-100 selection:text-rose-600">
+
+    <%- include('../partials/header') %>
+
+        <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 w-full flex-grow">
+
+            <!-- BREADCRUMB -->
+            <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 animate-fade-in-up">
+                <a href="/" class="hover:text-rose-500 transition-colors">Home</a>
+                <span class="text-gray-300">/</span>
+                <a href="/profile" class="hover:text-rose-500 transition-colors">Account</a>
+                <span class="text-gray-300">/</span>
+                <span class="font-semibold text-slate-800">Wallet</span>
+            </nav>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- SIDEBAR -->
+                <div class="lg:col-span-3 space-y-6 animate-fade-in-up delay-75">
+                    <div
+                        class="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 w-full h-24 bg-gradient-to-b from-rose-50 to-transparent opacity-50 left-0">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="relative inline-block mb-4">
+                                <img src="<%= user?.profilePic || 'https://via.placeholder.com/150' %>">
+                                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                                alt="Profile">
+                            </div>
+
+                            <h2 class="text-xl font-black text-slate-800 tracking-tight">
+                                <%= user.fullName %>
+                            </h2>
+                            <p class="text-xs text-rose-500 font-bold uppercase tracking-wider mt-1">
+                                <%= user.role || 'Member' %>
+                            </p>
+
+                            <div class="mt-6 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Referral
+                                    Code</p>
+                                <div class="flex items-center justify-center gap-2 cursor-pointer group"
+                                    onclick="navigator.clipboard.writeText('<%= user.referralCode %>')">
+                                    <span
+                                        class="font-mono font-bold text-slate-700 text-sm group-hover:text-rose-500 transition-colors">
+                                        <%= user.referralCode || '----' %>
+                                    </span>
+                                    <i
+                                        class="fa-regular fa-copy text-xs text-gray-300 group-hover:text-rose-400 transition-colors"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-1">
+                        <a href="/profile"
+                            class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition group">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-rose-500 group-hover:shadow-sm transition">
+                                <i class="fa-regular fa-user"></i>
+                            </div>
+                            <span class="group-hover:text-slate-700 transition">Profile Details</span>
+                        </a>
+                        <a href="/wallet"
+                            class="flex items-center gap-4 p-4 rounded-2xl bg-rose-50 text-rose-600 font-bold transition shadow-sm border border-rose-100">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-rose-500 shadow-sm">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            Wallet
+                        </a>
+                        <a href="/orders"
+                            class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 font-bold transition group">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-rose-500 group-hover:shadow-sm transition">
+                                <i class="fa-solid fa-box"></i>
+                            </div>
+                            <span class="group-hover:text-slate-700 transition">My Orders</span>
+                        </a>
+
+                        <form action="/logout" method="POST" class="pt-2 mt-2 border-t border-gray-50">
+                            <button type="submit"
+                                class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-400 font-bold transition text-left group">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-400 group-hover:bg-white group-hover:shadow-sm transition">
+                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                </div>
+                                <span class="group-hover:text-red-500 transition">Log Out</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MAIN CONTENT -->
+                <div class="lg:col-span-9 space-y-8 animate-fade-in-up delay-150">
+
+                    <!-- Balance Card -->
+                    <div
+                        class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-[2.5rem] p-8 sm:p-12 text-white shadow-xl shadow-rose-500/20 relative overflow-hidden group">
+
+                        <!-- Background Decorations -->
+                        <div
+                            class="absolute top-0 right-0 p-8 opacity-10 transform translate-x-10 -translate-y-10 group-hover:scale-110 transition-transform duration-700">
+                            <i class="fa-solid fa-wallet text-9xl"></i>
+                        </div>
+                        <div
+                            class="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -ml-20 -mb-20 pointer-events-none">
+                        </div>
+
+                        <div
+                            class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+                            <div>
+                                <p
+                                    class="text-rose-100 font-bold uppercase tracking-wider text-xs mb-3 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                    Total Available Balance
+                                </p>
+                                <h1 class="text-5xl sm:text-6xl font-black tracking-tight mb-2">
+                                    ₹<%= (wallet.balance || 0).toFixed(2) %>
+                                </h1>
+                                <p class="text-rose-200 text-sm font-medium">Use for your next purchase</p>
+                            </div>
+
+                            <div class="flex flex-col gap-3">
+                                <button onclick="showComingSoon()"
+                                    class="bg-white text-rose-600 hover:bg-rose-50 px-8 py-3.5 rounded-2xl font-bold text-sm transition shadow-lg shadow-black/10 flex items-center justify-center gap-2 transform active:scale-95">
+                                    <i class="fa-solid fa-plus-circle"></i> Add Money
+                                </button>
+                                <!-- <p class="text-center text-[10px] text-rose-200 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Instant Deposit</p> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Section -->
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                                <i class="fa-solid fa-clock-rotate-left text-rose-500"></i>
+                                Transaction History
+                            </h3>
+                            <!-- <button class="text-xs font-bold text-gray-400 hover:text-rose-500 transition">View All</button> -->
+                        </div>
+
+                        <% if (wallet.transactions && wallet.transactions.length> 0) { %>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr
+                                            class="text-gray-400 text-[10px] uppercase tracking-wider border-b border-gray-50">
+                                            <th class="py-4 font-bold pl-4">Date & Time</th>
+                                            <th class="py-4 font-bold">Details</th>
+                                            <th class="py-4 font-bold text-center">Reference</th>
+                                            <th class="py-4 font-bold text-right pr-4">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-sm">
+                                        <% wallet.transactions.slice().reverse().forEach(txn=> { %>
+                                            <tr
+                                                class="group hover:bg-gray-50/80 transition-colors border-b border-gray-50 last:border-0 rounded-2xl">
+
+                                                <!-- Date -->
+                                                <td class="py-5 pl-4 align-top">
+                                                    <div class="flex flex-col">
+                                                        <span class="font-bold text-slate-700">
+                                                            <%= new Date(txn.date).toLocaleDateString('en-IN', {
+                                                                day: 'numeric' , month: 'short' , year: 'numeric' }) %>
+                                                        </span>
+                                                        <span class="text-xs text-gray-400 font-medium">
+                                                            <%= new Date(txn.date).toLocaleTimeString('en-IN', {
+                                                                hour: '2-digit' , minute: '2-digit' }) %>
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Details -->
+                                                <td class="py-5 align-top">
+                                                    <div class="flex items-start gap-4">
+                                                        <div
+                                                            class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 <%= txn.type === 'Credit' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500' %>">
+                                                            <i
+                                                                class="fa-solid <%= txn.type === 'Credit' ? 'fa-arrow-down' : 'fa-arrow-up' %> transform <%= txn.type === 'Credit' ? '' : 'rotate-45' %>"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-bold text-slate-800 mb-0.5">
+                                                                <%= txn.type==='Credit' ? 'Received' : 'Sent' %>
+                                                            </p>
+                                                            <p
+                                                                class="text-xs text-slate-500 font-medium leading-relaxed max-w-[200px]">
+                                                                <%= txn.description %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Reference -->
+                                                <td class="py-5 text-center align-top">
+                                                    <% if (txn.orderId) { %>
+                                                        <a href="/order/<%= txn.orderId %>"
+                                                            class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-lg transition font-mono">
+                                                            #<%= String(txn.orderId).slice(-6).toUpperCase() %>
+                                                        </a>
+                                                        <% } else { %>
+                                                            <span class="text-gray-300 font-mono text-xs">-</span>
+                                                            <% } %>
+                                                </td>
+
+                                                <!-- Amount -->
+                                                <td class="py-5 pr-4 text-right align-top">
+                                                    <span
+                                                        class="font-black text-lg <%= txn.type === 'Credit' ? 'text-emerald-500' : 'text-slate-800' %>">
+                                                        <%= txn.type==='Credit' ? '+' : '-' %> ₹<%=
+                                                                txn.amount.toFixed(2) %>
+                                                    </span>
+                                                    <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">
+                                                        <%= txn.type %>
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } else { %>
+                                <div
+                                    class="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                    <div
+                                        class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 text-2xl shadow-sm">
+                                        <i class="fa-solid fa-receipt"></i>
+                                    </div>
+                                    <h4 class="text-lg font-bold text-slate-700 mb-1">No transactions yet</h4>
+                                    <p class="text-xs text-gray-400">Your wallet activity will appear here once you make
+                                        a transaction.</p>
+                                </div>
+                                <% } %>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+        <%- include('../partials/footer') %>
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                function showComingSoon() {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Coming Soon',
+                        text: 'This feature is currently under development.',
+                        confirmButtonColor: '#f43f5e'
+                    });
+                }
+            </script>
+
+</body>
+
+</html>

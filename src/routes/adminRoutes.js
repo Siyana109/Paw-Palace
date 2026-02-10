@@ -13,6 +13,7 @@ import variantController from "../controllers/adminControllers/variantController
 import couponController from "../controllers/adminControllers/couponController.js"
 import offerController from "../controllers/adminControllers/offerController.js"
 import orderController from "../controllers/adminControllers/orderController.js"
+import requestController from "../controllers/adminControllers/requestController.js"
 
 import { variantUpload, upload } from "../middlewares/upload.js"
 
@@ -76,9 +77,10 @@ router.get('/orders', adminMiddleware.adminSession, orderController.getAllOrders
 router.get('/orders/:id/details', adminMiddleware.adminSession, orderController.getOrderDetails);
 router.put('/orders/:id/status', adminMiddleware.adminSession, orderController.updateOrderStatus);
 
+
 // Return Management
-router.get('/returns', adminMiddleware.adminSession, orderController.getReturnRequests);
-router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.adminSession, orderController.handleReturnRequest);
+router.get('/returns', adminMiddleware.adminSession, requestController.getReturnRequests);
+router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.adminSession, requestController.handleReturnAction);
 
 
 export default router
