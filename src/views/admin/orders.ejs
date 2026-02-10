@@ -511,18 +511,40 @@
             const content = document.getElementById('drawerContent');
 
             // Generate HTML for Items
-            const itemsHtml = order.items.map(item => `
-                <div class="flex gap-4 items-center mb-4 last:mb-0">
-                    <div class="w-16 h-16 bg-gray-50 rounded-xl border border-gray-100 p-1 flex-shrink-0">
-                        <img src="${item.variantId?.coverImage || '/default.png'}" class="w-full h-full object-cover rounded-lg">
+            // Generate HTML for Items
+            const itemsHtml = order.items.map(item => {
+                let statusBadge = '';
+                let opacityClass = '';
+                let priceClass = 'text-accent-navy';
+
+                if (item.itemStatus === 'Cancelled') {
+                    statusBadge = '<span class="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-bold ml-2">Cancelled</span>';
+                    opacityClass = 'opacity-60 grayscale-[0.5]';
+                    priceClass = 'text-gray-400 line-through';
+                } else if (item.itemStatus === 'Returned') {
+                    statusBadge = '<span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold ml-2">Returned</span>';
+                } else if (item.itemStatus === 'Return Requested') {
+                    statusBadge = '<span class="text-[10px] bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-bold ml-2">Return Req</span>';
+                }
+
+                return `
+                <div class="flex gap-4 items-center mb-4 last:mb-0 ${opacityClass}">
+                    <div class="w-16 h-16 bg-gray-50 rounded-xl border border-gray-100 p-1 flex-shrink-0 relative">
+                        <img src="${item.variantId?.coverImage || '/assets/images/default-product.png'}" class="w-full h-full object-cover rounded-lg">
                     </div>
                     <div class="flex-1">
-                        <p class="font-bold text-accent-navy text-sm line-clamp-1">${item.productName}</p>
-                        <p class="text-xs text-gray-500">Qty: ${item.quantity} × ₹${item.price}</p>
+                        <div class="flex items-center flex-wrap gap-1">
+                            <p class="font-bold text-accent-navy text-sm line-clamp-1">${item.productName}</p>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            Qty: ${item.quantity} × ₹${item.price}
+                            ${item.variantName ? `<span class="ml-1 text-gray-400">(${item.variantName})</span>` : ''}
+                        </p>
                     </div>
-                    <p class="font-bold text-accent-navy text-sm">₹${(item.price * item.quantity).toFixed(2)}</p>
+                    <p class="font-bold text-sm ${priceClass}">₹${(item.totalAmount).toFixed(2)}</p>
                 </div>
-            `).join('');
+            `}).join('');
 
             content.innerHTML = `
                 <!-- Customer Info -->
