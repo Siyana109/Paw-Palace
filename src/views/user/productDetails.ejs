@@ -688,6 +688,11 @@
                             btn.classList.remove("border-brand-500");
                         }
 
+                        // Update Badge
+                        if (typeof window.updateWishlistCount === 'function' && data.wishlistCount !== undefined) {
+                            window.updateWishlistCount(data.wishlistCount);
+                        }
+
                     } catch (err) {
                         console.error("Wishlist toggle error:", err);
                     }

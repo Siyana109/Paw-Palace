@@ -30,7 +30,7 @@
 
                     <i class="fa-regular fa-heart text-2xl"></i>
 
-                    <span class="absolute -top-1 -right-1 bg-accent-navy text-white text-[10px] font-bold
+                    <span id="wishlistCountBadge" class="absolute -top-1 -right-1 bg-accent-navy text-white text-[10px] font-bold
            h-4 w-4 rounded-full flex items-center justify-center border-2 border-white
            group-hover:bg-brand-500">
                         <%= wishlistCount %>
@@ -87,6 +87,15 @@
         if (badge) {
             badge.innerText = count;
             // Optional: Bounce animation
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+    };
+
+    window.updateWishlistCount = (count) => {
+        const badge = document.getElementById('wishlistCountBadge');
+        if (badge) {
+            badge.innerText = count;
             badge.classList.add('scale-125');
             setTimeout(() => badge.classList.remove('scale-125'), 200);
         }

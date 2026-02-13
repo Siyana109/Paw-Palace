@@ -465,7 +465,7 @@ const addToWishlist = async (req, res) => {
         items: [{ product: productId, variant: variantId }]
       });
       await wishlist.save();
-      return res.json({ success: true, added: true });
+      return res.json({ success: true, added: true, wishlistCount: wishlist.items.length });
     }
 
     const exists = wishlist.items.some(
@@ -477,13 +477,13 @@ const addToWishlist = async (req, res) => {
         item => item.variant.toString() !== variantId
       );
       await wishlist.save();
-      return res.json({ success: true, removed: true });
+      return res.json({ success: true, removed: true, wishlistCount: wishlist.items.length });
     }
 
     wishlist.items.push({ product: productId, variant: variantId });
     await wishlist.save();
 
-    res.json({ success: true, added: true });
+    return res.json({ success: true, added: true, wishlistCount: wishlist.items.length });
 
   } catch (error) {
     console.error("Wishlist toggle error:", error);
@@ -503,7 +503,10 @@ const removeFromWishlist = async (req, res) => {
       { $pull: { items: { variant: variantId } } }
     );
 
-    res.json({ success: true });
+    const wishlist = await Wishlist.findOne({ user: userId });
+    const wishlistCount = wishlist ? wishlist.items.length : 0;
+
+    res.json({ success: true, wishlistCount });
 
   } catch (error) {
     console.error("Remove wishlist error:", error);

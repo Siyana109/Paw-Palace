@@ -163,6 +163,9 @@
                         const data = await res.json();
 
                         if (data.success) {
+                            if (typeof window.updateWishlistCount === 'function' && data.wishlistCount !== undefined) {
+                                window.updateWishlistCount(data.wishlistCount);
+                            }
                             location.reload();
                         } else {
                             // Handle error silently or toast
