@@ -193,6 +193,11 @@
                         const data = await res.json();
 
                         if (data.success) {
+                            // Update header badge
+                            if (typeof window.updateCartCount === 'function' && data.cartCount !== undefined) {
+                                window.updateCartCount(data.cartCount);
+                            }
+
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Added to Cart',
@@ -209,24 +214,24 @@
                         // For now keep it as per standard e-com behavior (keep in wishlist or let user remove)
                         // But typically "Move to cart" implies removing from wishlist. 
                         // The button says "Add to Cart", implying copy. I'll leave it as copy.
-                     else if (data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
+                        else if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops',
+                                text: data.message || 'Could not add to cart'
+                            });
+                        }
+                    } catch (err) {
+                        console.error(err);
                         Swal.fire({
                             icon: 'error',
-                            title: 'Oops',
-                            text: data.message || 'Could not add to cart'
+                            title: 'Error',
+                            text: 'Something went wrong'
                         });
                     }
-                } catch (err) {
-                    console.error(err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Something went wrong'
-                    });
                 }
-            }
             </script>
 
 </body>

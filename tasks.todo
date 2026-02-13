@@ -149,6 +149,36 @@ WEEK-8 PENDINGS:
 
 
 
+
+
+WEEK-10 PENDINGS:
+    User:
+    ☐ cart qty should be updated real time in navbar.
+    ☐ Inc is not happening inside the cart
+    ☐ Max qty per item couldn't test due to err in incrementing qty
+    ☐ Price mismatch in Cart & Checkout
+    ☐ Returned item should be skipped from invoice
+
+    Admin:
+    ☐ Prevent rollback of previous state in shipment status
+    ☐ Add to inventory btn can be added after return approval
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 TODO :
         ☐ session handling
 

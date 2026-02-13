@@ -269,6 +269,10 @@
                             return;
                         }
 
+                        if (data.cartCount !== undefined && typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cartCount);
+                        }
+
                         location.reload();
 
                     } catch (err) {
@@ -304,6 +308,10 @@
                     const data = await res.json();
 
                     if (data.success) {
+                        if (data.cartCount !== undefined && typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cartCount);
+                        }
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Removed!',

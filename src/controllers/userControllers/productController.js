@@ -228,10 +228,13 @@ const addToCart = async (req, res) => {
       { $pull: { items: { variant: variantId } } }
     );
 
+    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
     return res.json({
       success: true,
       message: "Added to cart",
       removedFromWishlist: true,
+      cartCount,
       redirect: "/cart"
     });
 
@@ -363,9 +366,12 @@ const updateCartQuantity = async (req, res) => {
 
     await cart.save();
 
+    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
     return res.json({
       success: true,
-      quantity: item.quantity
+      quantity: item.quantity,
+      cartCount
     });
 
   } catch (error) {
@@ -388,7 +394,10 @@ const removeCartItem = async (req, res) => {
     await Cart.updateOne({ user: userId },
       { $pull: { items: { variant: variantId } } });
 
-    res.json({ success: true });
+    const cart = await Cart.findOne({ user: userId });
+    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+
+    res.json({ success: true, cartCount });
   }
 
   catch (error) {

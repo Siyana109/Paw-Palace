@@ -768,6 +768,11 @@
 
                         // ✅ Success
                         if (data.success) {
+                            // Update header badge
+                            if (typeof window.updateCartCount === 'function' && data.cartCount !== undefined) {
+                                window.updateCartCount(data.cartCount);
+                            }
+
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Added to Cart',
@@ -778,7 +783,6 @@
 
                             // 🔁 Change button to "Go to Cart"
                             btn.innerText = 'Go to Cart';
-                            btn.innerText = 'Go to Cart';
 
                             btn.classList.remove(
                                 'bg-brand-500',
@@ -786,8 +790,8 @@
                             );
 
                             btn.classList.add(
-                                'bg-[#2dd4bf]',        // teal
-                                'hover:bg-[#14b8a6]',  // darker teal
+                                'bg-gray-900',
+                                'hover:bg-black',
                                 'text-white'
                             );
 
