@@ -267,10 +267,7 @@
 
                                     <!-- Totals -->
                                     <% const subtotal=cart.items.reduce((acc, item)=> {
-                                        const price = item.variant.offerApplied
-                                        ? item.variant.offerPrice
-                                        : item.variant.price;
-                                        return acc + price * item.quantity;
+                                        return acc + item.variant.price * item.quantity;
                                         }, 0);
 
                                         const offerDiscount = cart.items.reduce((acc, item) => {

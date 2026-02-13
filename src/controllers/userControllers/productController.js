@@ -301,10 +301,34 @@ const getCartPage = async (req, res) => {
 };
 
 
+
 const updateCartQuantity = async (req, res) => {
   try {
-    const { variantId, change } = req.body;
+    const { variantId, quantity } = req.body;
     const userId = req.session.user.id;
+
+    if (!variantId || quantity === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request"
+      });
+    }
+
+    const newQty = parseInt(quantity, 10);
+
+    if (isNaN(newQty) || newQty < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quantity"
+      });
+    }
+
+    if (newQty > 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum quantity per item is 10"
+      });
+    }
 
     const cart = await Cart.findOne({ user: userId });
     if (!cart) {
@@ -320,36 +344,39 @@ const updateCartQuantity = async (req, res) => {
     }
 
     const variant = await Variant.findById(variantId);
+
     if (!variant || !variant.isActive) {
-      return res.status(404).json({ success: false });
-    }
-
-    const newQty = item.quantity + change;
-
-    if (newQty < 1) {
-      return res.json({ success: false });
+      return res.status(404).json({
+        success: false,
+        message: "Product unavailable"
+      });
     }
 
     if (newQty > variant.stock) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: `Only ${variant.stock} items available`
       });
     }
 
     item.quantity = newQty;
+
     await cart.save();
 
-    res.json({
+    return res.json({
       success: true,
       quantity: item.quantity
     });
 
   } catch (error) {
-    console.error('Update cart error:', error);
-    res.status(500).json({ success: false });
+    console.error("Update cart error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 };
+
 
 
 const removeCartItem = async (req, res) => {

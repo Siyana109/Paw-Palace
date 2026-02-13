@@ -278,9 +278,11 @@ const placeOrder = async (req, res) => {
                 activeOffers
             });
 
-            const price = offerApplied ? finalPrice : item.variant.price;
-            const totalItemAmount = price * item.quantity;
-            subtotal += totalItemAmount;
+            const originalAmount = item.variant.price * item.quantity;
+            const discountedAmount = (offerApplied ? finalPrice : item.variant.price) * item.quantity;
+
+            subtotal += originalAmount;
+            offerDiscount += (originalAmount - discountedAmount);
 
             orderItems.push({
                 productId: item.product._id,

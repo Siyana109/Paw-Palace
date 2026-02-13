@@ -104,7 +104,7 @@ WEEK 10:
     ✔ Increase the quantity if the product is already in the cart @done (2/10/2026, 5:52:43 PM)
     ✔ Remove product from wishlist when added to cart @done (2/4/2026, 8:27:00 PM)
     ✔ Increment/decrement quantity with stock validations @done (2/4/2026, 8:27:03 PM)
-    ☐ Maximum quantity limits
+    ✔ Maximum quantity limits @done (2/11/2026, 3:40:45 AM)
     ✔ Disable out-of-stock products and restrict checkout @done (2/10/2026, 4:53:33 PM)
     ✔ Checkout page @done (2/10/2026, 4:53:36 PM)
     ✔ Show user addresses with an add/edit option, default address selection @done (2/4/2026, 8:27:10 PM)
@@ -112,14 +112,14 @@ WEEK 10:
     ✔ final price (including taxes, discounts, shipping) @done (2/6/2026, 1:15:46 AM)
     ✔ Place an order with Cash on Delivery @done (2/9/2026, 2:00:25 PM)
     ✔ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping @done (2/9/2026, 2:00:28 PM)
-    ☐ Order management
+    ✔ Order management @done (2/11/2026, 3:05:05 AM)
     ☐ Order listing with unique, consistent orderID, status, and order date
     ☐ Cancel order or specific products (stock increment on cancellation)
     ☐ Reason (optional) for cancellation
     ☐ Return order (mandatory reason) when delivered
     ✔ Order detail page @done (2/10/2026, 5:50:25 PM)
-    ☐ Download invoice (PDF)
-    ☐ Search order
+    ✔ Download invoice (PDF) @done (2/11/2026, 1:55:52 AM)
+    ✔ Search order @done (2/11/2026, 2:35:40 AM)
 
     Admin:
     ✔ Order management @done (2/10/2026, 5:34:24 PM)
@@ -140,7 +140,7 @@ WEEK-8 PENDINGS:
     ☐ Try to use appropriate HTTP methods for apis
     ☐ Object destructuring
     ✔ Fix the css issue in products list page @done (2/2/2026, 12:41:36 PM)
-    ☐ Only use soft delete for product variants
+    ✔ Only use soft delete for product variants @done (2/11/2026, 3:04:20 AM)
 
 
 
@@ -164,16 +164,17 @@ TODO :
         ☐ delivery date
         ☐ free deliver above .....
         ☐ check order number jusst after placing an order and orderaId in history
+        ☐ reduce stock afteer order increase after retturning
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
         ✔ swal on add/edit products @done (1/31/2026, 2:02:15 AM)
         ✔ sort & search & pagination brand, top brand @done (1/30/2026, 4:38:51 PM)
         ✔ search & sort & pagination in products @done (1/30/2026, 2:17:22 PM)
-        ☐ offer filtering sorting pagination
-        ☐ online filtering in admin order
+        ✔ offer filtering sorting pagination @done (2/11/2026, 3:51:43 AM)
+        ✔ online filtering in admin order @done (2/11/2026, 3:51:50 AM)
         ☐ debouncing
-        ☐ offer expiring
+        ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
 
 
 

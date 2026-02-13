@@ -104,49 +104,89 @@ const createOffer = async (req, res) => {
             endDate,
             status,
             offerType,
-            discountType
+            discountType,
+            minimumPurchase
         } = req.body;
 
-        if (new Date(endDate) < new Date(startDate)) {
+        const discountValue = Number(discount);
+        const minPurchase = Number(minimumPurchase || 0);
+
+        // Basic validations
+        if (!offerName || offerName.trim().length < 3) {
+            return res.status(400).json({
+                success: false,
+                message: "Offer name must be at least 3 characters"
+            });
+        }
+
+        if (!discountValue || discountValue <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Discount must be greater than 0"
+            });
+        }
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Start and end dates are required"
+            });
+        }
+
+        if (new Date(endDate) <= new Date(startDate)) {
             return res.status(400).json({
                 success: false,
                 message: "End date must be after start date"
             });
         }
 
-        if (!offerName || offerName.length < 3) {
-            return res.status(400).json({ success: false, message: "Invalid offer name" });
-        }
-
-        if (!discount || discount <= 0) {
-            return res.status(400).json({ success: false, message: "Invalid discount value" });
-        }
-
-        if (discountType === "percentage" && discount > 100) {
-            return res.status(400).json({ success: false, message: "Percentage discount cannot exceed 100" });
-        }
-
         if (!offerType || !["product", "category"].includes(offerType)) {
-            return res.status(400).json({ success: false, message: "Invalid offer type" });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid offer type"
+            });
         }
 
         if (offerType === "category" && !categoryId) {
-            return res.status(400).json({ success: false, message: "Category required" });
+            return res.status(400).json({
+                success: false,
+                message: "Category is required"
+            });
         }
 
         if (offerType === "product" && (!productId || productId.length === 0)) {
-            return res.status(400).json({ success: false, message: "Product required" });
+            return res.status(400).json({
+                success: false,
+                message: "Product is required"
+            });
         }
 
-        if (new Date(endDate) <= new Date(startDate)) {
-            return res.status(400).json({ success: false, message: "End date must be after start date" });
+        // Percentage Validation
+        if (discountType === "percentage") {
+            if (discountValue > 100) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Percentage discount cannot exceed 100%"
+                });
+            }
+        }
+
+        // FIXED AMOUNT VALIDATION (IMPORTANT)
+        if (discountType === "fixed") {
+            if (minPurchase < discountValue) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Minimum purchase must be greater than or equal to discount amount"
+                });
+            }
         }
 
         const newOffer = new Offer({
             offerName,
-            discount,
+            discount: discountValue,
             offerType,
             discountType,
+            minimumPurchase: minPurchase,
             categoryId: categoryId || null,
             productId: productId || [],
             startDate,
@@ -161,20 +201,45 @@ const createOffer = async (req, res) => {
             message: "Offer created successfully",
             offer: newOffer
         });
+
     } catch (error) {
         console.error("Create offer error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
     }
 };
+
 
 const updateOffer = async (req, res) => {
     try {
         const { id } = req.params;
+        const data = req.body;
+
+        const discountValue = Number(data.discount);
+        const minPurchase = Number(data.minimumPurchase || 0);
+
+        if (data.discountType === "percentage" && discountValue > 100) {
+            return res.status(400).json({
+                success: false,
+                message: "Percentage discount cannot exceed 100%"
+            });
+        }
+
+        if (data.discountType === "fixed") {
+            if (minPurchase < discountValue) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Minimum purchase must be greater than or equal to discount amount"
+                });
+            }
+        }
 
         const updatedOffer = await Offer.findByIdAndUpdate(
             id,
-            req.body,
-            { new: true }
+            data,
+            { new: true, runValidators: true }
         );
 
         if (!updatedOffer) {
@@ -189,11 +254,16 @@ const updateOffer = async (req, res) => {
             message: "Offer updated successfully",
             offer: updatedOffer
         });
+
     } catch (error) {
         console.error("Update offer error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
     }
 };
+
 
 
 const deleteOffer = async (req, res) => {
