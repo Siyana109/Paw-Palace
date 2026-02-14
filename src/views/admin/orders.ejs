@@ -506,7 +506,33 @@
 
         function renderDrawerContent(order) {
             document.getElementById('drawerOrderId').textContent = `ID: #${order.orderId}`;
-            document.getElementById('updateStatusSelect').value = order.orderStatus;
+
+            // Logic to restrict status updates
+            const statusSelect = document.getElementById('updateStatusSelect');
+            const currentStatus = order.orderStatus;
+            let nextSteps = [];
+
+            if (['Pending', 'Placed'].includes(currentStatus)) {
+                nextSteps = ['Processing', 'Cancelled'];
+            } else if (currentStatus === 'Processing') {
+                nextSteps = ['Shipped'];
+            } else if (currentStatus === 'Shipped') {
+                nextSteps = ['Out for Delivery'];
+            } else if (currentStatus === 'Out for Delivery') {
+                nextSteps = ['Delivered'];
+            }
+
+            // Combine Current Status + Next Valid Steps
+            const allOptions = [currentStatus, ...nextSteps];
+            const uniqueOptions = [...new Set(allOptions)];
+
+            // Populate Select
+            statusSelect.innerHTML = uniqueOptions.map(s =>
+                `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`
+            ).join('');
+
+            // Disable if no next steps (terminal state)
+            statusSelect.disabled = nextSteps.length === 0;
 
             const content = document.getElementById('drawerContent');
 

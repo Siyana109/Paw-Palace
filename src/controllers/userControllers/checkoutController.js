@@ -268,6 +268,7 @@ const placeOrder = async (req, res) => {
         });
 
         let subtotal = 0;
+        let offerDiscount = 0;
         const orderItems = [];
 
         cart.items.forEach(item => {
@@ -278,8 +279,10 @@ const placeOrder = async (req, res) => {
                 activeOffers
             });
 
+            const price = offerApplied ? finalPrice : item.variant.price;
             const originalAmount = item.variant.price * item.quantity;
             const discountedAmount = (offerApplied ? finalPrice : item.variant.price) * item.quantity;
+            const totalItemAmount = price * item.quantity;
 
             subtotal += originalAmount;
             offerDiscount += (originalAmount - discountedAmount);
