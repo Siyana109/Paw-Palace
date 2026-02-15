@@ -24,9 +24,6 @@ const getReturnRequests = async (req, res) => {
             .limit(limit)
             .lean();
 
-        // Process orders to extract only relevant items for the view if needed, 
-        // OR just pass orders and let EJS filter items. Passing orders is easier.
-
         res.render('admin/returnRequests', {
             orders,
             currentPage: page,
@@ -108,84 +105,65 @@ const handleReturnAction = async (req, res) => {
         }
 
         // ✅ Approve return
-        let refundAmount = item.totalAmount;
+        let refundAmount = Number(item.totalAmount);
 
         // 💰 Deduct proportional coupon discount
         if (order.couponId) {
             console.log("Coupon ID present:", order.couponId);
             const orderDiscount = Number(order.discount) || 0;
-            console.log("Order Discount (Number):", orderDiscount);
 
-            // Priority 1: Use pre-calculated discount from DB (New Orders)
+            // Priority 1: Use pre-calculated discount from DB
             if (item.couponDiscount && item.couponDiscount > 0) {
                 refundAmount = item.totalAmount - item.couponDiscount;
                 console.log("Using stored couponDiscount:", item.couponDiscount);
             }
-            // Priority 2: Fallback to dynamic calculation (Legacy Orders)
+            // Priority 2: Fallback to dynamic calculation
             else if (orderDiscount > 0) {
-                // Determine original subtotal
                 let originalSubtotal = 0;
                 if (order.items && order.items.length > 0) {
-                    originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+                    originalSubtotal = order.items.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
                 }
-
-                console.log("Original Subtotal:", originalSubtotal);
 
                 if (originalSubtotal > 0) {
                     const itemProportion = item.totalAmount / originalSubtotal;
                     const itemDiscountShare = orderDiscount * itemProportion;
-
-                    console.log("Item Proportion:", itemProportion);
-                    console.log("Discount Share:", itemDiscountShare);
-
                     refundAmount = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
                 }
-            } else {
-                console.warn("Coupon present but discount is 0. Refund might be incorrect if this is a coupon order.");
             }
         }
 
 
-        // if (order.shipping > 0) {
+        // Shipping Refund Logic (Correct Proportional Method)
 
-        //     // calculate active items (excluding cancelled/returned)
-        //     const activeItems = order.items.filter(
-        //         i => !["Cancelled", "Returned"].includes(i.itemStatus)
-        //     );
+        // Get original shipping stored in order
+// 🔥 Reconstruct ORIGINAL shipping (stateless & accurate)
 
-        //     const totalActiveValue = activeItems.reduce(
-        //         (sum, i) => sum + i.totalAmount,
-        //         0
-        //     );
+// Step 1: total of all items (this already contains offer-applied prices)
+const originalItemsTotal = order.items.reduce(
+    (sum, i) => sum + Number(i.totalAmount || 0),
+    0
+);
 
-        //     if (totalActiveValue > 0) {
-        //         const shippingShare =
-        //             (item.totalAmount / totalActiveValue) * order.shipping;
+// Step 2: subtract coupon discount
+const originalDiscount = Number(order.discount || 0);
 
-        //         refundAmount += Math.round(shippingShare);
-        //     }
-        // }
+// IMPORTANT: item.totalAmount already contains offer price.
+// So DO NOT subtract offer discount again.
 
+const originalNetAmount = originalItemsTotal - originalDiscount;
 
-        // Shipping Refund Logic (Corrected)
+// Step 3: determine shipping
+const originalShippingFee = originalNetAmount >= 500 ? 0 : 50;
 
-        let shippingRefund = 0;
+let shippingRefund = 0;
 
-        if (order.shipping > 0) {
+if (originalShippingFee > 0 && originalItemsTotal > 0) {
+    shippingRefund = Math.round(
+        (Number(item.totalAmount) / originalItemsTotal) * originalShippingFee
+    );
+}
 
-            const totalOrderValue = order.items.reduce(
-                (sum, i) => sum + i.totalAmount,
-                0
-            );
-
-            if (totalOrderValue > 0) {
-                shippingRefund = Math.round(
-                    (item.totalAmount / totalOrderValue) * order.shipping
-                );
-            }
-
-            refundAmount += shippingRefund;
-        }
+refundAmount += shippingRefund;
 
 
         // 1️⃣ Wallet credit
@@ -208,6 +186,7 @@ const handleReturnAction = async (req, res) => {
         item.refund = {
             amount: refundAmount,
             method: "Wallet",
+            shippingRefund,
             status: "Completed",
             refundedAt: new Date()
         };
@@ -215,10 +194,6 @@ const handleReturnAction = async (req, res) => {
         // 3️⃣ Update order totals
         order.subtotal -= item.totalAmount;
         order.totalAmount -= refundAmount;
-        order.shipping -= shippingRefund;
-        // order.shipping -= Math.round(
-        //     (item.totalAmount / order.subtotal) * order.shipping
-        // );
 
         order.refundSummary.totalRefunded += refundAmount;
         order.refundSummary.refundedAt = new Date();
@@ -239,7 +214,15 @@ const handleReturnAction = async (req, res) => {
         if (activeItems.length === 0) {
             order.orderStatus = "Returned";
         }
-        // Else: keep existing status (e.g. Delivered) as user requested "no need of partially returned"
+
+        console.log("==== SHIPPING DEBUG ====");
+console.log("Item total:", item.totalAmount);
+console.log("All items total:", originalItemsTotal);
+console.log("Order discount:", originalDiscount);
+console.log("Original net:", originalNetAmount);
+console.log("Original shipping calculated:", originalShippingFee);
+console.log("========================");
+
 
         await order.save();
 
@@ -250,7 +233,6 @@ const handleReturnAction = async (req, res) => {
         res.json({ success: false, message: "Server error" });
     }
 };
-
 
 
 export default { getReturnRequests, requestReturnItem, handleReturnAction }
