@@ -7,7 +7,7 @@ const getWalletPage = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const userId = req.session.user._id;
+    const userId = req.session.user.id;
 
     const user = await User.findById(userId).lean();
 

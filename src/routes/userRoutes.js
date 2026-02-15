@@ -76,7 +76,7 @@ router.post('/orders/:orderId/items/:itemId/return', userMiddleware.checkSession
 router.post('/orders/:orderId/items/:itemId/return/cancel', userMiddleware.checkSession, orderController.cancelReturnRequest);
 router.post('/orders/:orderId/cancel', userMiddleware.checkSession, orderController.cancelOrderOrItem);
 router.get('/orders/:orderId/invoice', userMiddleware.checkSession, orderController.downloadInvoice);
-router.get('/orders/:orderId/refund-receipt', userMiddleware.checkSession, orderController.downloadRefundReceipt);
+
 
 
 router.post('/orders/:orderId/reorder', userMiddleware.checkSession, orderController.reorder);

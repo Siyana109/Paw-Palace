@@ -227,21 +227,15 @@
                                                 </a>
                                                 <% } %>
 
-                                                    <% if (['Returned', 'Partially Returned'
-                                                        ].includes(order.orderStatus)) { %>
-                                                        <a href="/orders/<%= order._id %>/refund-receipt"
-                                                            class="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm text-center hover:bg-gray-50 transition text-brand-500">
-                                                            Refund Receipt
-                                                        </a>
-                                                        <% } %>
 
-                                                            <% if (['Cancelled', 'Failed' , 'Returned'
-                                                                ].includes(order.orderStatus)) { %>
-                                                                <button onclick="reorderItems('<%= order._id %>')"
-                                                                    class="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm text-center hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">
-                                                                    Buy Again
-                                                                </button>
-                                                                <% } %>
+
+                                                    <% if (['Cancelled', 'Failed' , 'Returned'
+                                                        ].includes(order.orderStatus)) { %>
+                                                        <button onclick="reorderItems('<%= order._id %>')"
+                                                            class="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm text-center hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">
+                                                            Buy Again
+                                                        </button>
+                                                        <% } %>
                                         </div>
                                     </div>
                                 </div>

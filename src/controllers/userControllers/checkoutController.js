@@ -323,22 +323,39 @@ const placeOrder = async (req, res) => {
                 console.log("Discount Applied:", discount);
 
                 // 🌟 Distribute discount to items for refund accuracy
-                if (discount > 0 && subtotal > 0) {
-                    orderItems.forEach(item => {
-                        const itemProportion = item.totalAmount / subtotal;
-                        const itemDiscountShare = discount * itemProportion;
-                        item.couponDiscount = Math.round(itemDiscountShare);
+                const postOfferSubtotal = subtotal - offerDiscount;
+
+                if (discount > 0 && postOfferSubtotal > 0) {
+
+                    let distributedDiscount = 0;
+
+                    orderItems.forEach((item, index) => {
+
+                        const proportion = item.totalAmount / postOfferSubtotal;
+
+                        let itemDiscount = Math.round(discount * proportion);
+
+                        if (index === orderItems.length - 1) {
+                            itemDiscount = discount - distributedDiscount;
+                        }
+
+                        item.couponDiscount = itemDiscount;
+
+                        distributedDiscount += itemDiscount;
                     });
                 }
-
+                else {
+                    console.log("Coupon Not Found or Inactive");
+                }
             } else {
-                console.log("Coupon Not Found or Inactive");
+                console.log("No Coupon Code provided in body");
             }
-        } else {
-            console.log("No Coupon Code provided in body");
         }
-        const shipping = 50;
-        const finalTotal = subtotal + shipping - discount;
+        const postDiscountAmount = subtotal - offerDiscount - discount;
+
+        const shipping = postDiscountAmount >= 500 ? 0 : 50;
+
+        const finalTotal = postDiscountAmount + shipping;
 
         cart.items.forEach(async item => {
             if (!item.variant || !item.variant.isActive || item.variant.stock === 0) {
@@ -373,6 +390,7 @@ const placeOrder = async (req, res) => {
             subtotal,
             discount,
             couponId,
+            shipping,
             totalAmount: finalTotal,
             payment: {
                 method: paymentMethod,
@@ -409,7 +427,8 @@ const placeOrder = async (req, res) => {
         // Redirect
         res.redirect(`/order-confirmation/${order._id}`);
 
-    } catch (error) {
+    }
+    catch (error) {
         console.error("❌ Place Order Error:", error);
         console.error("Stack:", error.stack);
         // If validation error, log details

@@ -266,18 +266,20 @@
                                     </div>
 
                                     <!-- Totals -->
-                                    <% const subtotal=cart.items.reduce((acc, item)=> {
-                                        return acc + item.variant.price * item.quantity;
-                                        }, 0);
+                                    <% const subtotal=cart.items.reduce((acc, item)=>
+                                        acc + item.variant.price * item.quantity, 0);
 
                                         const offerDiscount = cart.items.reduce((acc, item) => {
                                         if (!item.variant.offerApplied) return acc;
                                         return acc + (item.variant.price - item.variant.offerPrice) * item.quantity;
                                         }, 0);
 
-                                        const shipping = 50;
-                                        const couponDiscount = 0; // updated via JS
-                                        const total = subtotal + shipping - offerDiscount - couponDiscount;
+                                        const postOfferTotal = subtotal - offerDiscount;
+
+                                        const shipping = postOfferTotal >= 500 ? 0 : 50;
+
+                                        const couponDiscount = 0;
+                                        const total = postOfferTotal + shipping - couponDiscount;
                                         %>
 
                                         <div class="space-y-3 mb-6">
@@ -289,7 +291,11 @@
                                             <div
                                                 class="flex justify-between items-center text-xs font-bold text-gray-400">
                                                 <span>Shipping</span>
-                                                <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
+                                                <% if (shipping===0) { %>
+                                                    <span class="text-emerald-600 font-bold">FREE</span>
+                                                    <% } else { %>
+                                                        <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
+                                                        <% } %>
                                             </div>
                                             <!-- Tax Removed -->
                                             <div

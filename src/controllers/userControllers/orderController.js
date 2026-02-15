@@ -1,6 +1,7 @@
 import Order from "../../model/orderModel.js";
 import Cart from "../../model/cartModel.js";
 import Wallet from "../../model/walletModel.js";
+import Variant from "../../model/variantModel.js";
 import walletController from "../userControllers/walletController.js";
 import PDFDocument from 'pdfkit';
 
@@ -274,31 +275,35 @@ const cancelOrderOrItem = async (req, res) => {
                 processedAt: new Date()
             };
 
-            // 💰 Refund only if already paid (ONLINE / WALLET)
-            if (order.payment.method !== "COD") {
+            let refundAmount = 0;
+            let itemEffectiveValue = item.totalAmount;
 
-                if (item.refund?.status === "Completed") continue;
+            // 🧮 Calculate Item Effective Value (considering coupons)
+            if (order.couponId) {
+                const orderDiscount = Number(order.discount) || 0;
 
-                let refundAmount = item.totalAmount;
-
-                // 💰 Deduct proportional coupon discount if applied
-                if (order.couponId) {
-                    const orderDiscount = Number(order.discount) || 0;
-
-                    // Priority 1: Use pre-calculated discount from DB
-                    if (item.couponDiscount && item.couponDiscount > 0) {
-                        refundAmount = item.totalAmount - item.couponDiscount;
-                    }
-                    // Priority 2: Fallback to dynamic calculation
-                    else if (orderDiscount > 0) {
-                        const originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
-                        if (originalSubtotal > 0) {
-                            const itemProportion = item.totalAmount / originalSubtotal;
-                            const itemDiscountShare = orderDiscount * itemProportion;
-                            refundAmount = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
-                        }
+                // Priority 1: Use pre-calculated discount from DB
+                if (item.couponDiscount && item.couponDiscount > 0) {
+                    itemEffectiveValue = item.totalAmount - item.couponDiscount;
+                }
+                // Priority 2: Fallback to dynamic calculation
+                else if (orderDiscount > 0) {
+                    const originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+                    if (originalSubtotal > 0) {
+                        const itemProportion = item.totalAmount / originalSubtotal;
+                        const itemDiscountShare = orderDiscount * itemProportion;
+                        itemEffectiveValue = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
                     }
                 }
+            }
+
+            // 💰 Process Refund if applicable (Prepaid orders)
+            // For COD, we don't refund to wallet unless it was somehow paid (future proofing), 
+            // but usually COD cancel means no payment collected yet.
+            if (order.payment.method !== "COD") {
+                if (item.refund?.status === "Completed") continue;
+
+                refundAmount = itemEffectiveValue;
 
                 await walletController.creditWallet({
                     userId,
@@ -308,7 +313,7 @@ const cancelOrderOrItem = async (req, res) => {
                 });
 
                 item.refund = {
-                    amount: item.totalAmount,
+                    amount: refundAmount,
                     method: "Wallet",
                     status: "Completed",
                     refundedAt: new Date()
@@ -316,8 +321,14 @@ const cancelOrderOrItem = async (req, res) => {
             }
 
             // 📉 Adjust order totals
+            // Regardless of payment method, the order's valid total decreases
             order.subtotal -= item.totalAmount;
-            order.totalAmount -= refundAmount;
+            order.totalAmount -= itemEffectiveValue; // Deduct effective value (price - discount)
+
+            // 📦 Restore Stock
+            if (item.variantId) {
+                await Variant.findByIdAndUpdate(item.variantId, { $inc: { stock: item.quantity } });
+            }
         }
 
         // 🔁 Update order status
@@ -412,24 +423,25 @@ const downloadInvoice = async (req, res) => {
         doc.font('Helvetica');
 
         let y = doc.y + 10;
+        let totalRefunded = 0;
 
         // --- Items ---
         order.items.forEach(item => {
-            // Check status: Only charge for non-cancelled/returned items?
-            // Usually invoices show what was billed. If returned later, it's a credit note.
-            // But if it's "Cancelled" before invoice is effectively final or if it's "Delivered" we show it.
-            // Since this is for delivered orders, we show delivered items.
-            // If some items were cancelled, maybe exclude them or show as cancelled?
-            // User request is "download invoice of delivered order".
-            // I'll filter out Cancelled items for clarity or show them with status.
-            // I'll show only valid items for now to keep it clean, or all items.
-            // Let's stick to active items for the "Bill".
-
+            // Show all items including Returned/Cancelled ones, but mark them
             if (item.itemStatus !== 'Cancelled') {
-                const productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
+                let productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
+
+                // Add status marker if returned
+                if (item.itemStatus === 'Returned') {
+                    productName += ' (Returned)';
+                    // Calculate refund amount for this item (approximate if not stored)
+                    const refundAmount = item.refund && item.refund.amount ? item.refund.amount : 0;
+                    totalRefunded += refundAmount;
+                }
 
                 doc.text(productName, itemX, y, { width: 240, continued: false });
                 doc.text(item.quantity.toString(), qtyX, y);
+
                 // Pricing Logic
                 const currentMRP = item.variantId ? item.variantId.price : item.price;
                 const sellingPrice = item.price;
@@ -452,6 +464,7 @@ const downloadInvoice = async (req, res) => {
                     doc.fontSize(10).fillColor('black');
                 }
 
+                // Show total for the item (even if returned, it was part of the original invoice)
                 doc.text(`Rs.${(item.price * item.quantity).toFixed(2)}`, totalX, y);
 
                 y = Math.max(y + 20, priceY + 20);
@@ -479,12 +492,43 @@ const downloadInvoice = async (req, res) => {
         doc.text(`Rs.50.00`, valueX, y); // Hardcoded per UI
         y += 15;
 
+        // Store current Y for lines
+        let lineY = y + 5;
+        doc.moveTo(summaryX, lineY).lineTo(550, lineY).stroke();
+        y += 10;
+
         doc.font('Helvetica-Bold');
         doc.text('Total Amount:', summaryX, y);
         doc.text(`Rs.${order.totalAmount.toFixed(2)}`, valueX, y);
+        y += 20;
+
+        // If there are refunds, show them
+        if (totalRefunded > 0 || (order.refundSummary && order.refundSummary.totalRefunded > 0)) {
+            const finalRefund = (order.refundSummary && order.refundSummary.totalRefunded > 0)
+                ? order.refundSummary.totalRefunded
+                : totalRefunded;
+
+            doc.fillColor('red');
+            doc.text('Refunded:', summaryX, y);
+            doc.text(`- Rs.${finalRefund.toFixed(2)}`, valueX, y);
+            doc.fillColor('black');
+            y += 15;
+
+            // Updated Total or Net Payable (if desired, or just show original + refund)
+            // Keeping it simple: Original Total - Refund = Net Paid
+            const netPaid = order.totalAmount - finalRefund;
+            doc.text('Net Amount Paid:', summaryX, y);
+            doc.text(`Rs.${Math.max(0, netPaid).toFixed(2)}`, valueX, y);
+            y += 20;
+        }
+
+        doc.font('Helvetica');
 
         // --- Footer ---
         doc.fontSize(10).text('Thank you for shopping with Paw Palace!', 50, 700, { align: 'center', width: 500 });
+        if (totalRefunded > 0) {
+            doc.fontSize(8).text('Note: This invoice includes returned items.', 50, 715, { align: 'center', width: 500 });
+        }
 
         doc.end();
 
@@ -494,122 +538,7 @@ const downloadInvoice = async (req, res) => {
     }
 };
 
-const downloadRefundReceipt = async (req, res) => {
-    try {
-        const orderId = req.params.orderId;
-        const userId = req.session.user.id; // Ensure user is authenticated
 
-        const order = await Order.findOne({ _id: orderId, userId })
-            .populate("items.productId")
-            .populate("items.variantId");
-
-        if (!order) {
-            return res.status(404).render('error', { message: 'Order not found' });
-        }
-
-        // Check if there are any returned items or a refund summary
-        const refundedItems = order.items.filter(item =>
-            item.itemStatus === 'Returned' || (item.returnRequest && item.returnRequest.status === 'Approved')
-        );
-
-        if (refundedItems.length === 0 && (!order.refundSummary || order.refundSummary.totalRefunded === 0)) {
-            return res.status(400).render('error', { message: 'No refunds found for this order' });
-        }
-
-        const doc = new PDFDocument({ margin: 50 });
-        const filename = `refund-receipt-${order.orderId}.pdf`;
-
-        res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-type', 'application/pdf');
-
-        doc.pipe(res);
-
-        // --- Header ---
-        doc.fontSize(20).text('REFUND RECEIPT', { align: 'center' });
-        doc.moveDown();
-
-        doc.fontSize(12).text('Paw Palace', { align: 'right' });
-        doc.text('Support: support@pawpalace.com', { align: 'right' });
-        doc.moveDown();
-
-        // --- Refund Info ---
-        doc.text(`Refund Date: ${new Date().toLocaleDateString()}`); // Or refund date from DB if available per item
-        doc.text(`Original Order ID: ${order.orderId}`);
-        doc.moveDown();
-
-        doc.text(`Refund To:`, 50, doc.y);
-        doc.font('Helvetica-Bold').text(order.address.fullName);
-        doc.font('Helvetica').text('Wallet / Original Payment Method'); // Generic as per current logic
-        doc.moveDown();
-
-        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-        doc.moveDown();
-
-        // --- Items Table ---
-        const tableTop = doc.y + 10;
-        const itemX = 50;
-        const qtyX = 350;
-        const amountX = 450;
-
-        doc.font('Helvetica-Bold');
-        doc.text('Refunded Item', itemX, tableTop);
-        doc.text('Qty', qtyX, tableTop);
-        doc.text('Refund Amount', amountX, tableTop);
-        doc.moveDown();
-
-        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-        doc.font('Helvetica');
-
-        let y = doc.y + 10;
-        let totalRefundCalculated = 0;
-
-        refundedItems.forEach(item => {
-            const productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
-
-            // Calculate refund amount for this item
-            // Logic: (Price - CouponDiscountProportion) * Qty
-            // Using item.price (which is selling price) and item.couponDiscount
-            // But wait, if item.itemStatus is Returned, usually we store refund amount somewhere?
-            // item.refund.amount exists in schema?
-            // Checking schema: item.refund { amount, method, status, refundedAt }
-
-            const refundAmount = item.refund && item.refund.amount ? item.refund.amount : 0;
-            totalRefundCalculated += refundAmount;
-
-            doc.text(productName, itemX, y, { width: 280 });
-            doc.text(item.quantity.toString(), qtyX, y);
-            doc.text(`Rs.${refundAmount.toFixed(2)}`, amountX, y);
-
-            y += 20;
-        });
-
-        doc.moveDown();
-        doc.moveTo(50, y).lineTo(550, y).stroke();
-        y += 10;
-
-        // --- Summary ---
-        const summaryX = 350;
-        const valueX = 450;
-
-        doc.font('Helvetica-Bold');
-        doc.text('Total Refunded:', summaryX, y);
-        // Use summarized total from schema if available, else calculated
-        const finalRefundTotal = (order.refundSummary && order.refundSummary.totalRefunded > 0)
-            ? order.refundSummary.totalRefunded
-            : totalRefundCalculated;
-
-        doc.text(`Rs.${finalRefundTotal.toFixed(2)}`, valueX, y);
-
-        // --- Footer ---
-        doc.fontSize(10).text('This amount has been credited to your wallet/account.', 50, 700, { align: 'center', width: 500 });
-
-        doc.end();
-
-    } catch (error) {
-        console.error("Download Refund Receipt Error:", error);
-        res.status(500).render('error', { message: 'Failed to generate refund receipt' });
-    }
-};
 
 export default {
     getOrderHistory,
@@ -619,5 +548,5 @@ export default {
     reorder,
     cancelOrderOrItem,
     downloadInvoice,
-    downloadRefundReceipt
+
 };

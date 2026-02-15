@@ -92,15 +92,11 @@ WEEK-9 PENDINGS:
 
 
 
-
-
-
-
 WEEK 10:
     User:
     ✔ Cart management @done (2/10/2026, 7:09:57 PM)
     ✔ Add to cart, remove products, list cart products @done (2/4/2026, 8:26:40 PM)
-    ☐ Prevent adding blocked/unlisted products
+    ✔ Prevent adding blocked/ unlisted products @done (2/15/2026, 11:20:22 PM)
     ✔ Increase the quantity if the product is already in the cart @done (2/10/2026, 5:52:43 PM)
     ✔ Remove product from wishlist when added to cart @done (2/4/2026, 8:27:00 PM)
     ✔ Increment/decrement quantity with stock validations @done (2/4/2026, 8:27:03 PM)
@@ -115,8 +111,8 @@ WEEK 10:
     ✔ Order management @done (2/11/2026, 3:05:05 AM)
     ☐ Order listing with unique, consistent orderID, status, and order date
     ☐ Cancel order or specific products (stock increment on cancellation)
-    ☐ Reason (optional) for cancellation
-    ☐ Return order (mandatory reason) when delivered
+    ✔ Reason (optional) for cancellation @done (2/15/2026, 11:16:14 PM)
+    ✔ Return order (mandatory reason) when delivered @done (2/15/2026, 11:16:11 PM)
     ✔ Order detail page @done (2/10/2026, 5:50:25 PM)
     ✔ Download invoice (PDF) @done (2/11/2026, 1:55:52 AM)
     ✔ Search order @done (2/11/2026, 2:35:40 AM)
@@ -128,10 +124,7 @@ WEEK 10:
     ✔ Change order status (pending, shipped, out for delivery, delivered, cancelled) @done (2/10/2026, 12:01:04 PM)
     ✔ Search, sort, and filter with clear functionality @done (2/10/2026, 12:01:00 PM)
     ✔ Pagination @done (2/10/2026, 1:36:05 PM)
-    ☐ Inventory/Stock management
-
-
-
+    ✔ Inventory/Stock management @done (2/13/2026, 8:45:28 PM)
 
 
 
@@ -153,15 +146,15 @@ WEEK-8 PENDINGS:
 
 WEEK-10 PENDINGS:
     User:
-    ☐ cart qty should be updated real time in navbar.
-    ☐ Inc is not happening inside the cart
-    ☐ Max qty per item couldn't test due to err in incrementing qty
-    ☐ Price mismatch in Cart & Checkout
-    ☐ Returned item should be skipped from invoice
+    ✔ cart qty should be updated real time in navbar. @done (2/13/2026, 8:45:37 PM)
+    ✔ Inc is not happening inside the cart @done (2/13/2026, 8:45:43 PM)
+    ✔ Max qty per item couldn't test due to err in incrementing qty @done (2/13/2026, 8:45:52 PM)
+    ✔ Price mismatch in Cart & Checkout @done (2/13/2026, 8:45:55 PM)
+    ✔ Returned item should be skipped from invoice @done (2/15/2026, 10:10:06 PM)
 
     Admin:
-    ☐ Prevent rollback of previous state in shipment status
-    ☐ Add to inventory btn can be added after return approval
+    ✔ Prevent rollback of previous state in shipment status @done (2/14/2026, 10:49:54 AM)
+    ✔ Add to inventory btn can be added after return approval @done (2/15/2026, 11:15:46 PM)
 
 
 
@@ -190,11 +183,13 @@ TODO :
         ✔ manage out of stock profucts (display it in last and low transparency) @done (2/3/2026, 11:45:49 AM)
         ☐ filter products based on size in shop page
         ☐ show selected variant highlighted
-        ☐ wishlist cart Count in header
-        ☐ delivery date
-        ☐ free deliver above .....
-        ☐ check order number jusst after placing an order and orderaId in history
-        ☐ reduce stock afteer order increase after retturning
+        ✔ wishlist cart Count in header @done (2/15/2026, 11:31:27 PM)
+        ✔ delivery date @done (2/15/2026, 11:31:33 PM)
+        ✔ free delivery above ..... @done (2/15/2026, 11:31:18 PM)
+        ☐ check order number just after placing an order and orderaId in history
+        ✔ reduce stock afteer order increase after retturning @done (2/15/2026, 11:30:40 PM)
+        ☐ calculation in invoice
+        ☐ 
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

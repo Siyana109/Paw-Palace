@@ -132,8 +132,8 @@ const validateProductInput = ({
   }
 
   if (!Array.isArray(petType) || petType.length === 0) {
-  return "At least one pet type is required";
-}
+    return "At least one pet type is required";
+  }
 
   if (!description || description.trim().length < 10 || description.length > 250) {
     return "Description must be between 10 and 250 characters";
