@@ -276,6 +276,7 @@ const cancelOrderOrItem = async (req, res) => {
             };
 
             let refundAmount = 0;
+            let itemDiscountShare = 0;
             let itemEffectiveValue = item.totalAmount;
 
             // 🧮 Calculate Item Effective Value (considering coupons)
@@ -284,15 +285,25 @@ const cancelOrderOrItem = async (req, res) => {
 
                 // Priority 1: Use pre-calculated discount from DB
                 if (item.couponDiscount && item.couponDiscount > 0) {
+                    itemDiscountShare = item.couponDiscount;
                     itemEffectiveValue = item.totalAmount - item.couponDiscount;
                 }
                 // Priority 2: Fallback to dynamic calculation
                 else if (orderDiscount > 0) {
-                    const originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
-                    if (originalSubtotal > 0) {
-                        const itemProportion = item.totalAmount / originalSubtotal;
-                        const itemDiscountShare = orderDiscount * itemProportion;
-                        itemEffectiveValue = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
+                    // Calculate subtotal of currently active items (including the one being cancelled)
+                    const currentActiveSubtotal = order.items.reduce((sum, i) => {
+                        // Include if active OR if it's the current item (which we just marked cancelled)
+                        if (!["Cancelled", "Returned"].includes(i.itemStatus) || i._id.equals(item._id)) {
+                            return sum + (i.totalAmount || 0);
+                        }
+                        return sum;
+                    }, 0);
+
+                    if (currentActiveSubtotal > 0) {
+                        const itemProportion = item.totalAmount / currentActiveSubtotal;
+                        const rawShare = orderDiscount * itemProportion;
+                        itemEffectiveValue = Math.max(0, Math.round(item.totalAmount - rawShare));
+                        itemDiscountShare = item.totalAmount - itemEffectiveValue;
                     }
                 }
             }
@@ -323,6 +334,7 @@ const cancelOrderOrItem = async (req, res) => {
             // 📉 Adjust order totals
             // Regardless of payment method, the order's valid total decreases
             order.subtotal -= item.totalAmount;
+            order.discount -= itemDiscountShare;
             order.totalAmount -= itemEffectiveValue; // Deduct effective value (price - discount)
 
             // 📦 Restore Stock

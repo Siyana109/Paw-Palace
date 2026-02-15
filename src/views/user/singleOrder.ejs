@@ -311,6 +311,7 @@
                                                                                     <% } else if
                                                                                         (['Pending', 'Processing'
                                                                                         , 'Placed'
+                                                                                        , 'Partially Cancelled'
                                                                                         ].includes(order.orderStatus) &&
                                                                                         !['Cancelled', 'Returned'
                                                                                         , 'Failed'
@@ -427,7 +428,8 @@
                                     </div>
                                     <div class="flex justify-between text-slate-500">
                                         <span>Shipping</span>
-                                        <span class="font-semibold text-slate-700">₹50.00</span>
+                                        <span class="font-semibold text-slate-700">₹<%= (order.shipping || 0).toFixed(2)
+                                                %></span>
                                     </div>
                                     <div class="border-t border-dashed border-gray-200 my-4 pt-4">
                                         <div class="flex justify-between items-end">
