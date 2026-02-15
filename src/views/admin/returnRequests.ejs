@@ -61,7 +61,7 @@
                                                 <span class="text-gray-300">|</span>
                                                 <span class="text-brand-500 font-bold">Return Requested <%= new
                                                         Date(item.returnRequest.requestedAt).toLocaleDateString() %>
-                                                        </span>
+                                                </span>
                                             </div>
                                             <div class="flex items-center gap-2 text-xs">
                                                 <div
@@ -121,9 +121,15 @@
                                                 <div class="text-right">
                                                     <p class="text-[10px] text-gray-400 uppercase font-bold">Refund
                                                         Amount</p>
-                                                    <p class="text-lg font-bold text-brand-500">₹<%= (item.price *
-                                                            item.quantity).toFixed(2) %>
-                                                    </p>
+                                                    <% let refundAmount=item.totalAmount; if (item.couponDiscount &&
+                                                        item.couponDiscount> 0) {
+                                                        refundAmount = item.totalAmount - item.couponDiscount;
+                                                        }
+                                                        %>
+
+                                                        <p class="text-lg font-bold text-brand-500">
+                                                            ₹<%= refundAmount.toFixed(2) %>
+                                                        </p>
                                                 </div>
                                                 <div class="flex gap-2 w-full justify-end">
                                                     <button
@@ -185,36 +191,62 @@
 
     <script>
         async function handleReturn(orderId, itemId, action) {
-            const actionText = action === 'approve' ? 'Approve' : 'Reject';
+            if (action === 'reject') {
+                const result = await Swal.fire({
+                    title: 'Reject Return Request?',
+                    text: "This will revert item status to Delivered.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, Reject'
+                });
 
-            const result = await Swal.fire({
-                title: `${actionText} Request?`,
-                text: action === 'approve' ? "This will mark item as returned." : "This will revert item status to Delivered.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: action === 'approve' ? '#f43f5e' : '#64748b',
-                confirmButtonText: `Yes, ${actionText}`
-            });
-
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin/orders/${orderId}/items/${itemId}/return-action`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        Swal.fire("Success", data.message, "success").then(() => window.location.reload());
-                    } else {
-                        Swal.fire("Error", data.message, "error");
-                    }
-                } catch (error) {
-                    console.error(error);
-                    Swal.fire("Error", "Something went wrong", "error");
+                if (result.isConfirmed) {
+                    submitReturnAction(orderId, itemId, 'reject');
                 }
+            } else if (action === 'approve') {
+                const result = await Swal.fire({
+                    title: 'Approve Return',
+                    text: "Do you want to add this item back to stock?",
+                    icon: 'question',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981', // Emerald for Restock
+                    denyButtonColor: '#f59e0b', // Amber for Discard
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: '<i class="fa-solid fa-box"></i> Yes, Restock',
+                    denyButtonText: '<i class="fa-solid fa-trash"></i> No, Discard',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (result.isConfirmed) {
+                    // Approved + Restock
+                    submitReturnAction(orderId, itemId, 'approve', true);
+                } else if (result.isDenied) {
+                    // Approved + No Restock
+                    submitReturnAction(orderId, itemId, 'approve', false);
+                }
+            }
+        }
+
+        async function submitReturnAction(orderId, itemId, action, restock = true) {
+            try {
+                const response = await fetch(`/admin/orders/${orderId}/items/${itemId}/return-action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, restock })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire("Success", data.message, "success").then(() => window.location.reload());
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "Something went wrong", "error");
             }
         }
     </script>

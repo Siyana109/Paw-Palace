@@ -1,5 +1,6 @@
 import Order from "../../model/orderModel.js";
-import creditWallet from "../userControllers/walletController.js";
+import Variant from "../../model/variantModel.js";
+import walletController from "../userControllers/walletController.js";
 
 
 const getReturnRequests = async (req, res) => {
@@ -55,6 +56,13 @@ const requestReturnItem = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid return request" });
         }
 
+        const deliveredAt = item.deliveredAt;
+        const returnWindow = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+        if (Date.now() - deliveredAt > returnWindow) {
+            return res.json({ success: false, message: "Return window expired" });
+        }
+
         item.itemStatus = "Return Requested";
         item.returnRequest = {
             isRequested: true,
@@ -100,10 +108,88 @@ const handleReturnAction = async (req, res) => {
         }
 
         // ✅ Approve return
-        const refundAmount = item.totalAmount;
+        let refundAmount = item.totalAmount;
+
+        // 💰 Deduct proportional coupon discount
+        if (order.couponId) {
+            console.log("Coupon ID present:", order.couponId);
+            const orderDiscount = Number(order.discount) || 0;
+            console.log("Order Discount (Number):", orderDiscount);
+
+            // Priority 1: Use pre-calculated discount from DB (New Orders)
+            if (item.couponDiscount && item.couponDiscount > 0) {
+                refundAmount = item.totalAmount - item.couponDiscount;
+                console.log("Using stored couponDiscount:", item.couponDiscount);
+            }
+            // Priority 2: Fallback to dynamic calculation (Legacy Orders)
+            else if (orderDiscount > 0) {
+                // Determine original subtotal
+                let originalSubtotal = 0;
+                if (order.items && order.items.length > 0) {
+                    originalSubtotal = order.items.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+                }
+
+                console.log("Original Subtotal:", originalSubtotal);
+
+                if (originalSubtotal > 0) {
+                    const itemProportion = item.totalAmount / originalSubtotal;
+                    const itemDiscountShare = orderDiscount * itemProportion;
+
+                    console.log("Item Proportion:", itemProportion);
+                    console.log("Discount Share:", itemDiscountShare);
+
+                    refundAmount = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
+                }
+            } else {
+                console.warn("Coupon present but discount is 0. Refund might be incorrect if this is a coupon order.");
+            }
+        }
+
+
+        // if (order.shipping > 0) {
+
+        //     // calculate active items (excluding cancelled/returned)
+        //     const activeItems = order.items.filter(
+        //         i => !["Cancelled", "Returned"].includes(i.itemStatus)
+        //     );
+
+        //     const totalActiveValue = activeItems.reduce(
+        //         (sum, i) => sum + i.totalAmount,
+        //         0
+        //     );
+
+        //     if (totalActiveValue > 0) {
+        //         const shippingShare =
+        //             (item.totalAmount / totalActiveValue) * order.shipping;
+
+        //         refundAmount += Math.round(shippingShare);
+        //     }
+        // }
+
+
+        // Shipping Refund Logic (Corrected)
+
+        let shippingRefund = 0;
+
+        if (order.shipping > 0) {
+
+            const totalOrderValue = order.items.reduce(
+                (sum, i) => sum + i.totalAmount,
+                0
+            );
+
+            if (totalOrderValue > 0) {
+                shippingRefund = Math.round(
+                    (item.totalAmount / totalOrderValue) * order.shipping
+                );
+            }
+
+            refundAmount += shippingRefund;
+        }
+
 
         // 1️⃣ Wallet credit
-        await creditWallet({
+        await walletController.creditWallet({
             userId: order.userId,
             amount: refundAmount,
             description: "Item Return Refund",
@@ -127,19 +213,33 @@ const handleReturnAction = async (req, res) => {
         };
 
         // 3️⃣ Update order totals
-        order.subtotal -= refundAmount;
+        order.subtotal -= item.totalAmount;
         order.totalAmount -= refundAmount;
+        order.shipping -= shippingRefund;
+        // order.shipping -= Math.round(
+        //     (item.totalAmount / order.subtotal) * order.shipping
+        // );
 
         order.refundSummary.totalRefunded += refundAmount;
         order.refundSummary.refundedAt = new Date();
+
+        // 📦 Restore Stock (Only if restock is true)
+        if (req.body.restock !== false) { // Default to true if not specified
+            await Variant.findByIdAndUpdate(
+                item.variantId,
+                { $inc: { stock: item.quantity } }
+            );
+        }
 
         // 4️⃣ Update order status
         const activeItems = order.items.filter(
             i => !["Cancelled", "Returned"].includes(i.itemStatus)
         );
 
-        order.orderStatus =
-            activeItems.length === 0 ? "Returned" : "Partially Returned";
+        if (activeItems.length === 0) {
+            order.orderStatus = "Returned";
+        }
+        // Else: keep existing status (e.g. Delivered) as user requested "no need of partially returned"
 
         await order.save();
 
