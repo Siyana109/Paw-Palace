@@ -4,7 +4,7 @@ const attachUserToViews = async (req, res, next) => {
   try {
     if (req.session.user?.id) {
       const user = await User.findById(req.session.user.id)
-        .select("fullName email");
+        .select("fullName email profilePic");
 
       res.locals.user = user || null;
     } else {

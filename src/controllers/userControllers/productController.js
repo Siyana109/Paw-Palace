@@ -291,10 +291,13 @@ const getCartPage = async (req, res) => {
       !item.variant || !item.variant.isActive || item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
+    // const totalPrice = 
+
     res.render('user/cart', {
       cart,
       hasStockIssues: stockIssues.length > 0,
-      stockIssues
+      stockIssues,
+      // totalPrice
     });
 
   } catch (error) {
@@ -366,7 +369,8 @@ const updateCartQuantity = async (req, res) => {
 
     await cart.save();
 
-    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = cart.items.reduce((sum, item) => sum + item, 0);
+    
 
     return res.json({
       success: true,

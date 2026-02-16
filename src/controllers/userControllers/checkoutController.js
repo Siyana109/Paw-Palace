@@ -28,14 +28,14 @@ const getCheckoutPage = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        // 🔥 Fetch active offers ONCE
+        // Fetch active offers ONCE
         const activeOffers = await Offer.find({
             status: "active",
             startDate: { $lte: new Date() },
             endDate: { $gte: new Date() }
         });
 
-        // 🔥 Recalculate offers for each cart item
+        // Recalculate offers for each cart item
         cart.items.forEach(item => {
             const { offerApplied, finalPrice } = applyOfferToPrice({
                 price: item.variant.price,

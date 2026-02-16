@@ -94,7 +94,7 @@ const handleReturnAction = async (req, res) => {
             return res.json({ success: false, message: "Invalid return action" });
         }
 
-        // ❌ Reject return
+        // Reject return
         if (action === "reject") {
             item.returnRequest.status = "Rejected";
             item.returnRequest.processedAt = new Date();
@@ -104,10 +104,10 @@ const handleReturnAction = async (req, res) => {
             return res.json({ success: true, message: "Return request rejected" });
         }
 
-        // ✅ Approve return
+        // Approve return
         let refundAmount = Number(item.totalAmount);
 
-        // 💰 Deduct proportional coupon discount
+        // Deduct proportional coupon discount
         if (order.couponId) {
             console.log("Coupon ID present:", order.couponId);
             const orderDiscount = Number(order.discount) || 0;
@@ -136,7 +136,7 @@ const handleReturnAction = async (req, res) => {
         // Shipping Refund Logic (Correct Proportional Method)
 
         // Get original shipping stored in order
-// 🔥 Reconstruct ORIGINAL shipping (stateless & accurate)
+//  Reconstruct ORIGINAL shipping (stateless & accurate)
 
 // Step 1: total of all items (this already contains offer-applied prices)
 const originalItemsTotal = order.items.reduce(
@@ -166,7 +166,7 @@ if (originalShippingFee > 0 && originalItemsTotal > 0) {
 refundAmount += shippingRefund;
 
 
-        // 1️⃣ Wallet credit
+        // Wallet credit
         await walletController.creditWallet({
             userId: order.userId,
             amount: refundAmount,
@@ -178,7 +178,7 @@ refundAmount += shippingRefund;
             return res.json({ success: false, message: "Already refunded" });
         }
 
-        // 2️⃣ Update item
+        // Update item
         item.itemStatus = "Returned";
         item.returnRequest.status = "Approved";
         item.returnRequest.processedAt = new Date();
@@ -191,14 +191,14 @@ refundAmount += shippingRefund;
             refundedAt: new Date()
         };
 
-        // 3️⃣ Update order totals
+        // Update order totals
         order.subtotal -= item.totalAmount;
         order.totalAmount -= refundAmount;
 
         order.refundSummary.totalRefunded += refundAmount;
         order.refundSummary.refundedAt = new Date();
 
-        // 📦 Restore Stock (Only if restock is true)
+        // Restore Stock (Only if restock is true)
         if (req.body.restock !== false) { // Default to true if not specified
             await Variant.findByIdAndUpdate(
                 item.variantId,
@@ -206,7 +206,7 @@ refundAmount += shippingRefund;
             );
         }
 
-        // 4️⃣ Update order status
+        // Update order status
         const activeItems = order.items.filter(
             i => !["Cancelled", "Returned"].includes(i.itemStatus)
         );

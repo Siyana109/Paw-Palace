@@ -33,17 +33,7 @@ const getOrderHistory = async (req, res) => {
         }
 
         if (search) {
-            const searchRegex = new RegExp(search, 'i');
-            // We need to look up orders where orderId matches OR any item matches
-            // Note: items.productName is inside the items array.
-            // But we are not joining tables here, basic find.
-            // We populated productId? No, items array has productId ref.
-            // Wait, the schema stores product details in items array?
-            // Let's check orderItemSchema. Usually yes for snapshots.
-            // Assuming items has productName.
-
-            // If we already have $or (from 'Failed' status), we need to be careful.
-            // $and: [ { original_query }, { $or: [ { orderId }, { 'items.productName' } ] } ]
+            const searchRegex = new RegExp(search, 'i')
 
             const searchQuery = {
                 $or: [
@@ -77,7 +67,7 @@ const getOrderHistory = async (req, res) => {
             totalPages,
             currentStatus: status,
             searchQuery: search,
-            user: req.session.user
+            searchQuery: search
         });
 
     } catch (error) {
@@ -106,7 +96,7 @@ const getOrderDetails = async (req, res) => {
         res.render('user/singleOrder', {
             title: `Order #${order.orderId} | PawPalace`,
             order,
-            user: req.session.user
+            order
         });
 
     } catch (error) {
@@ -264,7 +254,7 @@ const cancelOrderOrItem = async (req, res) => {
         for (const item of itemsToCancel) {
             if (!item) continue;
 
-            // ⛔ Safety: prevent double cancel/refund
+            // Safety: prevent double cancel/refund
             if (["Cancelled", "Returned"].includes(item.itemStatus)) continue;
 
             item.itemStatus = "Cancelled";
@@ -279,7 +269,7 @@ const cancelOrderOrItem = async (req, res) => {
             let itemDiscountShare = 0;
             let itemEffectiveValue = item.totalAmount;
 
-            // 🧮 Calculate Item Effective Value (considering coupons)
+            // Calculate Item Effective Value (considering coupons)
             if (order.couponId) {
                 const orderDiscount = Number(order.discount) || 0;
 
@@ -307,10 +297,7 @@ const cancelOrderOrItem = async (req, res) => {
                     }
                 }
             }
-
-            // 💰 Process Refund if applicable (Prepaid orders)
-            // For COD, we don't refund to wallet unless it was somehow paid (future proofing), 
-            // but usually COD cancel means no payment collected yet.
+            
             if (order.payment.method !== "COD") {
                 if (item.refund?.status === "Completed") continue;
 
