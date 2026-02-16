@@ -228,7 +228,7 @@ const placeOrder = async (req, res) => {
 
         console.log("REQ BODY:", req.body);
 
-        /* 1️ Validate payment method */
+        // 1️ Validate payment method
         const allowedMethods = ["COD", "ONLINE", "WALLET"];
 
         if (!allowedMethods.includes(paymentDetails)) {
@@ -236,7 +236,7 @@ const placeOrder = async (req, res) => {
             return res.redirect("/checkout");
         }
 
-        //  FIX: Map 'ONLINE' to 'RAZORPAY' if needed by Schema, or 'COD' to 'COD' 
+        // Map 'ONLINE' to 'RAZORPAY' if needed by Schema, or 'COD' to 'COD' 
         // Schema Enum: ["COD", "RAZORPAY", "WALLET"]
         let paymentMethodCheck = paymentDetails;
         if (paymentDetails === "ONLINE") {
@@ -245,7 +245,7 @@ const placeOrder = async (req, res) => {
 
         const paymentMethod = paymentMethodCheck;
 
-        /* 2️ Fetch Cart */
+        // 2️ Fetch Cart
         const cart = await Cart.findOne({ user: userId })
             .populate("items.product")
             .populate("items.variant");
@@ -254,13 +254,13 @@ const placeOrder = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        /* 3️ Fetch Address */
+        // 3️ Fetch Address
         const addressDoc = await Address.findOne({ _id: addressId, userId });
         if (!addressDoc) {
             return res.redirect("/checkout");
         }
 
-        /* 4️ Fetch active offers */
+        // 4️ Fetch active offers
         const activeOffers = await Offer.find({
             status: "active",
             startDate: { $lte: new Date() },
@@ -322,7 +322,7 @@ const placeOrder = async (req, res) => {
                 couponId = coupon._id;
                 console.log("Discount Applied:", discount);
 
-                // 🌟 Distribute discount to items for refund accuracy
+                // Distribute discount to items for refund accuracy
                 const postOfferSubtotal = subtotal - offerDiscount;
 
                 if (discount > 0 && postOfferSubtotal > 0) {

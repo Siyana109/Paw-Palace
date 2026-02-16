@@ -77,6 +77,12 @@ const homePage = async (req, res) => {
 
       { $unwind: "$variants" },
 
+      {
+        $match: {
+          "variants.isActive": true
+        }
+      },
+
       ...(minPrice || maxPrice
         ? [{
           $match: {
