@@ -67,7 +67,7 @@ const getOrderHistory = async (req, res) => {
             totalPages,
             currentStatus: status,
             searchQuery: search,
-            searchQuery: search
+            user: req.session.user
         });
 
     } catch (error) {
@@ -96,7 +96,7 @@ const getOrderDetails = async (req, res) => {
         res.render('user/singleOrder', {
             title: `Order #${order.orderId} | PawPalace`,
             order,
-            order
+            user: req.session.user
         });
 
     } catch (error) {

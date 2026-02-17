@@ -127,8 +127,8 @@
                                     <% if (item.variant.offerPrice && item.variant.offerPrice < item.variant.price) { %>
                                         <span class="text-gray-400 line-through text-sm font-bold">₹<%=
                                                 item.variant.price %></span>
-                                        <span class="text-gray-400 line-through text-sm font-bold">₹<%=
-                                                item.variant.price* item.variant.quantity %></span>
+                                        <!-- <span class="text-gray-400 line-through text-sm font-bold">₹<%=
+                                                item.variant.price* item.variant.quantity %></span> -->
                                         <span class="text-brand-500 text-xl font-black">₹<%= item.variant.offerPrice %>
                                         </span>
                                         <% } else { %>

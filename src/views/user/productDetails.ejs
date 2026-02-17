@@ -417,7 +417,7 @@
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
 
-                    // 🔥 INITIAL RENDER
+                    // INITIAL RENDER
                     selectVariant(activeVariant._id);
                 }
 
@@ -549,7 +549,7 @@
                     const stockCount = document.getElementById('stockCount');
 
                     if (variant.stock > 0) {
-                        // ✅ In stock
+                        // In stock
                         qtyWrapper.classList.remove('opacity-50', 'pointer-events-none');
                         if (btn) {
                             btn.disabled = false;
@@ -560,7 +560,7 @@
                         stockMsg.classList.add('hidden');
                     }
                     else {
-                        // ❌ Out of stock
+                        // Out of stock
                         qtyWrapper.classList.add('opacity-50', 'pointer-events-none');
                         if (btn) {
                             btn.disabled = true;
@@ -651,6 +651,21 @@
                 //script
 
                 document.getElementById("wishlistBtn").addEventListener("click", async () => {
+                    if (!isLoggedIn) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Login Required',
+                            text: 'Please login to add items to wishlist',
+                            confirmButtonText: 'Login',
+                            confirmButtonColor: '#ff4d6d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/login';
+                            }
+                        });
+                        return;
+                    }
+
                     const btn = document.getElementById("wishlistBtn");
                     const icon = document.getElementById("wishlistIcon");
 
@@ -668,7 +683,7 @@
 
                         const data = await res.json();
 
-                        // 🔐 Not logged in
+                        // Not logged in
                         if (!data.success && data.redirect) {
                             window.location.href = data.redirect;
                             return;
@@ -706,29 +721,28 @@
                 //script
                 const isLoggedIn = <%=user?'true': 'false' %>;
 
-                document.querySelectorAll('form[action="/cart/add"], form[action="/wishlist/add"]')
-                    .forEach(form => {
-                        form.addEventListener('submit', function (e) {
-                            if (!isLoggedIn) {
-                                e.preventDefault();
+                // Dead code removed - specific handlers added above and below
 
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Login Required',
-                                    text: 'Please login to continue',
-                                    confirmButtonText: 'Login',
-                                    confirmButtonColor: '#ff4d6d'
-                                }).then(() => {
-                                    window.location.href = '/login';
-                                });
-                            }
-                        });
-                    });
             </script>
 
             <script>
                 document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
+
+                    if (!isLoggedIn) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Login Required',
+                            text: 'Please login to add items to cart',
+                            confirmButtonText: 'Login',
+                            confirmButtonColor: '#ff4d6d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/login';
+                            }
+                        });
+                        return;
+                    }
 
                     const btn = document.getElementById('addToCartBtn');
 
@@ -753,7 +767,7 @@
 
                         const data = await res.json();
 
-                        // 🔐 Not logged in → redirect
+                        // Not logged in → redirect
                         if (res.status === 401 && data.redirect) {
                             window.location.href = data.redirect;
                             return;
@@ -771,7 +785,7 @@
                             return;
                         }
 
-                        // ✅ Success
+                        // Success
                         if (data.success) {
                             // Update header badge
                             if (typeof window.updateCartCount === 'function' && data.cartCount !== undefined) {
@@ -786,7 +800,7 @@
                                 showConfirmButton: false
                             });
 
-                            // 🔁 Change button to "Go to Cart"
+                            // Change button to "Go to Cart"
                             btn.innerText = 'Go to Cart';
 
                             btn.classList.remove(

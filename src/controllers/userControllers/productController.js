@@ -12,7 +12,7 @@ const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
 
-    /* 1️⃣ Fetch Product */
+    // Fetch Product
     const product = await Product.findById(productId)
       .populate("brandId")
       .populate("categoryId");
@@ -21,7 +21,7 @@ const getProductDetails = async (req, res) => {
       return res.redirect("/home");
     }
 
-    /* 2️⃣ Fetch ALL Variants */
+    // Fetch ALL Variants
     const variants = await Variant.find({ product: productId, isActive: true });
 
     if (!variants.length) {
@@ -29,14 +29,14 @@ const getProductDetails = async (req, res) => {
       return res.redirect("/home");
     }
 
-    /* 3️⃣ Stock Computation */
+    // Stock Computation
     const sellableVariants = variants.filter(v => v.stock > 0);
     const hasStock = sellableVariants.length > 0;
 
-    /* 4️⃣ Default Variant (SAFE) */
+    // Default Variant (SAFE)
     const defaultVariant = hasStock ? sellableVariants[0] : variants[0];
 
-    /* 5️⃣ Wishlist & Cart Status */
+    // Wishlist & Cart Status
     let inWishlist = false;
     let isInCart = false;
 
@@ -54,12 +54,12 @@ const getProductDetails = async (req, res) => {
       });
     }
 
-    /* 6️⃣ Normalize petType */
+    // Normalize petType
     const petTypes = Array.isArray(product.petType)
       ? product.petType
       : [product.petType];
 
-    /* 7️⃣ Related Products (ONLY IN-STOCK VARIANTS) */
+    // Related Products (ONLY IN-STOCK VARIANTS)
     const relatedBaseProducts = await Product.find({
       _id: { $ne: productId },
       isActive: true,
@@ -82,7 +82,7 @@ const getProductDetails = async (req, res) => {
 
 
 
-    /* 7.5️⃣ Calculate Offers */
+    // Calculate Offers
     const currentDate = new Date();
 
     const activeOffers = await Offer.find({
@@ -95,7 +95,7 @@ const getProductDetails = async (req, res) => {
       ]
     });
 
-    // 1️⃣ Product offer wins
+    // Product offer wins
     variants.forEach(variant => {
       const { offerApplied, finalPrice } = applyOfferToPrice({
         price: variant.price,
@@ -111,7 +111,7 @@ const getProductDetails = async (req, res) => {
     });
 
 
-    /* 8️⃣ Render */
+    // Render
     res.render("user/productDetails", {
       product,
       variants,
@@ -200,10 +200,10 @@ const addToCart = async (req, res) => {
       if (index > -1) {
         const newQty = cart.items[index].quantity + qty;
 
-        if (newQty > 5) {
+        if (newQty > 10) {
           return res.status(400).json({
             success: false,
-            message: `Maximum quantity per item is 5`
+            message: `Maximum quantity per item is 10`
           });
         }
 
@@ -267,14 +267,14 @@ const getCartPage = async (req, res) => {
       return res.render('user/cart', { cart: null, hasOutOfStock: false });
     }
 
-    // 🔥 Fetch active offers ONCE
+    // Fetch active offers ONCE
     const activeOffers = await Offer.find({
       status: "active",
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() }
     });
 
-    // 🔥 Apply offers to each cart item
+    // Apply offers to each cart item
     cart.items.forEach(item => {
       const { finalPrice, offerApplied } = applyOfferToPrice({
         price: item.variant.price,
@@ -291,13 +291,10 @@ const getCartPage = async (req, res) => {
       !item.variant || !item.variant.isActive || item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
-    // const totalPrice = 
-
     res.render('user/cart', {
       cart,
       hasStockIssues: stockIssues.length > 0,
       stockIssues,
-      // totalPrice
     });
 
   } catch (error) {
@@ -369,8 +366,7 @@ const updateCartQuantity = async (req, res) => {
 
     await cart.save();
 
-    const cartCount = cart.items.reduce((sum, item) => sum + item, 0);
-    
+    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0)
 
     return res.json({
       success: true,
@@ -424,14 +420,14 @@ const getWishlist = async (req, res) => {
 
     const wishlistItems = wishlistDoc ? wishlistDoc.items.filter(item => item.variant && item.variant.isActive) : [];
 
-    // 🔥 Active offers
+    // Active offers
     const activeOffers = await Offer.find({
       status: "active",
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() }
     });
 
-    // 🔥 Apply offers
+    // Apply offers
     wishlistItems.forEach(item => {
       const { finalPrice, offerApplied } = applyOfferToPrice({
         price: item.variant.price,
@@ -458,6 +454,13 @@ const getWishlist = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.status(401).json({
+        success: false,
+        redirect: "/login"
+      });
+    }
+
     const userId = req.session.user.id;
     const { productId, variantId } = req.body;
 
