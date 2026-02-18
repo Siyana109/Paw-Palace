@@ -65,6 +65,8 @@ router.delete('/cart/remove', userMiddleware.checkSession, productController.rem
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
 router.post('/checkout/place-order', userMiddleware.checkSession, checkoutController.placeOrder);
+router.post("/verify-payment", userMiddleware.checkSession, checkoutController.verifyPayment);
+router.get('/checkout/payment-failed', userMiddleware.checkSession, checkoutController.getPaymentFailedPage);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 
 

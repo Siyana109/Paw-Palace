@@ -163,6 +163,41 @@ WEEK-10 PENDINGS:
 
 
 
+WEEK-11:
+    User:
+    Integrate online payment gateway (Razorpay or PayPal; multi-gateway integration as an add-on)
+    Payment success page with statement, illustration, buttons to order details, and continue shopping
+    Payment failure page with retry and redirect buttons
+    ✔ Order cancellation or return with stock increment and reason handling @done (2/16/2026, 3:48:18 PM)
+    ✔ Coupon management @done (2/16/2026, 3:47:50 PM)
+    ✔ Apply and remove the coupon at checkout @done (2/16/2026, 3:47:53 PM)
+    ✔ Prevent multiple coupon applications @done (2/16/2026, 3:47:57 PM)
+    ✔ Show breakdown, including discount on checkout page @done (2/16/2026, 3:48:08 PM)
+    ✔ Search, category filtering enhancement @done (2/16/2026, 3:48:02 PM)
+    ✔ Wishlist management @done (2/16/2026, 3:47:19 PM)
+    ✔ Add/remove wishlist items @done (2/16/2026, 3:47:22 PM)
+    ✔ Remove from wishlist when moved to cart @done (2/16/2026, 3:47:27 PM)
+    ☐ Wishlist buttons on product listing and detail pages
+    ☐ Wallet management
+    ☐ Wallet system for canceled/returned orders
+    ✔ Refund to wallet after admin confirmation for returns @done (2/16/2026, 3:56:39 PM)
+    ☐ direct refund for cancellations
+    ☐ Payment using a wallet
+
+    Admin:
+    ✔ Order management @done (2/16/2026, 3:51:09 PM)
+    ✔ Verify return requests @done (2/16/2026, 3:51:14 PM)
+    ✔ Refund to the wallet if return request is accepted @done (2/16/2026, 3:50:53 PM)
+    ✔ Offer module @done (2/16/2026, 3:50:40 PM)
+    ✔ Product-specific offers @done (2/16/2026, 3:50:36 PM)
+    ✔ Category offers (apply the largest between product and category offer) @done (2/16/2026, 3:50:05 PM)
+    Referral offers (token URL and referral code approaches)
+    ✔ Coupon management (create and delete with validations) @done (2/16/2026, 3:50:20 PM)
+    Sales reports (daily, weekly, yearly, custom)
+    Filter by date, show discounts/coupon deductions, overall sales count, order amount, and discount
+    Report downloads (PDF, Excel)
+
+
 
 
 

@@ -512,22 +512,28 @@
             const currentStatus = order.orderStatus;
             let nextSteps = [];
 
-            if (['Pending', 'Placed'].includes(currentStatus)) {
-                nextSteps = ['Processing', 'Cancelled'];
+            if (['Pending', 'Placed', 'Partially Cancelled'].includes(currentStatus)) {
+                nextSteps = ['Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
             } else if (currentStatus === 'Processing') {
-                nextSteps = ['Shipped'];
+                nextSteps = ['Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
             } else if (currentStatus === 'Shipped') {
-                nextSteps = ['Out for Delivery'];
+                nextSteps = ['Out for Delivery', 'Delivered'];
             } else if (currentStatus === 'Out for Delivery') {
                 nextSteps = ['Delivered'];
+            } else if (currentStatus === 'Partially Returned') {
+                nextSteps = ['Returned'];
             }
 
             // Combine Current Status + Next Valid Steps
             const allOptions = [currentStatus, ...nextSteps];
-            const uniqueOptions = [...new Set(allOptions)];
+            // Filter out 'Partially Cancelled'/'Partially Returned' from being selected manually if not already current
+            // because admin should select the logistic status (Shipped, etc.)
+            const displayOptions = [...new Set(allOptions)].filter(s =>
+                !['Partially Cancelled', 'Partially Returned'].includes(s) || s === currentStatus
+            );
 
             // Populate Select
-            statusSelect.innerHTML = uniqueOptions.map(s =>
+            statusSelect.innerHTML = displayOptions.map(s =>
                 `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`
             ).join('');
 

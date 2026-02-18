@@ -8,6 +8,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -991,8 +992,89 @@
         }, 300);
     }
 
-    function submitOrder() {
-        document.getElementById("checkoutForm").submit();
+    async function submitOrder() {
+
+        const form = document.getElementById("checkoutForm");
+        const paymentValue = document.getElementById("paymentDetailsInput").value;
+
+        // If COD or WALLET → normal submit
+        if (paymentValue === "COD" || paymentValue === "WALLET") {
+            form.submit();
+            return;
+        }
+
+        // If ONLINE → use Razorpay
+        if (paymentValue === "ONLINE") {
+
+            try {
+
+                const formData = new FormData(form);
+                const payload = Object.fromEntries(formData.entries());
+
+                const response = await fetch("/checkout/place-order", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    Swal.fire("Error", "Something went wrong!", "error");
+                    return;
+                }
+
+                const options = {
+                    key: data.key,
+                    amount: data.razorpayOrder.amount,
+                    currency: "INR",
+                    name: "PawPalace",
+                    description: "Order Payment",
+                    order_id: data.razorpayOrder.id,
+
+                    handler: async function (paymentResponse) {
+
+                        const verifyRes = await fetch("/verify-payment", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                ...paymentResponse,
+                                orderData: data.orderData // Pass the orderData received from place-order
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+
+                        if (verifyData.success) {
+                            window.location.href =
+                                `/order-confirmation/${verifyData.orderId}`;
+                        } else {
+                            // Payment verification failed
+                            window.location.href = '/checkout/payment-failed';
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            console.log('Payment cancelled by user');
+                            window.location.href = '/checkout/payment-failed';
+                        }
+                    },
+
+                    theme: {
+                        color: "#f43f5e"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "Payment initialization failed", "error");
+            }
+        }
     }
 
     // Close modal on click outside
