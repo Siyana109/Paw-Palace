@@ -246,7 +246,7 @@
                                             <% } else if (product.offerApplied) { %>
                                                 <!-- OFFER BADGE -->
                                                 <div
-                                                    class="absolute top-3 right-3 bg-brand-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                                                    class="absolute top-3 left-3 bg-brand-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg z-10">
                                                     <% if(product.offerDiscountType==='percentage' ) { %>
                                                         <%= product.offerDiscountVal %>% OFF
                                                             <% } else { %>
@@ -255,28 +255,29 @@
                                                 </div>
                                                 <% } %>
 
+                                                    <!-- WISHLIST BUTTON (FIXED TOP-RIGHT) -->
+                                                    <button
+                                                        onclick="toggleWishlist('<%= product._id %>', '<%= product.variantId %>', this)"
+                                                        class="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md z-20 hover:scale-110 transition-transform duration-300 group/btn">
+                                                        <i
+                                                            class="<%= product.inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-xl transition-colors duration-300"></i>
+                                                    </button>
+
+                                                    <% if (product.offerApplied) { %>
+                                                        <!-- OFFER BADGE -->
+                                                        <div
+                                                            class="absolute top-3 left-3 bg-brand-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                                                            <% if(product.offerDiscountType==='percentage' ) { %>
+                                                                <%= product.offerDiscountVal %>% OFF
+                                                                    <% } else { %>
+                                                                        ₹<%= product.offerDiscountVal %> OFF
+                                                                            <% } %>
+                                                        </div>
+                                                        <% } %>
+
                                     </div>
 
-                                    <!-- HOVER ACTIONS -->
-                                    <!-- <div class="absolute inset-0 bg-accent-navy/20 opacity-0 group-hover:opacity-100
-                      transition duration-300 flex items-center justify-center gap-3 pointer-events-none">
-                                        <form action="/wishlist/add" method="POST" class="pointer-events-auto">
-                                            <input type="hidden" name="productId" value="<%= product._id %>">
-                                            <button
-                                                class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition">
-                                                <i class="fa-solid fa-heart"></i>
-                                            </button>
-                                        </form>
-
-                                        <form action="/cart/add" method="POST"
-                                            class="pointer-events-auto <%= !product.inStock ? 'opacity-40 pointer-events-none' : '' %>">
-                                            <input type="hidden" name="productId" value="<%= product._id %>">
-                                            <button
-                                                class="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition">
-                                                <i class="fa-solid fa-cart-shopping"></i>
-                                            </button>
-                                        </form>
-                                    </div> -->
+                                    <!-- HOVER ACTIONS REMOVED (WISHLIST MOVED UP) -->
 
                                     <!-- CONTENT -->
                                     <div class="px-2 pb-2 flex flex-col flex-grow justify-between">
@@ -306,7 +307,8 @@
                                                                 product.offerPrice %></span>
                                                         <span
                                                             class="text-xs text-gray-400 line-through font-bold mt-1">₹
-                                                            <%= product.price %></span>
+                                                            <%= product.price %>
+                                                        </span>
                                                     </div>
                                                     <% } else { %>
                                                         <span class="text-xl font-black">₹<%= product.price %></span>
@@ -383,6 +385,47 @@
         </main>
 
         <%- include('../partials/footer') %>
+            <script>
+                async function toggleWishlist(productId, variantId, btn) {
+                    try {
+                        const response = await fetch('/wishlist/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId, variantId })
+                        });
+
+                        if (response.status === 401) {
+                            window.location.href = '/login';
+                            return;
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const icon = btn.querySelector('i');
+                            // data.added is returned by the controller if it was added
+                            // if data.removed is true, then it was removed
+                            if (data.added) {
+                                icon.classList.remove('fa-regular', 'text-gray-400');
+                                icon.classList.add('fa-solid', 'text-brand-500');
+                            } else {
+                                icon.classList.remove('fa-solid', 'text-brand-500');
+                                icon.classList.add('fa-regular', 'text-gray-400');
+                            }
+
+                            // Update Header Badge
+                            if (data.wishlistCount !== undefined && window.updateWishlistCount) {
+                                window.updateWishlistCount(data.wishlistCount);
+                            }
+                        } else {
+                            console.error(data.message || 'Failed to toggle wishlist');
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            </script>
 </body>
 
 </html>

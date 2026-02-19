@@ -1,6 +1,7 @@
 import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
 import Offer from "../../model/offerModel.js";
+import Wishlist from "../../model/wishlistModel.js";
 
 import { applyOfferToPrice } from "../../../utils/applyOffer.js";
 
@@ -94,13 +95,15 @@ const homePage = async (req, res) => {
         }]
         : []),
 
+      { $sort: { "variants.price": 1 } },
       {
         $group: {
           _id: "$_id",
           name: { $first: "$productName" },
           category: { $first: "$categoryId" },
           image: { $first: "$variants.coverImage" },
-          price: { $min: "$variants.price" },
+          price: { $first: "$variants.price" },
+          variantId: { $first: "$variants._id" },
           createdAt: { $first: "$createdAt" },
           petType: { $first: "$petType" },
 
@@ -128,6 +131,16 @@ const homePage = async (req, res) => {
       endDate: { $gte: new Date() }
     });
 
+    let wishlistVariantIds = new Set();
+    if (req.session.user) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user.id });
+      if (wishlist && wishlist.items) {
+        wishlist.items.forEach(item => {
+          if (item.variant) wishlistVariantIds.add(item.variant.toString());
+        });
+      }
+    }
+
     products = products.map(product => {
       const { offerApplied, finalPrice, discountType, discountValue } =
         applyOfferToPrice({
@@ -138,11 +151,18 @@ const homePage = async (req, res) => {
         });
 
       if (!offerApplied) {
-        return { ...product, offerApplied: false };
+        return {
+          ...product,
+          offerApplied: false,
+          inWishlist: wishlistVariantIds.has(product.variantId.toString())
+        };
       }
+
+
 
       return {
         ...product,
+        inWishlist: wishlistVariantIds.has(product.variantId.toString()),
         offerApplied: true,
         offerPrice: finalPrice,
         offerDiscountType: discountType,
