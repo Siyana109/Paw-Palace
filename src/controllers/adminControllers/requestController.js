@@ -37,47 +37,6 @@ const getReturnRequests = async (req, res) => {
 };
 
 
-const requestReturnItem = async (req, res) => {
-    try {
-        const { orderId, itemId } = req.params;
-        const { reason } = req.body;
-        const userId = req.session.user._id;
-
-        const order = await Order.findOne({ _id: orderId, userId });
-        if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
-        }
-
-        const item = order.items.id(itemId);
-        if (!item || item.itemStatus !== "Delivered") {
-            return res.status(400).json({ success: false, message: "Invalid return request" });
-        }
-
-        const deliveredAt = item.deliveredAt;
-        const returnWindow = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-        if (Date.now() - deliveredAt > returnWindow) {
-            return res.json({ success: false, message: "Return window expired" });
-        }
-
-        item.itemStatus = "Return Requested";
-        item.returnRequest = {
-            isRequested: true,
-            reason,
-            status: "Pending",
-            requestedAt: new Date()
-        };
-
-        await order.save();
-
-        res.json({ success: true });
-
-    } catch (error) {
-        console.error("Return Request Error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-};
-
 
 const handleReturnAction = async (req, res) => {
     try {
@@ -135,35 +94,41 @@ const handleReturnAction = async (req, res) => {
 
         // Shipping Refund Logic (Correct Proportional Method)
 
-        // Get original shipping stored in order
-//  Reconstruct ORIGINAL shipping (stateless & accurate)
+        // ORIGINAL SHIPPING CHARGED
+        const originalShippingFee = Number(order.shipping || 0);
 
-// Step 1: total of all items (this already contains offer-applied prices)
-const originalItemsTotal = order.items.reduce(
-    (sum, i) => sum + Number(i.totalAmount || 0),
-    0
-);
+        // If no shipping charged → no refund
+        let shippingRefund = 0;
 
-// Step 2: subtract coupon discount
-const originalDiscount = Number(order.discount || 0);
+        if (originalShippingFee > 0) {
 
-// IMPORTANT: item.totalAmount already contains offer price.
-// So DO NOT subtract offer discount again.
+            // Get items that were originally part of shipping distribution
+            const originalItemsTotal = order.items.reduce(
+                (sum, i) => sum + Number(i.totalAmount || 0),
+                0
+            );
 
-const originalNetAmount = originalItemsTotal - originalDiscount;
+            if (originalItemsTotal > 0) {
 
-// Step 3: determine shipping
-const originalShippingFee = originalNetAmount >= 500 ? 0 : 50;
+                // Proportional share
+                shippingRefund = Math.round(
+                    (Number(item.totalAmount) / originalItemsTotal) * originalShippingFee
+                );
 
-let shippingRefund = 0;
+                // SAFETY: If this is the LAST active item,
+                // refund ALL remaining shipping
+                const remainingActiveItems = order.items.filter(
+                    i => !["Cancelled", "Returned"].includes(i.itemStatus)
+                );
 
-if (originalShippingFee > 0 && originalItemsTotal > 0) {
-    shippingRefund = Math.round(
-        (Number(item.totalAmount) / originalItemsTotal) * originalShippingFee
-    );
-}
+                if (remainingActiveItems.length === 1) {
+                    // Refund whatever shipping is left
+                    shippingRefund = originalShippingFee;
+                }
+            }
+        }
 
-refundAmount += shippingRefund;
+        refundAmount += shippingRefund;
 
 
         // Wallet credit
@@ -194,6 +159,8 @@ refundAmount += shippingRefund;
         // Update order totals
         order.subtotal -= item.totalAmount;
         order.totalAmount -= refundAmount;
+        order.shipping -= shippingRefund;
+
 
         order.refundSummary.totalRefunded += refundAmount;
         order.refundSummary.refundedAt = new Date();
@@ -216,12 +183,9 @@ refundAmount += shippingRefund;
         }
 
         console.log("==== SHIPPING DEBUG ====");
-console.log("Item total:", item.totalAmount);
-console.log("All items total:", originalItemsTotal);
-console.log("Order discount:", originalDiscount);
-console.log("Original net:", originalNetAmount);
-console.log("Original shipping calculated:", originalShippingFee);
-console.log("========================");
+        console.log("Item total:", item.totalAmount);
+        console.log("Original shipping calculated:", originalShippingFee);
+        console.log("========================");
 
 
         await order.save();
@@ -235,4 +199,4 @@ console.log("========================");
 };
 
 
-export default { getReturnRequests, requestReturnItem, handleReturnAction }
+export default { getReturnRequests, handleReturnAction }

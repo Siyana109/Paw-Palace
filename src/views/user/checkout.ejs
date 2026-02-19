@@ -87,7 +87,9 @@
                                     </div>
                                     <div>
                                         <h4 class="font-bold text-lg">PawPalace Wallet</h4>
-                                        <p class="text-sm text-emerald-600 font-bold">Available Balance: ₹125.00</p>
+                                        <p class="text-sm text-emerald-600 font-bold">Available Balance: ₹<%=
+                                                walletBalance.toFixed(2) %>
+                                        </p>
                                     </div>
                                     <div
                                         class="ml-auto w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-emerald-500 flex items-center justify-center">
@@ -277,7 +279,7 @@
 
                                         const postOfferTotal = subtotal - offerDiscount;
 
-                                        const shipping = postOfferTotal >= 500 ? 0 : 50;
+                                        const shipping = 50;
 
                                         const couponDiscount = 0;
                                         const total = postOfferTotal + shipping - couponDiscount;
@@ -292,11 +294,7 @@
                                             <div
                                                 class="flex justify-between items-center text-xs font-bold text-gray-400">
                                                 <span>Shipping</span>
-                                                <% if (shipping===0) { %>
-                                                    <span class="text-emerald-600 font-bold">FREE</span>
-                                                    <% } else { %>
-                                                        <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
-                                                        <% } %>
+                                                <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
                                             </div>
                                             <!-- Tax Removed -->
                                             <div
@@ -412,7 +410,7 @@
                             class="py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition border border-gray-200">
                             Cancel
                         </button>
-                        <button onclick="submitOrder()"
+                        <button type="button" onclick="submitOrder()"
                             class="py-3.5 rounded-xl font-bold text-white bg-brand-500 hover:bg-brand-600 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
                             <span>Confirm</span>
                             <i class="fa-solid fa-arrow-right"></i>
@@ -514,7 +512,7 @@
 
 <script>
     function openConfirmationModal() {
-    <%if (stockIssues.length) {%>
+    <% if (stockIssues.length) {%>
             Swal.fire({
                 icon: 'error',
                 title: 'Stock issue',
@@ -999,7 +997,35 @@
 
         // If COD or WALLET → normal submit
         if (paymentValue === "COD" || paymentValue === "WALLET") {
-            form.submit();
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            // Explicitly add paymentDetails if not in formData (radio buttons sometimes tricky)
+            payload.paymentDetails = paymentValue;
+
+            // Add addressId explicitly if needed (it is a hidden input, so should be in formData)
+            // But let's be safe
+            const addressId = document.querySelector("input[name='addressId']").value;
+            payload.addressId = addressId;
+
+
+            try {
+                const response = await fetch("/checkout/place-order", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = `/order-confirmation/${data.orderId}`;
+                } else {
+                    Swal.fire("Error", data.message || "Failed to place order", "error");
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "Something went wrong", "error");
+            }
             return;
         }
 
@@ -1041,7 +1067,7 @@
                             },
                             body: JSON.stringify({
                                 ...paymentResponse,
-                                orderData: data.orderData // Pass the orderData received from place-order
+                                orderId: data.orderId
                             })
                         });
 
@@ -1052,13 +1078,13 @@
                                 `/order-confirmation/${verifyData.orderId}`;
                         } else {
                             // Payment verification failed
-                            window.location.href = '/checkout/payment-failed';
+                            window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
                         }
                     },
                     modal: {
                         ondismiss: function () {
                             console.log('Payment cancelled by user');
-                            window.location.href = '/checkout/payment-failed';
+                            window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
                         }
                     },
 
@@ -1075,6 +1101,8 @@
                 Swal.fire("Error", "Payment initialization failed", "error");
             }
         }
+
+
     }
 
     // Close modal on click outside

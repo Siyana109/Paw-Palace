@@ -297,7 +297,7 @@ const cancelOrderOrItem = async (req, res) => {
                     }
                 }
             }
-            
+
             if (order.payment.method !== "COD") {
                 if (item.refund?.status === "Completed") continue;
 
@@ -488,7 +488,7 @@ const downloadInvoice = async (req, res) => {
         y += 15;
 
         doc.text('Shipping:', summaryX, y);
-        doc.text(`Rs.50.00`, valueX, y); // Hardcoded per UI
+        doc.text(`Rs.${(order.shipping || 50).toFixed(2)}`, valueX, y);
         y += 15;
 
         // Store current Y for lines

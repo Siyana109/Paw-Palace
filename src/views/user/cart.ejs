@@ -139,21 +139,7 @@
                             </div>
                             <% }) %>
 
-                                <!-- FREE SHIPPING PROGRESS -->
-                                <div
-                                    class="bg-emerald-50 rounded-2xl p-6 mt-8 flex items-center gap-4 border border-emerald-100">
-                                    <div
-                                        class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 flex-shrink-0">
-                                        <i class="fa-solid fa-truck-fast"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-emerald-800 text-sm mb-2">Add ₹150.00 more to unlock
-                                            Free Shipping!</h4>
-                                        <div class="w-full bg-emerald-200 rounded-full h-2">
-                                            <div class="bg-emerald-400 h-2 rounded-full" style="width: 65%"></div>
-                                        </div>
-                                    </div>
-                                </div>
+
 
                                 <% } else { %>
                                     <!-- EMPTY STATE -->
@@ -192,7 +178,7 @@
 
                                 const postOfferTotal = subtotal - offerDiscount;
 
-                                const shipping = postOfferTotal >= 500 ? 0 : 50;
+                                const shipping = 50;
 
                                 const total = postOfferTotal + shipping;
                                 %>
@@ -212,11 +198,7 @@
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Shipping</span>
 
-                                        <% if (shipping===0) { %>
-                                            <span class="text-emerald-600 font-black">FREE</span>
-                                            <% } else { %>
-                                                <span class="text-accent-navy">₹<%= shipping.toFixed(2) %></span>
-                                                <% } %>
+                                        <span class="text-accent-navy">₹<%= shipping.toFixed(2) %></span>
                                     </div>
 
                                 </div>

@@ -121,34 +121,44 @@
                                                 <div class="text-right">
                                                     <p class="text-[10px] text-gray-400 uppercase font-bold">Refund
                                                         Amount</p>
-                                                    <% /* --- REFUND CALCULATION LOGIC (Must match backend) --- */ let
+                                                    <% /* --- REFUND CALCULATION LOGIC --- */ let
                                                         estimatedRefund=Number(item.totalAmount); const
                                                         orderDiscount=Number(order.discount) || 0; /* 1. Coupon Logic */
                                                         if (item.couponDiscount && item.couponDiscount> 0) {
                                                         estimatedRefund = item.totalAmount - item.couponDiscount;
-                                                        }
-                                                        else if (orderDiscount > 0) {
-                                                        const originalSubtotal = order.items.reduce((sum, i) => sum +
-                                                        (Number(i.totalAmount) || 0), 0);
+                                                        } else if (orderDiscount > 0) {
+                                                        const originalSubtotal = order.items.reduce(
+                                                        (sum, i) => sum + (Number(i.totalAmount) || 0),
+                                                        0
+                                                        );
+
                                                         if (originalSubtotal > 0) {
-                                                        const share = (Number(item.totalAmount) / originalSubtotal) *
-                                                        orderDiscount;
-                                                        estimatedRefund = Math.max(0,
-                                                        Math.round(Number(item.totalAmount) - share));
+                                                        const share =
+                                                        (Number(item.totalAmount) / originalSubtotal) * orderDiscount;
+
+                                                        estimatedRefund = Math.max(
+                                                        0,
+                                                        Math.round(Number(item.totalAmount) - share)
+                                                        );
                                                         }
                                                         }
 
                                                         /* 2. Shipping Logic */
-                                                        /* Reconstruct totals */
-                                                        const allItemsTotal = order.items.reduce((sum, i) => sum +
-                                                        Number(i.totalAmount || 0), 0);
-                                                        const origNet = allItemsTotal - orderDiscount;
-                                                        const origShipping = origNet >= 500 ? 0 : 50;
-
                                                         let shippingRef = 0;
-                                                        if (origShipping > 0 && allItemsTotal > 0) {
-                                                        shippingRef = Math.round((Number(item.totalAmount) /
-                                                        allItemsTotal) * origShipping);
+
+                                                        if (item.shippingShare !== undefined) {
+                                                        shippingRef = item.shippingShare;
+                                                        } else if (order.shipping > 0) {
+                                                        const allItemsTotal = order.items.reduce(
+                                                        (sum, i) => sum + Number(i.totalAmount || 0),
+                                                        0
+                                                        );
+
+                                                        if (allItemsTotal > 0) {
+                                                        shippingRef = Math.round(
+                                                        (Number(item.totalAmount) / allItemsTotal) * order.shipping
+                                                        );
+                                                        }
                                                         }
 
                                                         estimatedRefund += shippingRef;
@@ -156,10 +166,6 @@
                                                         <p class="text-lg font-bold text-brand-500">
                                                             ₹<%= estimatedRefund.toFixed(2) %>
                                                         </p>
-                                                        <!-- <% if (shippingRef> 0) { %>
-                                                            <span class="text-[10px] text-gray-400 block">(Includes ₹<%=
-                                                                    shippingRef %> Shipping)</span>
-                                                            <% } %> -->
                                                 </div>
                                                 <div class="flex gap-2 w-full justify-end">
                                                     <button
