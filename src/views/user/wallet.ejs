@@ -52,8 +52,8 @@
                         <div class="relative z-10">
                             <div class="relative inline-block mb-4">
                                 <img src="<%= user?.profilePic || 'https://via.placeholder.com/150' %>"
-                                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
-                                alt="Profile">
+                                    class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                                    alt="Profile">
                             </div>
 
                             <h2 class="text-xl font-black text-slate-800 tracking-tight">
@@ -149,7 +149,7 @@
                             </div>
 
                             <div class="flex flex-col gap-3">
-                                <button onclick="showComingSoon()"
+                                <button onclick="openAddMoneyModal()"
                                     class="bg-white text-rose-600 hover:bg-rose-50 px-8 py-3.5 rounded-2xl font-bold text-sm transition shadow-lg shadow-black/10 flex items-center justify-center gap-2 transform active:scale-95">
                                     <i class="fa-solid fa-plus-circle"></i> Add Money
                                 </button>
@@ -269,15 +269,206 @@
 
         <%- include('../partials/footer') %>
 
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+            <!-- ADD MONEY MODAL -->
+            <div id="addMoneyModal"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+                <div
+                    class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 relative">
+
+                    <button onclick="closeAddMoneyModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+
+                    <div class="test-center mb-6">
+                        <div
+                            class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                            <i class="fa-solid fa-wallet text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 text-center">Add Money</h3>
+                        <p class="text-sm text-gray-500 text-center">Add funds to your wallet instantly.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount
+                                (₹)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                                <input type="number" id="rechargeAmount" placeholder="Enter amount" min="1"
+                                    class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setAmount(100)"
+                                class="py-2 bg-gray-50 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 border border-transparent rounded-lg text-xs font-bold text-gray-500 transition">₹100</button>
+                            <button onclick="setAmount(500)"
+                                class="py-2 bg-gray-50 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 border border-transparent rounded-lg text-xs font-bold text-gray-500 transition">₹500</button>
+                            <button onclick="setAmount(1000)"
+                                class="py-2 bg-gray-50 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 border border-transparent rounded-lg text-xs font-bold text-gray-500 transition">₹1000</button>
+                        </div>
+
+                        <button onclick="initiateRecharge()" id="payBtn"
+                            class="w-full bg-rose-500 hover:bg-rose-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-rose-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">
+                            <span>Proceed to Pay</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <script>
-                function showComingSoon() {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Coming Soon',
-                        text: 'This feature is currently under development.',
-                        confirmButtonColor: '#f43f5e'
-                    });
+                const modal = document.getElementById('addMoneyModal');
+                const modalContent = modal.querySelector('div');
+                const amountInput = document.getElementById('rechargeAmount');
+
+                function openAddMoneyModal() {
+                    modal.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before opacity transition
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        modalContent.classList.remove('scale-95');
+                        modalContent.classList.add('scale-100');
+                    }, 10);
+                    amountInput.focus();
+                }
+
+                function closeAddMoneyModal() {
+                    modal.classList.add('opacity-0');
+                    modalContent.classList.remove('scale-100');
+                    modalContent.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                    }, 300);
+                }
+
+                function setAmount(val) {
+                    amountInput.value = val;
+                }
+
+                // Close on outside click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeAddMoneyModal();
+                });
+
+                async function initiateRecharge() {
+                    const amount = amountInput.value;
+                    const btn = document.getElementById('payBtn');
+
+                    if (!amount || amount < 1) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid Amount',
+                            text: 'Please enter a valid amount (minimum ₹1)',
+                            confirmButtonColor: '#f43f5e'
+                        });
+                        return;
+                    }
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+
+                        const response = await fetch('/wallet/recharge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount })
+                        });
+
+                        const data = await response.json();
+
+                        if (!data.success) {
+                            throw new Error(data.message);
+                        }
+
+                        const options = {
+                            key: data.key,
+                            amount: data.order.amount,
+                            currency: "INR",
+                            name: "PawPalace",
+                            description: "Wallet Recharge",
+                            order_id: data.order.id,
+                            handler: async function (response) {
+                                verifyPayment(response, amount);
+                            },
+                            theme: { color: "#f43f5e" }
+                        };
+
+                        const rzp1 = new Razorpay(options);
+                        rzp1.open();
+
+                        rzp1.on('payment.failed', function (response) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Payment Failed',
+                                text: response.error.description,
+                                confirmButtonColor: '#f43f5e'
+                            });
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>Proceed to Pay</span><i class="fa-solid fa-arrow-right"></i>';
+                        });
+
+
+                    } catch (error) {
+                        console.error(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'Something went wrong',
+                            confirmButtonColor: '#f43f5e'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = '<span>Proceed to Pay</span><i class="fa-solid fa-arrow-right"></i>';
+                    }
+                }
+
+                async function verifyPayment(paymentResponse, amount) {
+                    const btn = document.getElementById('payBtn');
+                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+
+                    try {
+                        const res = await fetch('/wallet/verify-recharge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                ...paymentResponse,
+                                amount
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            closeAddMoneyModal();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Wallet recharged successfully.',
+                                confirmButtonColor: '#f43f5e',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message);
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Verification Failed',
+                            text: error.message || 'Payment verification failed',
+                            confirmButtonColor: '#f43f5e'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = '<span>Proceed to Pay</span><i class="fa-solid fa-arrow-right"></i>';
+                    }
                 }
             </script>
 

@@ -43,6 +43,8 @@ router.post('/profile/image/update', userMiddleware.checkSession, upload.single(
 router.post('/profile/image/remove', userMiddleware.checkSession, profileController.removeProfilePic);
 
 router.get('/wallet', userMiddleware.checkSession, walletController.getWalletPage);
+router.post('/wallet/recharge', userMiddleware.checkSession, walletController.createRechargeOrder);
+router.post('/wallet/verify-recharge', userMiddleware.checkSession, walletController.verifyRecharge);
 
 router.get('/change-password', userMiddleware.checkSession, profileController.getChangePassword);
 router.post('/change-password', userMiddleware.checkSession, profileController.postChangePassword);

@@ -178,7 +178,7 @@ WEEK-11:
     ✔ Add/remove wishlist items @done (2/16/2026, 3:47:22 PM)
     ✔ Remove from wishlist when moved to cart @done (2/16/2026, 3:47:27 PM)
     ✔ Wishlist buttons on product listing and detail pages @done (2/19/2026, 4:59:17 PM)
-    ☐ Wallet management
+    ✔ Wallet management @done (2/19/2026, 7:39:49 PM)
     ☐ Wallet system for canceled/returned orders
     ✔ Refund to wallet after admin confirmation for returns @done (2/16/2026, 3:56:39 PM)
     ☐ direct refund for cancellations
@@ -229,6 +229,7 @@ TODO :
         ☐ payment status when order is placing
         ☐ order tracking statuses
         ☐ is shippingShare needed in order model
+        ☐ reviews
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
