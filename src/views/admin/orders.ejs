@@ -625,7 +625,7 @@
                     </div>
                     <div class="flex justify-between text-xs text-gray-500">
                         <span>Shipping</span>
-                        <span>+₹${(order.totalAmount - order.subtotal + (order.discount || 0)).toFixed(2)}</span>
+                        <span>+₹${(order.shipping || 0).toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between text-xs text-gray-500">
                         <span>Coupon Discount</span>

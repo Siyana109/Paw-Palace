@@ -57,6 +57,7 @@
                             color: 'bg-emerald-100 text-emerald-700' , icon: 'fa-check-circle' }, 'Cancelled' : {
                             color: 'bg-rose-100 text-rose-700' , icon: 'fa-circle-xmark' }, 'Returned' : {
                             color: 'bg-orange-100 text-orange-700' , icon: 'fa-rotate-left' }, 'Failed' : {
+                            color: 'bg-red-100 text-red-700' , icon: 'fa-circle-exclamation' }, 'Payment Failed' : {
                             color: 'bg-red-100 text-red-700' , icon: 'fa-circle-exclamation' } }; let
                             currentStatus=statusConfig[order.orderStatus] || { color: 'bg-gray-100 text-gray-700' ,
                             icon: 'fa-circle-info' }; %>
@@ -86,7 +87,7 @@
 
 
                             <% if (order.orderStatus==='Delivered' || ['Returned', 'Partially Returned' , 'Cancelled'
-                                ].includes(order.orderStatus)) { %>
+                                , 'Failed' , 'Payment Failed' ].includes(order.orderStatus)) { %>
                                 <button onclick="reorderItems('<%= order._id %>')"
                                     class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm hover:bg-rose-600 transition flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-95 transform duration-200">
                                     <i class="fa-solid fa-cart-plus"></i> Buy Again
@@ -103,7 +104,7 @@
 
 
             <!-- TRACKING BAR -->
-            <% if (!['Cancelled', 'Returned' , 'Failed' ].includes(order.orderStatus)) { %>
+            <% if (!['Cancelled', 'Returned' , 'Failed' , 'Payment Failed' ].includes(order.orderStatus)) { %>
                 <div
                     class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8 relative overflow-hidden animate-fade-in-up delay-100">
                     <div
@@ -120,7 +121,7 @@
                             <div class="absolute top-5 left-0 w-full h-1 bg-gray-100 rounded-full"></div>
 
                             <!-- Active Progress -->
-                            <% let progressWidth='5%' ; if (order.orderStatus==='Processing' ) progressWidth='38%' ; if
+                            <% let progressWidth='5%' ; if (order.orderStatus==='Processing' ) progressWidth='22%' ; if
                                 (['Shipped', 'Partially Shipped' ].includes(order.orderStatus)) progressWidth='70%' ; if
                                 (order.orderStatus==='Out for Delivery' ) progressWidth='85%' ; if
                                 (order.orderStatus==='Delivered' ) progressWidth='100%' ; %>
@@ -140,7 +141,7 @@
                                     </div>
 
                                     <!-- Step 2: Packed -->
-                                    <% let s2Active=['Processing', 'Shipped' , 'Out for Delivery' , 'Delivered'
+                                    <% let s2Active=['Shipped' , 'Out for Delivery' , 'Delivered'
                                         ].includes(order.orderStatus); %>
                                         <div class="flex flex-col items-center gap-3 group cursor-default">
                                             <div

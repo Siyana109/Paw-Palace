@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    fullName:{
+    fullName: {
         type: String,
         required: true
     },
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true
@@ -15,11 +15,20 @@ const userSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
+    referralCode: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     emailVerified: {
         type: Boolean,
         default: false
     },
-    password:{
+    password: {
         type: String,
         required: true
     },
@@ -45,7 +54,7 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-}, {timestamps: true})
+}, { timestamps: true })
 
 
 export default mongoose.model('User', userSchema)

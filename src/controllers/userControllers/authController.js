@@ -1,6 +1,7 @@
 import User from "../../model/userModel.js"
 import bcrypt from "bcrypt"
 import OTP from "../../model/otpModel.js"
+import Wallet from "../../model/walletModel.js"
 import { generateOTP } from "../../../utils/otp.js";
 import { sendOTPEmail } from "../../../utils/sendEmail.js";
 import passport from "passport";
@@ -44,8 +45,8 @@ const getSignup = (req, res) => {
 const postSignup = async (req, res) => {
   try {
     console.log("POST /signup HIT");
-    const { fullName, email, password, confirmPassword, terms } = req.body;
-    const formData = { fullName, email };
+    const { fullName, email, password, confirmPassword, referralCode } = req.body;
+    const formData = { fullName, email, referralCode };
 
     const emailRegex = /^[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}$/;
 
@@ -101,10 +102,24 @@ const postSignup = async (req, res) => {
 
     await sendOTPEmail(email, otp);
 
+    let referrerId = null;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode });
+      if (referrer) {
+        referrerId = referrer._id;
+      } else {
+        return res.render("user/signup", {
+          errors: [{ msg: "Invalid referral code" }],
+          formData
+        });
+      }
+    }
+
     req.session.signupData = {
       fullName,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      referrerId
     };
 
     res.redirect("/verify-otp");
@@ -161,11 +176,58 @@ const verifyOtp = async (req, res) => {
       });
     }
 
+    // Generate unique referral code
+    const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
     const user = await User.create({
       fullName: signupData.fullName,
       email: signupData.email,
-      password: signupData.password
+      password: signupData.password,
+      referralCode,
+      referredBy: signupData.referrerId || null
     });
+
+    // Create Wallet for new user
+    const newWallet = await Wallet.create({
+      user: user._id,
+      balance: 0,
+      transactions: []
+    });
+
+    // Handle Referral Rewards
+    if (signupData.referrerId) {
+      // Credit Referrer (e.g. 100)
+      await Wallet.findOneAndUpdate(
+        { user: signupData.referrerId },
+        {
+          $inc: { balance: 100 },
+          $push: {
+            transactions: {
+              type: 'Credit',
+              amount: 100,
+              description: `Referral Bonus for inviting ${user.fullName}`,
+              date: new Date()
+            }
+          }
+        }
+      );
+
+      // Credit Referee (e.g. 50)
+      await Wallet.findOneAndUpdate(
+        { user: user._id },
+        {
+          $inc: { balance: 50 },
+          $push: {
+            transactions: {
+              type: 'Credit',
+              amount: 50,
+              description: 'Referral Bonus for signing up',
+              date: new Date()
+            }
+          }
+        }
+      );
+    }
 
     req.session.user = { id: user._id };
 
@@ -220,7 +282,7 @@ const googleSignup = (req, res) => {
   passport.authenticate("google", { scope: ["profile", "email"] })
     (req, res)
 
-    
+
 }
 
 

@@ -191,7 +191,7 @@ WEEK-11:
     ✔ Offer module @done (2/16/2026, 3:50:40 PM)
     ✔ Product-specific offers @done (2/16/2026, 3:50:36 PM)
     ✔ Category offers (apply the largest between product and category offer) @done (2/16/2026, 3:50:05 PM)
-    Referral offers (token URL and referral code approaches)
+    ✔ Referral offers (token URL and referral code approaches) @done (2/20/2026, 10:57:19 AM)
     ✔ Coupon management (create and delete with validations) @done (2/16/2026, 3:50:20 PM)
     ✔ Sales reports (daily, weekly, yearly, custom) @done (2/19/2026, 2:36:51 PM)
     Filter by date, show discounts/coupon deductions, overall sales count, order amount, and discount

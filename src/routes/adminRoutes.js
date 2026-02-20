@@ -14,6 +14,7 @@ import couponController from "../controllers/adminControllers/couponController.j
 import offerController from "../controllers/adminControllers/offerController.js"
 import orderController from "../controllers/adminControllers/orderController.js"
 import requestController from "../controllers/adminControllers/requestController.js"
+import salesController from "../controllers/adminControllers/salesController.js"
 
 import { variantUpload, upload } from "../middlewares/upload.js"
 
@@ -84,5 +85,9 @@ router.put('/orders/:id/status', adminMiddleware.adminSession, orderController.u
 router.get('/returns', adminMiddleware.adminSession, requestController.getReturnRequests);
 router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.adminSession, requestController.handleReturnAction);
 
+
+// Sales Report
+router.get('/sales-report', adminMiddleware.adminSession, salesController.getSalesReport);
+router.get('/sales-report/download', adminMiddleware.adminSession, salesController.downloadReport);
 
 export default router
