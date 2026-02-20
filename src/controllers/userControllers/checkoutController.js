@@ -27,6 +27,9 @@ const getCheckoutPage = async (req, res) => {
       expiryDate: { $gte: new Date() }
     });
 
+    // Optional: Filter coupons user has already exhausted?
+    // Let's mark them or filter them. For now, pass all and let applyCoupon handle validation.
+
     if (!cart || cart.items.length === 0) {
       return res.redirect("/cart");
     }
@@ -149,9 +152,12 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Coupon has expired" });
     }
 
-    // Validate Usage Limit (Global)
-    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
+    // Validate Usage Limit (Per User)
+    if (coupon.usageLimit) {
+      const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
+      if (userUsageCount >= coupon.usageLimit) {
+        return res.status(400).json({ success: false, message: "You have reached the usage limit for this coupon" });
+      }
     }
 
 

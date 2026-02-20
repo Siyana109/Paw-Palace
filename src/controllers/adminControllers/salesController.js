@@ -53,7 +53,11 @@ const getSalesReport = async (req, res) => {
         // Only consider valid orders for sales report
         const matchStage = {
             ...dateQuery,
-            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending'] } // Exclude non-sales
+            // Exclude non-sales statuses. 
+            // 'Returned' is excluded to avoid counting fully returned orders if their amount wasn't 0'd out correctly, 
+            // or if the user wants strictly "Net Valid Sales" count.
+            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending', 'Returned'] },
+            "payment.status": { $ne: "Failed" }
         };
 
         // 2. Metrics Aggregation
@@ -154,7 +158,8 @@ const downloadReport = async (req, res) => {
 
         const orders = await Order.find({
             ...dateQuery,
-            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending'] }
+            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending', 'Returned'] },
+            "payment.status": { $ne: "Failed" }
         }).populate('userId', 'fullName').lean();
 
         if (format === 'excel') {
