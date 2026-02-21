@@ -12,7 +12,7 @@ const viewDataMiddleware = async (req, res, next) => {
     const wishlist = await Wishlist.findOne({ user: userId });
 
     res.locals.cartCount = cart
-      ? cart.items.reduce((sum, i) => sum + i.quantity, 0)
+      ? cart.items.length
       : 0;
 
     res.locals.wishlistCount = wishlist ? wishlist.items.length : 0;

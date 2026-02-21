@@ -228,7 +228,7 @@ const addToCart = async (req, res) => {
       { $pull: { items: { variant: variantId } } }
     );
 
-    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = cart.items.length
 
     return res.json({
       success: true,
@@ -366,7 +366,7 @@ const updateCartQuantity = async (req, res) => {
 
     await cart.save();
 
-    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0)
+    const cartCount = cart.items.length
 
     return res.json({
       success: true,
@@ -395,7 +395,7 @@ const removeCartItem = async (req, res) => {
       { $pull: { items: { variant: variantId } } });
 
     const cart = await Cart.findOne({ user: userId });
-    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+    const cartCount = cart ? cart.items.length : 0;
 
     res.json({ success: true, cartCount });
   }

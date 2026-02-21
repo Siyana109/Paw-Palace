@@ -43,6 +43,11 @@ export const orderItemSchema = new mongoose.Schema({
     default: 0
   },
 
+  shippingShare: {
+    type: Number,
+    default: 0
+  },
+
   itemStatus: {
     type: String,
     enum: [
