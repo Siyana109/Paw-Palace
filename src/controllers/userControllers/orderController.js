@@ -9,6 +9,7 @@ import PDFDocument from 'pdfkit';
 const getOrderHistory = async (req, res) => {
     try {
         const userId = req.session.user?.id;
+        console.log(req.session.user.id)
         if (!userId) return res.redirect('/login');
 
         const page = parseInt(req.query.page) || 1;
@@ -426,17 +427,9 @@ const downloadInvoice = async (req, res) => {
 
         // --- Items ---
         order.items.forEach(item => {
-            // Show all items including Returned/Cancelled ones, but mark them
-            if (item.itemStatus !== 'Cancelled') {
+            // Show all items EXCEPT Returned/Cancelled ones
+            if (item.itemStatus !== 'Cancelled' && item.itemStatus !== 'Returned') {
                 let productName = item.productName + (item.variantName ? ` - ${item.variantName}` : '');
-
-                // Add status marker if returned
-                if (item.itemStatus === 'Returned') {
-                    productName += ' (Returned)';
-                    // Calculate refund amount for this item (approximate if not stored)
-                    const refundAmount = item.refund && item.refund.amount ? item.refund.amount : 0;
-                    totalRefunded += refundAmount;
-                }
 
                 doc.text(productName, itemX, y, { width: 240, continued: false });
                 doc.text(item.quantity.toString(), qtyX, y);
