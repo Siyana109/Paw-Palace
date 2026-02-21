@@ -124,17 +124,16 @@
 
                                 <!-- PRICE -->
                                 <div class="flex flex-col items-end gap-1">
-                                    <% if (item.variant.offerPrice && item.variant.offerPrice < item.variant.price) { %>
-                                        <span class="text-gray-400 line-through text-sm font-bold">₹<%=
-                                                item.variant.price %></span>
-                                        <!-- <span class="text-gray-400 line-through text-sm font-bold">₹<%=
-                                                item.variant.price* item.variant.quantity %></span> -->
-                                        <span class="text-brand-500 text-xl font-black">₹<%= item.variant.offerPrice %>
-                                        </span>
-                                        <% } else { %>
-                                            <span class="text-brand-500 text-xl font-black">₹<%= item.variant.price %>
-                                            </span>
-                                            <% } %>
+                                    <% const effectivePrice=(item.variant.offerPrice && item.variant.offerPrice <
+                                        item.variant.price) ? item.variant.offerPrice : item.variant.price; const
+                                        itemTotal=effectivePrice * item.quantity; %>
+                                        <span class="text-sm font-semibold text-gray-500">₹<%= effectivePrice %> /- </span>
+
+                                        <div class="flex items-end gap-2 mt-1">
+                                            <span class="text-sm font-bold text-gray-400">Total:</span>
+                                            <span class="text-brand-500 text-xl font-black">₹<%= itemTotal.toFixed(2) %>
+                                                    </span>
+                                        </div>
                                 </div>
                             </div>
                             <% }) %>
