@@ -83,7 +83,6 @@ router.get('/orders/:orderId/invoice', userMiddleware.checkSession, orderControl
 
 
 
-router.post('/orders/:orderId/reorder', userMiddleware.checkSession, orderController.reorder);
 
 
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);

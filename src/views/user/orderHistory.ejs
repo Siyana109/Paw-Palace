@@ -229,13 +229,6 @@
 
 
 
-                                                    <% if (['Cancelled', 'Failed' , 'Returned'
-                                                        ].includes(order.orderStatus)) { %>
-                                                        <button onclick="reorderItems('<%= order._id %>')"
-                                                            class="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm text-center hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">
-                                                            Buy Again
-                                                        </button>
-                                                        <% } %>
                                         </div>
                                     </div>
                                 </div>

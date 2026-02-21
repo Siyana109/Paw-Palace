@@ -177,56 +177,6 @@ const cancelReturnRequest = async (req, res) => {
 };
 
 
-const reorder = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const userId = req.session.user.id;
-
-        const order = await Order.findOne({ _id: orderId, userId }).populate('items.variantId');
-        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-
-        let cart = await Cart.findOne({ user: userId });
-        if (!cart) {
-            cart = new Cart({ user: userId, items: [] });
-        }
-
-        let addedCount = 0;
-
-        for (const item of order.items) {
-            if (item.variantId && item.variantId.stock > 0) {
-                const existingItemIndex = cart.items.findIndex(cartItem => cartItem.variant.toString() === item.variantId._id.toString());
-
-                if (existingItemIndex > -1) {
-                    let newQty = cart.items[existingItemIndex].quantity + item.quantity;
-                    if (newQty > item.variantId.stock) newQty = item.variantId.stock;
-                    cart.items[existingItemIndex].quantity = newQty;
-                } else {
-                    let qty = item.quantity;
-                    if (qty > item.variantId.stock) qty = item.variantId.stock;
-                    cart.items.push({
-                        product: item.productId,
-                        variant: item.variantId._id,
-                        quantity: qty
-                    });
-                }
-                addedCount++;
-            }
-        }
-
-        if (addedCount === 0) {
-            return res.status(400).json({ success: false, message: 'Items are out of stock' });
-        }
-
-        await cart.save();
-        res.json({ success: true, redirect: '/checkout' });
-
-    } catch (error) {
-        console.error("Reorder Error:", error);
-        res.status(500).json({ success: false, message: 'Failed to reorder' });
-    }
-};
-
-
 
 const cancelOrderOrItem = async (req, res) => {
     try {
@@ -339,6 +289,25 @@ const cancelOrderOrItem = async (req, res) => {
 
         order.orderStatus =
             remaining.length === 0 ? "Cancelled" : "Partially Cancelled";
+
+        // 🚚🚚 Shipping Refund Logic 🚚🚚
+        // Refund shipping if the ENTIRE order is now cancelled and it's prepaid
+        if (remaining.length === 0 && order.shipping > 0 && order.payment.method !== "COD") {
+            const shippingRefund = order.shipping;
+
+            await walletController.creditWallet({
+                userId,
+                amount: shippingRefund,
+                description: "Shipping Fee Refund for Full Cancellation",
+                orderId: order._id
+            });
+
+            // Adjust order totalAmount
+            order.totalAmount -= shippingRefund;
+
+            // Set shipping to 0 so we don't refund it again
+            order.shipping = 0;
+        }
 
         await order.save();
 
