@@ -151,8 +151,8 @@ WEEK-10 PENDINGS:
     ✔ Max qty per item couldn't test due to err in incrementing qty @done (2/13/2026, 8:45:52 PM)
     ✔ Price mismatch in Cart & Checkout @done (2/13/2026, 8:45:55 PM)
     ✔ Returned item should be skipped from invoice @done (2/15/2026, 10:10:06 PM)
-    ☐ Cart count should show only items count -> don’t show total quantity
-    ☐ Returned item should be skipped from invoice
+    ✔ Cart count should show only items count -> don’t show total quantity @done (2/21/2026, 1:16:48 PM)
+    ✔ Returned item should be skipped from invoice @done (2/21/2026, 1:16:51 PM)
 
     Admin:
     ✔ Prevent rollback of previous state in shipment status @done (2/14/2026, 10:49:54 AM)
@@ -181,9 +181,9 @@ WEEK-11:
     ✔ Remove from wishlist when moved to cart @done (2/16/2026, 3:47:27 PM)
     ✔ Wishlist buttons on product listing and detail pages @done (2/19/2026, 4:59:17 PM)
     ✔ Wallet management @done (2/19/2026, 7:39:49 PM)
-    ☐ Wallet system for canceled/returned orders
+    ✔ Wallet system for canceled/returned orders @done (2/21/2026, 1:17:56 PM)
     ✔ Refund to wallet after admin confirmation for returns @done (2/16/2026, 3:56:39 PM)
-    ☐ direct refund for cancellations
+    ✔ direct refund for cancellations @done (2/21/2026, 1:23:48 PM)
     ✔ Payment using a wallet @done (2/19/2026, 2:35:31 PM)
 
     Admin:
@@ -230,8 +230,8 @@ TODO :
         ☐ after returing order summary not proper
         ✔ payment status when order is placing @done (2/20/2026, 3:19:18 PM)
         ✔ order tracking statuses @done (2/20/2026, 3:17:19 PM)
-        ☐ is shippingShare needed in order model
         ☐ reviews
+        ☐ order detailing page calculations
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

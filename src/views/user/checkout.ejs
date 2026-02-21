@@ -530,7 +530,7 @@
 
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <%- JSON.stringify(addresses || []) %>;
+    const allAddresses = <%-JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {
@@ -1036,6 +1036,9 @@
 
                 const formData = new FormData(form);
                 const payload = Object.fromEntries(formData.entries());
+                payload.paymentDetails = paymentValue;
+                const addressId = document.querySelector("input[name='addressId']").value;
+                payload.addressId = addressId;
 
                 const response = await fetch("/checkout/place-order", {
                     method: "POST",
@@ -1046,7 +1049,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    Swal.fire("Error", "Something went wrong!", "error");
+                    Swal.fire("Error", data.message || "Something went wrong!", "error");
                     return;
                 }
 

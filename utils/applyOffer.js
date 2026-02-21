@@ -8,9 +8,9 @@ export const applyOfferToPrice = ({ price, productId, categoryId, activeOffers }
   // Category offer (only if no product offer)
   const categoryOffer = !productOffer
     ? activeOffers.find(o =>
-        o.offerType === "category" &&
-        o.categoryId?.toString() === categoryId.toString()
-      )
+      o.offerType === "category" &&
+      categoryId && o.categoryId?.toString() === categoryId.toString()
+    )
     : null;
 
   const appliedOffer = productOffer || categoryOffer;

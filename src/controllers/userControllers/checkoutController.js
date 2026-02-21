@@ -483,7 +483,7 @@ const placeOrder = async (req, res) => {
 
   } catch (error) {
     console.error("Place Order Error:", error);
-    return res.status(500).json({ success: false, message: "Failed to place order" });
+    return res.status(500).json({ success: false, message: error.message || "Failed to place order" });
   }
 };
 
