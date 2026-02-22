@@ -398,34 +398,40 @@
                 }
 
                 function initSelectors() {
-                    // Group variants by Size and Color to remove duplicates in display
-                    // FOR THIS UI: We assume variants are distinct combinations. 
-                    // The UI in image shows separated Size and Color. 
-                    // Complex logic needed if not all combinations exist. 
-                    // Simplified approach: Show all unique sizes and colors available for this product.
-                    // On click, valid combinations check or just strict filtering.
-
-                    // For now, let's just list the variants as buttons but styled differently.
-                    // Actually, the user wants "Select Size" [S] [M] [L] and "Select Color" (circles).
-                    // This implies a matrix. 
-
-                    if (!variants.length || !activeVariant) return;
+                    if (!variants.length) return;
 
                     const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
+                    const colors = [...new Set(variants.map(v => v.color).filter(Boolean))];
 
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
 
-                    // INITIAL RENDER
-                    selectVariant(activeVariant._id);
+                    // If only one variant exists, auto-select it.
+                    // Otherwise, leave it unselected so the user has to choose.
+                    if (variants.length === 1) {
+                        selectVariant(variants[0]._id);
+                    } else {
+                        // Clear active variant initially so user must select
+                        activeVariant = null;
+                        document.getElementById('cartVariantId').value = "";
+                        document.getElementById('wishlistBtn').dataset.variant = "";
+
+                        // Disable Add to Cart button initially if multiple variants
+                        const btn = document.getElementById('addToCartBtn');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = 'Select Variant';
+                            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                            btn.classList.remove('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+                        }
+                    }
                 }
 
 
                 function renderSizeSelectors(sizes) {
                     const container = document.getElementById('sizeSelectors');
                     container.innerHTML = sizes.map(size => `
-                <button onclick="filterVariant('size', '${size}')" 
+                <button type="button" onclick="filterVariant('size', '${size}')" 
                     id="size-btn-${size}"
                     class="h-10 px-6 rounded-lg border font-bold text-sm transition-all shadow-sm
                            bg-white text-gray-500 border-gray-200 hover:border-gray-300">
@@ -437,7 +443,7 @@
                 function renderColorSelectors(colors) {
                     const container = document.getElementById('colorSelectors');
                     container.innerHTML = colors.map(color => `
-                <button onclick="filterVariant('color', '${color}')" 
+                <button type="button" onclick="filterVariant('color', '${color}')" 
                     id="color-btn-${color}"
                     class="w-10 h-10 rounded-full border border-gray-100 shadow-sm transition-transform hover:scale-110 focus:ring-4 focus:ring-gray-100 relative items-center justify-center flex"
                     style="background-color: ${getHexColor(color)}"
@@ -450,20 +456,21 @@
 
                 // Logic to find best match or specific variant
                 function filterVariant(type, value) {
-                    let targetSize = activeVariant.size || '';
-                    let targetColor = activeVariant.color || '';
+                    let targetSize = activeVariant?.size || '';
+                    let targetColor = activeVariant?.color || '';
 
                     if (type === 'size') targetSize = value;
                     if (type === 'color') targetColor = value;
 
-                    const match = variants.find(v => (v.size == targetSize || !v.size) && (v.color == targetColor || !v.color));
+                    let match = variants.find(v => (v.size == targetSize || !v.size) && (v.color == targetColor || !v.color));
+
+                    if (!match) {
+                        // Fallback
+                        match = variants.find(v => type === 'size' ? v.size === value : v.color === value);
+                    }
 
                     if (match) {
                         selectVariant(match._id);
-                    } else {
-                        // Fallback
-                        const fallback = variants.find(v => type === 'size' ? v.size === value : v.color === value);
-                        if (fallback) selectVariant(fallback._id);
                     }
                 }
 
@@ -484,11 +491,21 @@
                     document.getElementById('formQuantity').value = 1;
                     updateQuantity(0); // Trigger button state update
 
-                    const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
-                    const colors = [...new Set(variants.filter(v => v.size == activeVariant.size).map(v => v.color).filter(Boolean))];
+                    // Update styling for selectors
+                    document.querySelectorAll('#sizeSelectors button').forEach(btn => {
+                        btn.className = 'h-10 px-6 rounded-lg border font-bold text-sm transition-all shadow-sm bg-white text-gray-500 border-gray-200 hover:border-gray-300';
+                    });
+                    const activeSizeBtn = document.getElementById(`size-btn-${activeVariant.size}`);
+                    if (activeSizeBtn) {
+                        activeSizeBtn.className = 'h-10 px-6 rounded-lg border font-bold text-sm transition-all shadow-sm bg-teal-50 text-accent-teal border-accent-teal';
+                    }
 
-                    renderSizeSelectors(sizes);
-                    renderColorSelectors(colors);
+                    // Update color checkmarks
+                    document.querySelectorAll('#colorSelectors i').forEach(icon => icon.classList.add('hidden'));
+                    const activeColorIcon = document.getElementById(`color-icon-${activeVariant.color}`);
+                    if (activeColorIcon) {
+                        activeColorIcon.classList.remove('hidden');
+                    }
                 }
 
                 function updatePrice(variant) {
@@ -554,7 +571,7 @@
                         if (btn) {
                             btn.disabled = false;
                             btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Add to Cart';
-                            btn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed', 'shadow-none');
+                            btn.classList.remove('bg-gray-200', 'bg-gray-300', 'text-gray-400', 'text-gray-500', 'cursor-not-allowed', 'shadow-none');
                             btn.classList.add('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
                         }
                         stockMsg.classList.add('hidden');
@@ -566,7 +583,7 @@
                             btn.disabled = true;
                             btn.innerHTML = 'Out of Stock';
                             btn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed', 'shadow-none');
-                            btn.classList.remove('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+                            btn.classList.remove('bg-brand-500', 'bg-gray-300', 'text-gray-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
                         }
                         stockMsg.classList.add('hidden'); // Or show "Out of Stock" text
                     }
@@ -581,7 +598,7 @@
                 }
 
                 function updateQuantity(change) {
-                    if (activeVariant.stock === 0) return;
+                    if (!activeVariant || activeVariant.stock === 0) return;
 
                     const input = document.getElementById('quantityInput');
                     const formInput = document.getElementById('formQuantity');
@@ -667,9 +684,19 @@
                     }
 
                     const btn = document.getElementById("wishlistBtn");
-                    const icon = document.getElementById("wishlistIcon");
-
                     const variantId = btn.dataset.variant;
+
+                    if (!variantId) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Select Variant',
+                            text: 'Please select a size/color before adding to wishlist',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        return;
+                    }
+
+                    const icon = document.getElementById("wishlistIcon");
                     const productId = "<%= product._id %>";
 
                     try {
@@ -740,6 +767,17 @@
                             if (result.isConfirmed) {
                                 window.location.href = '/login';
                             }
+                        });
+                        return;
+                    }
+
+                    const variantId = document.getElementById('cartVariantId').value;
+                    if (!variantId) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Select Variant',
+                            text: 'Please select a size and color before adding to cart',
+                            confirmButtonColor: '#3b82f6'
                         });
                         return;
                     }
