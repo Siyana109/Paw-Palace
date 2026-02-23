@@ -196,7 +196,7 @@ WEEK-11:
     ✔ Referral offers (token URL and referral code approaches) @done (2/20/2026, 10:57:19 AM)
     ✔ Coupon management (create and delete with validations) @done (2/16/2026, 3:50:20 PM)
     ✔ Sales reports (daily, weekly, yearly, custom) @done (2/19/2026, 2:36:51 PM)
-    Filter by date, show discounts/coupon deductions, overall sales count, order amount, and discount
+    ✔ Filter by date, show discounts/coupon deductions, overall sales count, order amount, and discount @done (2/23/2026, 10:08:52 PM)
     ✔ Report downloads (PDF, Excel) @done (2/19/2026, 12:21:49 AM)
 
 
@@ -232,6 +232,8 @@ TODO :
         ✔ order tracking statuses @done (2/20/2026, 3:17:19 PM)
         ☐ reviews
         ☐ order detailing page calculations
+        ☐ coupon controller
+        ☐ ONLINE , RAZORPAY in db (placeOrder)
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

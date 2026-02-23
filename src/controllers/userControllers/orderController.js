@@ -221,31 +221,36 @@ const cancelOrderOrItem = async (req, res) => {
             let itemDiscountShare = 0;
             let itemEffectiveValue = item.totalAmount;
 
-            // Calculate Item Effective Value (considering coupons)
-            if (order.couponId) {
-                const orderDiscount = Number(order.discount) || 0;
+            // Calculate remaining active items (excluding the one just marked cancelled)
+            const remainingActiveItems = order.items.filter(
+                i => !["Cancelled", "Returned"].includes(i.itemStatus)
+            );
 
-                // Priority 1: Use pre-calculated discount from DB
-                if (item.couponDiscount && item.couponDiscount > 0) {
-                    itemDiscountShare = item.couponDiscount;
-                    itemEffectiveValue = item.totalAmount - item.couponDiscount;
-                }
-                // Priority 2: Fallback to dynamic calculation
-                else if (orderDiscount > 0) {
-                    // Calculate subtotal of currently active items (including the one being cancelled)
-                    const currentActiveSubtotal = order.items.reduce((sum, i) => {
-                        // Include if active OR if it's the current item (which we just marked cancelled)
-                        if (!["Cancelled", "Returned"].includes(i.itemStatus) || i._id.equals(item._id)) {
-                            return sum + (i.totalAmount || 0);
+            if (remainingActiveItems.length === 0) {
+                // LAST ACTIVE ITEM: Absorb all remaining amounts to zero out the order cleanly
+                itemEffectiveValue = Math.max(0, order.totalAmount - order.shipping);
+                itemDiscountShare = order.discount;
+            } else {
+                // Calculate Item Effective Value proportionally
+                if (order.couponId) {
+                    const orderDiscount = Number(order.discount) || 0;
+
+                    if (item.couponDiscount && item.couponDiscount > 0) {
+                        itemDiscountShare = item.couponDiscount;
+                        itemEffectiveValue = item.totalAmount - item.couponDiscount;
+                    } else if (orderDiscount > 0) {
+                        // Calculate subtotal of historically original active items to get correct proportion
+                        let originalSubtotal = 0;
+                        if (order.items && order.items.length > 0) {
+                            originalSubtotal = order.items.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
                         }
-                        return sum;
-                    }, 0);
 
-                    if (currentActiveSubtotal > 0) {
-                        const itemProportion = item.totalAmount / currentActiveSubtotal;
-                        const rawShare = orderDiscount * itemProportion;
-                        itemEffectiveValue = Math.max(0, Math.round(item.totalAmount - rawShare));
-                        itemDiscountShare = item.totalAmount - itemEffectiveValue;
+                        if (originalSubtotal > 0) {
+                            const itemProportion = item.totalAmount / originalSubtotal;
+                            const rawShare = orderDiscount * itemProportion;
+                            itemEffectiveValue = Math.max(0, Math.round(item.totalAmount - rawShare));
+                            itemDiscountShare = item.totalAmount - itemEffectiveValue;
+                        }
                     }
                 }
             }

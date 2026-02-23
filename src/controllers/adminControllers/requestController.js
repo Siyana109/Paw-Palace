@@ -64,33 +64,49 @@ const handleReturnAction = async (req, res) => {
         }
 
         // Approve return
-        let refundAmount = Number(item.totalAmount);
+        let refundAmount = 0;
+        let itemDiscountShare = 0;
 
-        // Deduct proportional coupon discount
-        if (order.couponId) {
-            console.log("Coupon ID present:", order.couponId);
-            const orderDiscount = Number(order.discount) || 0;
+        // Calculate remaining active items BEFORE marking this one as returned explicitly in DB,
+        // (but this item is considered effectively returned right now)
+        const remainingActiveItems = order.items.filter(
+            i => !["Cancelled", "Returned"].includes(i.itemStatus) && !i._id.equals(item._id)
+        );
 
-            // Priority 1: Use pre-calculated discount from DB
-            if (item.couponDiscount && item.couponDiscount > 0) {
-                refundAmount = item.totalAmount - item.couponDiscount;
-                console.log("Using stored couponDiscount:", item.couponDiscount);
-            }
-            // Priority 2: Fallback to dynamic calculation
-            else if (orderDiscount > 0) {
-                let originalSubtotal = 0;
-                if (order.items && order.items.length > 0) {
-                    originalSubtotal = order.items.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
+        if (remainingActiveItems.length === 0) {
+            // LAST ACTIVE ITEM: Absorb all remaining amounts to zero out the order cleanly
+            refundAmount = Math.max(0, order.totalAmount - order.shipping);
+            itemDiscountShare = order.discount;
+        } else {
+            // Calculate Item Effective Value proportionally
+            refundAmount = Number(item.totalAmount);
+
+            if (order.couponId) {
+                console.log("Coupon ID present:", order.couponId);
+                const orderDiscount = Number(order.discount) || 0;
+
+                // Priority 1: Use pre-calculated discount from DB
+                if (item.couponDiscount && item.couponDiscount > 0) {
+                    itemDiscountShare = item.couponDiscount;
+                    refundAmount = item.totalAmount - item.couponDiscount;
+                    console.log("Using stored couponDiscount:", item.couponDiscount);
                 }
+                // Priority 2: Fallback to dynamic calculation
+                else if (orderDiscount > 0) {
+                    let originalSubtotal = 0;
+                    if (order.items && order.items.length > 0) {
+                        originalSubtotal = order.items.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
+                    }
 
-                if (originalSubtotal > 0) {
-                    const itemProportion = item.totalAmount / originalSubtotal;
-                    const itemDiscountShare = orderDiscount * itemProportion;
-                    refundAmount = Math.max(0, Math.round(item.totalAmount - itemDiscountShare));
+                    if (originalSubtotal > 0) {
+                        const itemProportion = item.totalAmount / originalSubtotal;
+                        const rawShare = orderDiscount * itemProportion;
+                        refundAmount = Math.max(0, Math.round(item.totalAmount - rawShare));
+                        itemDiscountShare = item.totalAmount - refundAmount;
+                    }
                 }
             }
         }
-
 
         // Shipping Refund Logic (Correct Proportional Method)
 
@@ -158,6 +174,11 @@ const handleReturnAction = async (req, res) => {
 
         // Update order totals
         order.subtotal -= item.totalAmount;
+        if (order.discount >= itemDiscountShare) {
+            order.discount -= itemDiscountShare;
+        } else {
+            order.discount = 0;
+        }
         order.totalAmount -= refundAmount;
         order.shipping -= shippingRefund;
 
