@@ -100,6 +100,8 @@
                                 <option value="">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
+                                <option value="expired">Expired</option>
                             </select>
 
                             <select
@@ -492,11 +494,30 @@
                 const status = statusFilter.value;
                 const sort = sortFilter.value;
 
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
                 filteredCoupons = couponsData.filter(c => {
                     const matchesSearch = c.code.toLowerCase().includes(query);
                     let matchesStatus = true;
-                    if (status === 'active') matchesStatus = c.isActive;
-                    if (status === 'inactive') matchesStatus = !c.isActive;
+
+                    if (status) {
+                        const startDate = new Date(c.startDate);
+                        startDate.setHours(0, 0, 0, 0);
+                        const expiryDate = new Date(c.expiryDate);
+                        expiryDate.setHours(0, 0, 0, 0);
+
+                        const isExpired = expiryDate < today;
+                        const isPending = startDate > today;
+
+                        let currentStatus = '';
+                        if (isExpired) currentStatus = 'expired';
+                        else if (isPending) currentStatus = 'pending';
+                        else if (c.isActive) currentStatus = 'active';
+                        else currentStatus = 'inactive';
+
+                        matchesStatus = (currentStatus === status);
+                    }
 
                     return matchesSearch && matchesStatus;
                 });

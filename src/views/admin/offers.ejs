@@ -238,7 +238,7 @@
                             <div class="col-span-2">
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Offer
                                     Name</label>
-                                <input type="text" id="offerName" placeholder="e.g. Summer Sale" 
+                                <input type="text" id="offerName" placeholder="e.g. Summer Sale"
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm text-accent-navy">
                             </div>
                             <div>
@@ -304,7 +304,7 @@
                             <div>
                                 <label
                                     class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Value</label>
-                                <input type="number" id="discountValue" placeholder="0" 
+                                <input type="number" id="discountValue" placeholder="0"
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm">
                             </div>
                         </div>
@@ -314,13 +314,13 @@
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Start
                                     Date</label>
-                                <input type="text" id="startDate" placeholder="Select" 
+                                <input type="text" id="startDate" placeholder="Select"
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">End
                                     Date</label>
-                                <input type="text" id="endDate" placeholder="Select" 
+                                <input type="text" id="endDate" placeholder="Select"
                                     class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-medium text-sm datepicker cursor-pointer">
                             </div>
                         </div>
@@ -379,7 +379,7 @@
             categoriesData.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c._id;
-                opt.textContent = c.name;
+                opt.textContent = c.categoryName;
                 catSelect.appendChild(opt);
             });
 
@@ -497,7 +497,7 @@
                         </span>
                     </td>
                     <td class="px-8 py-5 text-right">
-                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex items-center justify-end gap-2">
                             <button onclick="openEditOfferModal('${offer._id}')" 
                                 class="w-8 h-8 rounded-lg bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white transition flex items-center justify-center" title="Edit">
                                 <i class="fa-solid fa-pen text-xs"></i>
