@@ -8,8 +8,7 @@ const offerSchema = new mongoose.Schema({
     discount: {
         type: Number,
         required: true,
-        min: 0,
-        max: 100
+        min: 0
     },
     discountType: {
         type: String,

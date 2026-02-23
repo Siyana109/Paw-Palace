@@ -128,16 +128,6 @@
 
                         <!-- Actions -->
                         <div class="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0">
-                            <!-- Date Filter -->
-                            <div class="flex items-center bg-gray-50 rounded-xl border border-gray-100 px-3 py-2">
-                                <i class="fa-regular fa-calendar text-gray-400 mr-2 text-xs"></i>
-                                <input type="text" id="filterStartDate" placeholder="Start"
-                                    class="bg-transparent w-20 text-xs font-bold outline-none text-gray-600 datepicker">
-                                <span class="text-gray-300 mx-2">|</span>
-                                <input type="text" id="filterEndDate" placeholder="End"
-                                    class="bg-transparent w-20 text-xs font-bold outline-none text-gray-600 datepicker">
-                            </div>
-
                             <!-- Status Filter -->
                             <div class="relative">
                                 <select id="statusFilter" onchange="applyFilters()"
@@ -309,7 +299,17 @@
                             </div>
                         </div>
 
-                        <!-- Row 4: Date Range -->
+                        <!-- Row 4: Minimum Purchase -->
+                        <!-- <div class="grid grid-cols-1 gap-3" id="minPurchaseContainer">
+                            <div id="minPurchaseDiv" class="hidden">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Minimum
+                                    Purchase Amount</label>
+                                <input type="number" id="minimumPurchase" placeholder="0"
+                                    class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-sm">
+                            </div>
+                        </div> -->
+
+                        <!-- Row 5: Date Range -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Start
@@ -362,10 +362,6 @@
                 applyFilters();
             });
 
-            // Date Filters Listener
-            document.getElementById('filterStartDate').addEventListener('change', applyFilters);
-            document.getElementById('filterEndDate').addEventListener('change', applyFilters);
-
             updateStats();
             renderTable(); // Render provided data
             renderPagination();
@@ -405,6 +401,17 @@
             }
         }
 
+        // function toggleMinPurchase() {
+        //     const type = document.getElementById('discountType').value;
+        //     const minDiv = document.getElementById('minPurchaseDiv');
+        //     if (type === 'fixed') {
+        //         minDiv.classList.remove('hidden');
+        //     } else {
+        //         minDiv.classList.add('hidden');
+        //         document.getElementById('minimumPurchase').value = '';
+        //     }
+        // }
+
         document.getElementById('offerCategory').value = "";
         document.getElementById('offerProduct').value = "";
 
@@ -414,27 +421,33 @@
             const query = document.getElementById('searchInput').value.toLowerCase();
             const status = document.getElementById('statusFilter').value;
             const sort = document.getElementById('sortFilter').value;
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
 
             // Filter
             filteredOffers = offersData.filter(offer => {
                 const matchesSearch = offer.offerName.toLowerCase().includes(query)
                 const matchesStatus = status ? offer.status === status : true;
 
-                let matchesDate = true;
-                if (startDate) matchesDate = matchesDate && new Date(offer.startDate) >= new Date(startDate);
-                if (endDate) matchesDate = matchesDate && new Date(offer.endDate) <= new Date(endDate);
-
-                return matchesSearch && matchesStatus && matchesDate;
+                return matchesSearch && matchesStatus;
             });
 
             // Sort
             filteredOffers.sort((a, b) => {
-                if (sort === 'newest') return new Date(b.startDate) - new Date(a.startDate);
-                if (sort === 'discount_high') return b.value - a.value;
-                if (sort === 'discount_low') return a.value - b.value;
-                if (sort === 'name_asc') return a.name.localeCompare(b.name);
+                if (sort === 'newest') {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+
+                if (sort === 'discount_high') {
+                    return b.discount - a.discount;
+                }
+
+                if (sort === 'discount_low') {
+                    return a.discount - b.discount;
+                }
+
+                if (sort === 'name_asc') {
+                    return a.offerName.localeCompare(b.offerName);
+                }
+
                 return 0;
             });
 
@@ -594,6 +607,7 @@
             document.getElementById('modalTitle').innerText = 'Add Offer';
             document.getElementById('submitBtn').innerText = 'Save Offer';
             toggleScope(); // Ensure UI syncs with reset form (defaults to Category)
+            // toggleMinPurchase(); // Hide min purchase by default
             showModal();
         }
 
@@ -664,6 +678,10 @@
                 return "Percentage discount cannot exceed 100%";
             }
 
+            // if (data.discountType === "fixed" && data.minimumPurchase < data.discount) {
+            //     return "Minimum purchase must be greater than or equal to the discount amount.";
+            // }
+
             if (!data.startDate || !data.endDate) {
                 return "Start and end dates are required";
             }
@@ -692,6 +710,7 @@
                 offerName: document.getElementById('offerName').value.trim(),
                 discountType: document.getElementById('discountType').value,
                 discount: Number(document.getElementById('discountValue').value),
+                // minimumPurchase: Number(document.getElementById('minimumPurchase').value) || 0,
                 startDate: document.getElementById('startDate').value,
                 endDate: document.getElementById('endDate').value,
                 status: document.getElementById('offerStatus').value

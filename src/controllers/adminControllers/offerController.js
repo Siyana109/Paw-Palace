@@ -8,8 +8,6 @@ const getOffers = async (req, res) => {
             search = "",
             status,
             sort = "newest",
-            startDate,
-            endDate,
             page = 1,
             limit = 5
         } = req.query;
@@ -30,19 +28,6 @@ const getOffers = async (req, res) => {
         // Status filter
         if (status) {
             query.status = status;
-        }
-
-        // Date filter
-        if (startDate || endDate) {
-            query.$and = [];
-
-            if (startDate) {
-                query.$and.push({ startDate: { $gte: new Date(startDate) } });
-            }
-
-            if (endDate) {
-                query.$and.push({ endDate: { $lte: new Date(endDate) } });
-            }
         }
 
         // Sorting
@@ -104,12 +89,10 @@ const createOffer = async (req, res) => {
             endDate,
             status,
             offerType,
-            discountType,
-            minimumPurchase
+            discountType
         } = req.body;
 
         const discountValue = Number(discount);
-        const minPurchase = Number(minimumPurchase || 0);
 
         // Basic validations
         if (!offerName || offerName.trim().length < 3) {
@@ -172,21 +155,14 @@ const createOffer = async (req, res) => {
         }
 
         // FIXED AMOUNT VALIDATION (IMPORTANT)
-        if (discountType === "fixed") {
-            if (minPurchase < discountValue) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Minimum purchase must be greater than or equal to discount amount"
-                });
-            }
-        }
+        // Fixed amount doesn't need minimum purchase validation for Offers
+        // as per user request. We just allow any fixed amount.
 
         const newOffer = new Offer({
             offerName,
             discount: discountValue,
             offerType,
             discountType,
-            minimumPurchase: minPurchase,
             categoryId: categoryId || null,
             productId: productId || [],
             startDate,
@@ -218,22 +194,12 @@ const updateOffer = async (req, res) => {
         const data = req.body;
 
         const discountValue = Number(data.discount);
-        const minPurchase = Number(data.minimumPurchase || 0);
 
         if (data.discountType === "percentage" && discountValue > 100) {
             return res.status(400).json({
                 success: false,
                 message: "Percentage discount cannot exceed 100%"
             });
-        }
-
-        if (data.discountType === "fixed") {
-            if (minPurchase < discountValue) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Minimum purchase must be greater than or equal to discount amount"
-                });
-            }
         }
 
         const updatedOffer = await Offer.findByIdAndUpdate(
