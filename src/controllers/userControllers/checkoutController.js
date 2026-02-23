@@ -152,12 +152,17 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Coupon has expired" });
     }
 
+    // Validate Global Usage Limit
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: "Coupon limit reached" });
+    }
+
     // Validate Usage Limit (Per User)
-    if (coupon.usageLimit) {
-      const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
-      if (userUsageCount >= coupon.usageLimit) {
-        return res.status(400).json({ success: false, message: "You have reached the usage limit for this coupon" });
-      }
+    // There is no explicit per-user limit field on Coupon model right now, but usageLimit acts as global.
+    // However, if we restrict users to 1 use per coupon:
+    const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
+    if (userUsageCount >= 1) { // Common rule: 1 use per user per coupon unless stated otherwise
+      return res.status(400).json({ success: false, message: "You have already used this coupon" });
     }
 
 
