@@ -2,26 +2,29 @@ import Order from "../../model/orderModel.js";
 import exceljs from "exceljs";
 import PDFDocument from "pdfkit";
 
-// Helper to get date range filters
 const getDateRange = (filter) => {
-    const today = new Date();
+    const now = new Date();
     let startDate, endDate;
 
     switch (filter) {
         case 'daily':
-            startDate = new Date(today.setHours(0, 0, 0, 0));
-            endDate = new Date(today.setHours(23, 59, 59, 999));
+            startDate = new Date(now);
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date(now);
+            endDate.setHours(23, 59, 59, 999);
             break;
         case 'weekly':
-            const firstDay = today.getDate() - today.getDay();
-            startDate = new Date(today.setDate(firstDay));
+            startDate = new Date(now);
+            // Get Sunday of the current week
+            startDate.setDate(now.getDate() - now.getDay());
             startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(today);
+
+            endDate = new Date(now); // Up to current time/end of today
             endDate.setHours(23, 59, 59, 999);
             break;
         case 'yearly':
-            startDate = new Date(today.getFullYear(), 0, 1);
-            endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
             break;
         default: // 'custom' or all time
             startDate = null;

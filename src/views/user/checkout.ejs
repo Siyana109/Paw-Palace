@@ -365,6 +365,13 @@
                     <div id="addressListContainer" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2">
                         <!-- Addresses populated by JS -->
                     </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-100 flex-shrink-0">
+                        <button onclick="openAddAddressModal()"
+                            class="w-full py-3 rounded-xl border-2 border-brand-500 text-brand-500 font-bold hover:bg-brand-50 transition">
+                            + Add New Address
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -420,18 +427,7 @@
                 </div>
             </div>
 
-            <div class="space-y-4 overflow-y-auto custom-scrollbar flex-1 pr-2" id="addressListContainer">
-                <!-- Populated by JS -->
-            </div>
 
-            <div class="mt-6 pt-4 border-t border-gray-100 flex-shrink-0">
-                <button onclick="openAddAddressModal()"
-                    class="w-full py-3 rounded-xl border-2 border-brand-500 text-brand-500 font-bold hover:bg-brand-50 transition">
-                    + Add New Address
-                </button>
-            </div>
-            </div>
-            </div>
 
             <!-- ADD / EDIT ADDRESS MODAL -->
             <div id="addressModal"
@@ -594,11 +590,9 @@
                         ${addr.isDefault ? '<span class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">Default</span>' : ''}
                     </div>
                     
-                    <% if (addresses && addresses.length > 1) { %>
-                    <button onclick="openSelectAddressModal()" class="text-sm font-bold text-brand-500 hover:underline">
+                    <button type="button" onclick="openSelectAddressModal()" class="text-sm font-bold text-brand-500 hover:underline">
                         Change
                     </button>
-                    <% } %>
                 </div>
 
                 <p class="text-gray-600 text-sm leading-relaxed mb-4">
