@@ -22,9 +22,18 @@ const getCheckoutPage = async (req, res) => {
       })
       .populate("items.variant");
 
-    const coupons = await Coupon.find({
-      isActive: true,
-      expiryDate: { $gte: new Date() }
+    const allCoupons = await Coupon.find({ isActive: true });
+
+    // Timezone-safe date validation (matching the Exact Calendar Date)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const coupons = allCoupons.filter(c => {
+      const startDate = new Date(c.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      const expiryDate = new Date(c.expiryDate);
+      expiryDate.setHours(0, 0, 0, 0);
+      return startDate <= today && expiryDate >= today;
     });
 
     // Optional: Filter coupons user has already exhausted?
@@ -142,13 +151,27 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Coupon code is required" });
     }
 
-    const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+    const coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase(),
+      isActive: true
+    });
+
     if (!coupon) {
       return res.status(404).json({ success: false, message: "Invalid or inactive coupon" });
     }
 
-    // Validate Date
-    if (new Date() > new Date(coupon.expiryDate)) {
+    // Timezone-safe Date Validation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(coupon.startDate);
+    startDate.setHours(0, 0, 0, 0);
+    const expiryDate = new Date(coupon.expiryDate);
+    expiryDate.setHours(0, 0, 0, 0);
+
+    if (startDate > today) {
+      return res.status(400).json({ success: false, message: "This coupon is not yet active (Pending)" });
+    }
+    if (expiryDate < today) {
       return res.status(400).json({ success: false, message: "Coupon has expired" });
     }
 
@@ -158,13 +181,17 @@ const applyCoupon = async (req, res) => {
     }
 
     // Validate Usage Limit (Per User)
-    // There is no explicit per-user limit field on Coupon model right now, but usageLimit acts as global.
-    // However, if we restrict users to 1 use per coupon:
-    const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
-    if (userUsageCount >= 1) { // Common rule: 1 use per user per coupon unless stated otherwise
-      return res.status(400).json({ success: false, message: "You have already used this coupon" });
-    }
+    // Count how many times THIS USER used this coupon
+    const userUsageCount = coupon.usedBy
+      .filter(u => u.userId.toString() === userId).length;
 
+    // If usageLimit is set, restrict per user by that limit
+    if (coupon.usageLimit && userUsageCount >= coupon.usageLimit) {
+      return res.status(400).json({
+        success: false,
+        message: `You can use this coupon only ${coupon.usageLimit} times`
+      });
+    }
 
     // --- Calculate Cart Total (Securely) ---
     const cart = await Cart.findOne({ user: userId })
