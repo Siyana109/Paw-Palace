@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         tailwind.config = {
@@ -68,10 +69,10 @@
 
                         <!-- Custom Date Inputs -->
                         <div id="customDateContainer" class="flex gap-2 <%= filter === 'custom' ? '' : 'hidden' %>">
-                            <input type="date" name="startDate" value="<%= startDate %>"
+                            <input type="date" name="startDate" id="startDate" value="<%= startDate %>"
                                 class="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2 outline-none">
                             <span class="text-gray-400 self-center">to</span>
-                            <input type="date" name="endDate" value="<%= endDate %>"
+                            <input type="date" name="endDate" id="endDate" value="<%= endDate %>"
                                 class="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2 outline-none">
                         </div>
 
@@ -245,6 +246,28 @@
 
     <!-- Chart Scripts -->
     <script>
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        // Initial setup for max dates
+        const todayStr = new Date().toISOString().split('T')[0];
+        startDateInput.max = todayStr;
+        endDateInput.max = todayStr;
+
+        // When start date changes, restrict the end date's minimum value
+        startDateInput.addEventListener('change', function () {
+            if (this.value) {
+                endDateInput.min = this.value;
+            } else {
+                endDateInput.min = '';
+            }
+        });
+
+        // Optional: If start date is already filled (e.g., from server load), set end date's min
+        if (startDateInput.value) {
+            endDateInput.min = startDateInput.value;
+        }
+
         const toggleCustomDate = (val) => {
             const container = document.getElementById('customDateContainer');
             if (val === 'custom') container.classList.remove('hidden');
@@ -254,8 +277,60 @@
         const downloadReport = (format) => {
             const params = new URLSearchParams(window.location.search);
             params.set('format', format);
+
+            // Add basic check for custom before downloading
+            if (params.get('filter') === 'custom') {
+                const s = params.get('startDate');
+                const e = params.get('endDate');
+                if (!s || !e) return Swal.fire({ icon: 'error', title: 'Invalid Filter', text: 'You must apply a valid date range first.', confirmButtonColor: '#f43f5e' });
+            }
+
             window.location.href = `/admin/sales-report/download?${params.toString()}`;
         };
+
+        // Form Validation for applying custom filter
+        document.getElementById('filterForm').addEventListener('submit', function (e) {
+            const filter = this.filter.value;
+            if (filter === 'custom') {
+                const start = this.startDate.value;
+                const end = this.endDate.value;
+
+                if (!start || !end) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Dates',
+                        text: 'Please select both a start date and an end date.',
+                        confirmButtonColor: '#f43f5e'
+                    });
+                    return;
+                }
+
+                if (new Date(start) > new Date(end)) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date Range',
+                        text: 'The end date cannot be earlier than the start date.',
+                        confirmButtonColor: '#f43f5e'
+                    });
+                    return;
+                }
+
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                if (new Date(end) > today) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date',
+                        text: 'The end date cannot be in the future.',
+                        confirmButtonColor: '#f43f5e'
+                    });
+                    return;
+                }
+            }
+        });
 
         // Parse Chart Data
         const salesData = JSON.parse('<%- salesChart %>');

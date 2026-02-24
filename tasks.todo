@@ -205,6 +205,27 @@ WEEK-11:
 
 
 
+WEEK-11 PENDINGS:
+    User:
+    ☐ Page should not refresh while updating the qty in cart
+    ☐ Category unlist is not working
+    ☐ Product unlist is not working, still accessible through url.
+
+    Admin:
+    ☐ Admin dashboard is not done.
+    ☐ Refund details should also be included in sales report
+    ✔ Add custom date range validation @done (2/24/2026, 5:59:51 PM)
+    ✔ Sales report (pdf)  - display details in table view @done (2/24/2026, 3:34:21 PM)
+    ✔ Sales report (csv) - Missing the date details @done (2/24/2026, 3:34:23 PM)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -244,6 +265,9 @@ TODO :
         ✔ online filtering in admin order @done (2/11/2026, 3:51:50 AM)
         ☐ debouncing
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
+
+
+
 
 
 
