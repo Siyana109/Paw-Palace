@@ -41,8 +41,9 @@
                     <% if (cart && cart.items && cart.items.length> 0) { %>
 
                         <% cart.items.forEach(item=> { %>
-                            <div
-                                class="bg-white rounded-[2rem] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center relative group">
+                            <div class="cart-item-row bg-white rounded-[2rem] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center relative group"
+                                data-variant-id="<%= item.variant._id %>" data-price="<%= item.variant.price %>"
+                                data-offer-price="<%= item.variant.offerPrice || item.variant.price %>">
 
                                 <!-- DELETE BUTTON (Top right on mobile, inline on desktop) -->
                                 <button onclick="removeItem('<%= item.variant._id %>')"
@@ -79,8 +80,8 @@
                                     <div class="flex flex-col items-center sm:items-start gap-1">
                                         <div class="flex items-center bg-gray-50 rounded-xl p-1">
                                             <button
-                                                onclick="updateQuantity('<%= item.variant._id %>', -1, <%= item.quantity %>, <%= item.variant.stock %>)"
-                                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
+                                                onclick="updateQuantity('<%= item.variant._id %>', -1, <%= item.variant.stock %>)"
+                                                class="qty-btn-minus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
                                                     <%= item.quantity <= 1 
                                                         ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
                                                         : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>"
@@ -94,8 +95,8 @@
                                             </span>
 
                                             <button
-                                                onclick="updateQuantity('<%= item.variant._id %>', 1, <%= item.quantity %>, <%= item.variant.stock %>)"
-                                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
+                                                onclick="updateQuantity('<%= item.variant._id %>', 1, <%= item.variant.stock %>)"
+                                                class="qty-btn-plus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all
                                                     <%= item.quantity >= Math.min(item.variant.stock, 10)
                                                         ? 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none' 
                                                         : 'bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm' %>"
@@ -127,12 +128,14 @@
                                     <% const effectivePrice=(item.variant.offerPrice && item.variant.offerPrice <
                                         item.variant.price) ? item.variant.offerPrice : item.variant.price; const
                                         itemTotal=effectivePrice * item.quantity; %>
-                                        <span class="text-sm font-semibold text-gray-500">₹<%= effectivePrice %> /- </span>
+                                        <span class="text-sm font-semibold text-gray-500">₹<%= effectivePrice %> /-
+                                        </span>
 
                                         <div class="flex items-end gap-2 mt-1">
                                             <span class="text-sm font-bold text-gray-400">Total:</span>
-                                            <span class="text-brand-500 text-xl font-black">₹<%= itemTotal.toFixed(2) %>
-                                                    </span>
+                                            <span id="item-total-<%= item.variant._id %>"
+                                                class="text-brand-500 text-xl font-black">₹<%= itemTotal.toFixed(2) %>
+                                            </span>
                                         </div>
                                 </div>
                             </div>
@@ -186,18 +189,21 @@
 
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Subtotal</span>
-                                        <span class="text-accent-navy">₹<%= subtotal.toFixed(2) %></span>
+                                        <span id="summary-subtotal" class="text-accent-navy">₹<%= subtotal.toFixed(2) %>
+                                                </span>
                                     </div>
 
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Discount</span>
-                                        <span class="text-emerald-600">-₹<%= offerDiscount.toFixed(2) %></span>
+                                        <span id="summary-discount" class="text-emerald-600">-₹<%=
+                                                offerDiscount.toFixed(2) %></span>
                                     </div>
 
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Shipping</span>
 
-                                        <span class="text-accent-navy">₹<%= shipping.toFixed(2) %></span>
+                                        <span id="summary-shipping" class="text-accent-navy">₹<%= shipping.toFixed(2) %>
+                                                </span>
                                     </div>
 
                                 </div>
@@ -206,7 +212,7 @@
 
                                 <div class="flex justify-between items-center mb-8">
                                     <span class="font-bold text-lg">Total</span>
-                                    <span class="text-3xl font-black text-brand-500">
+                                    <span id="summary-total" class="text-3xl font-black text-brand-500">
                                         ₹<%= total.toFixed(2) %>
                                     </span>
                                 </div>
@@ -240,7 +246,43 @@
         <%- include('../partials/footer') %>
 
             <script>
-                async function updateQuantity(variantId, change, currentQty, maxStock) {
+                function recalculateCartTotals() {
+                    let subtotal = 0;
+                    let offerDiscount = 0;
+
+                    document.querySelectorAll('.cart-item-row').forEach(row => {
+                        const variantId = row.dataset.variantId;
+                        const price = parseFloat(row.dataset.price);
+                        const offerPrice = parseFloat(row.dataset.offerPrice);
+                        const qtySpan = document.getElementById(`qty-${variantId}`);
+
+                        if (!qtySpan) return;
+                        const qty = parseInt(qtySpan.innerText, 10);
+
+                        subtotal += (price * qty);
+                        offerDiscount += ((price - offerPrice) * qty);
+
+                        const effectivePrice = offerPrice < price ? offerPrice : price;
+                        const itemTotal = effectivePrice * qty;
+
+                        const itemTotalEl = document.getElementById(`item-total-${variantId}`);
+                        if (itemTotalEl) {
+                            itemTotalEl.innerText = `₹${itemTotal.toFixed(2)}`;
+                        }
+                    });
+
+                    const postOfferTotal = subtotal - offerDiscount;
+                    const shipping = 50;
+                    const total = postOfferTotal + shipping;
+
+                    document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
+                    document.getElementById('summary-discount').innerText = `-₹${offerDiscount.toFixed(2)}`;
+                    document.getElementById('summary-total').innerText = `₹${total.toFixed(2)}`;
+                }
+
+                async function updateQuantity(variantId, change, maxStock) {
+                    const qtySpan = document.getElementById(`qty-${variantId}`);
+                    const currentQty = parseInt(qtySpan.innerText, 10);
 
                     const newQty = currentQty + change;
                     const limit = Math.min(maxStock, 10);
@@ -262,7 +304,7 @@
                         const res = await fetch('/cart/update', {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ variantId, quantity: newQty }) // Send absolute quantity, or change if backend expects change
+                            body: JSON.stringify({ variantId, quantity: newQty })
                         });
 
                         const data = await res.json();
@@ -280,7 +322,31 @@
                             window.updateCartCount(data.cartCount);
                         }
 
-                        location.reload();
+                        // Update the DOM dynamically without reload
+                        qtySpan.innerText = newQty;
+
+                        // Update buttons visually
+                        const row = qtySpan.closest('.cart-item-row');
+                        const btnMinus = row.querySelector('.qty-btn-minus');
+                        const btnPlus = row.querySelector('.qty-btn-plus');
+
+                        if (newQty <= 1) {
+                            btnMinus.disabled = true;
+                            btnMinus.className = "qty-btn-minus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all bg-gray-100 text-gray-300 cursor-not-allowed shadow-none";
+                        } else {
+                            btnMinus.disabled = false;
+                            btnMinus.className = "qty-btn-minus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm";
+                        }
+
+                        if (newQty >= limit) {
+                            btnPlus.disabled = true;
+                            btnPlus.className = "qty-btn-plus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all bg-gray-100 text-gray-300 cursor-not-allowed shadow-none";
+                        } else {
+                            btnPlus.disabled = false;
+                            btnPlus.className = "qty-btn-plus w-8 h-8 flex items-center justify-center rounded-lg border border-transparent transition-all bg-white text-gray-400 hover:text-accent-navy hover:border-gray-200 shadow-sm";
+                        }
+
+                        recalculateCartTotals();
 
                     } catch (err) {
                         console.error(err);
