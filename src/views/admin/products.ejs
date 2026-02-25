@@ -964,16 +964,28 @@
   function processCropQueue() {
     if (cropQueue.length === 0) return;
 
-    const { file, input, previewId } = cropQueue.shift();
+    const { file, input, previewId, isEditMode } = cropQueue.shift();
     currentInput = input;
 
     startCropper(file, (blob) => {
       const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
 
-      selectedVariantSubImages.push(newFile);
+      if (isEditMode) {
+        // Edit Variant context
+        editVariantNewFiles.push(newFile);
+        renderEditVariantSubImages();
 
-      renderSubImagesPreview(previewId);
-      updateSubInputFiles(input);
+        // Update the actual input files for form submission
+        const dataTransfer = new DataTransfer();
+        editVariantNewFiles.forEach(f => dataTransfer.items.add(f));
+        input.files = dataTransfer.files;
+
+      } else {
+        // Add Variant context
+        selectedVariantSubImages.push(newFile);
+        if (previewId) renderSubImagesPreview(previewId);
+        updateSubInputFiles(input);
+      }
     });
   }
 
@@ -1038,6 +1050,7 @@
 
   function renderSubImagesPreview(previewId) {
     const preview = document.getElementById(previewId);
+    if (!preview) return; // Add null check
     preview.innerHTML = '';
 
     if (selectedVariantSubImages.length > 0) {
@@ -1228,14 +1241,37 @@
     renderEditVariantSubImages();
   }
 
-  // Handle new file selection
+  // Handle new file selection (with cropping)
   function handleEditVariantNewFiles(input) {
-    if (input.files) {
+    if (input.files && input.files.length > 0) {
+      // Check total images (kept + new + incoming)
+      const totalImages = editVariantKeptImages.length + editVariantNewFiles.length + input.files.length;
+      if (totalImages > 5) {
+        Swal.fire("Error", "You can only have up to 5 sub-images in total.", "error");
+
+        // Reset the input specifically for the edit variant input so form doesn't hold bad data
+        const dataTransfer = new DataTransfer();
+        editVariantNewFiles.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+        return;
+      }
+
       Array.from(input.files).forEach(file => {
-        editVariantNewFiles.push(file);
+        // Here we hook into the SAME crop queue system
+        cropQueue.push({
+          file,
+          input,
+          previewId: null, // we manually call renderEditVariantSubImages instead
+          isEditMode: true // Custom flag to know where to push the cropped file
+        });
       });
-      renderEditVariantSubImages();
+
+      // Clear the input value immediately so selecting the same file again triggers onchange
       input.value = '';
+
+      if (!document.getElementById('cropperModal').classList.contains('flex')) {
+        processCropQueue();
+      }
     }
   }
 
