@@ -15,12 +15,15 @@ import offerController from "../controllers/adminControllers/offerController.js"
 import orderController from "../controllers/adminControllers/orderController.js"
 import requestController from "../controllers/adminControllers/requestController.js"
 import salesController from "../controllers/adminControllers/salesController.js"
+import dashboardController from "../controllers/adminControllers/dashboardController.js"
 
 import { variantUpload, upload } from "../middlewares/upload.js"
 
 
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)
 router.post('/login', authController.postAdmin)
+
+router.get('/dashboard', adminMiddleware.adminSession, dashboardController.getDashboard)
 
 router.get('/users', adminMiddleware.adminSession, userController.getUsers)
 router.post('/users/:userId/block', adminMiddleware.adminSession, userController.blockUser)

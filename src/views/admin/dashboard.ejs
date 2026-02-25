@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy overflow-hidden">
+
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+            <main class="flex-1 p-8 h-full overflow-y-auto custom-scrollbar relative">
+
+                <!-- HEADER -->
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-accent-navy">Dashboard Overview</h1>
+                        <p class="text-gray-400 font-medium text-sm mt-1">
+                            Welcome back! Here's what's happening today.
+                        </p>
+                    </div>
+                </header>
+
+                <!-- STAT CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+                    <!-- Revenue -->
+                    <div
+                        class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div
+                            class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Revenue</p>
+                            <h3 class="text-2xl font-black text-accent-navy">₹<%=
+                                    stats.totalRevenue.toLocaleString('en-IN') %>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Orders -->
+                    <div
+                        class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div
+                            class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Orders</p>
+                            <h3 class="text-2xl font-black text-accent-navy">
+                                <%= stats.totalOrders.toLocaleString() %>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Products -->
+                    <div
+                        class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div
+                            class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Products</p>
+                            <h3 class="text-2xl font-black text-accent-navy">
+                                <%= stats.totalProducts.toLocaleString() %>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Users -->
+                    <div
+                        class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div
+                            class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-500 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Users</p>
+                            <h3 class="text-2xl font-black text-accent-navy">
+                                <%= stats.totalUsers.toLocaleString() %>
+                            </h3>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- MAIN CONTENT GRID -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+                    <!-- CHART SECTION (Spans 2 columns) -->
+                    <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-accent-navy">Revenue Analytics</h2>
+                            <span class="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">Last 6
+                                Months</span>
+                        </div>
+                        <div class="w-full h-[300px]">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- RECENT ORDERS SECTION (Spans 1 column) -->
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-accent-navy">Recent Orders</h2>
+                            <a href="/admin/orders" class="text-xs font-bold text-brand-500 hover:text-brand-600">View
+                                All</a>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+                            <% if (recentOrders && recentOrders.length> 0) { %>
+                                <% recentOrders.forEach(order=> { %>
+                                    <div class="p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition cursor-pointer"
+                                        onclick="window.location.href='/admin/orders/<%= order._id %>/details'">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p class="text-xs font-bold text-gray-400">#<%= order.orderId %>
+                                                </p>
+                                                <p class="text-sm font-bold text-accent-navy mt-1 truncate w-32">
+                                                    <%= order.userId ? order.userId.fullName : 'Guest User' %>
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-sm font-black text-brand-500">₹<%= order.totalAmount %>
+                                                </p>
+                                                <p class="text-[10px] font-bold text-gray-400 mt-1">
+                                                    <%= new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                        day: 'numeric' , month: 'short' }) %>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <% let statusColor='bg-gray-100 text-gray-600' ; if
+                                                (order.orderStatus==='Delivered' )
+                                                statusColor='bg-emerald-100 text-emerald-600' ; if
+                                                (order.orderStatus==='Pending' || order.orderStatus==='Processing' )
+                                                statusColor='bg-orange-100 text-orange-600' ; if
+                                                (order.orderStatus==='Cancelled' || order.orderStatus==='Failed' )
+                                                statusColor='bg-red-100 text-red-600' ; %>
+                                                <span
+                                                    class="px-2 py-1 rounded-md text-[10px] font-bold inline-block <%= statusColor %>">
+                                                    <%= order.orderStatus %>
+                                                </span>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div
+                                                class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+                                                <i class="fa-solid fa-box-open text-3xl mb-2"></i>
+                                                <p class="text-sm font-medium">No recent orders found.</p>
+                                            </div>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                </div>
+
+            </main>
+    </div>
+
+    <!-- Chart Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Parse chart data passed from JS controller
+            const rawChartData = '<%- chartData %>';
+            const parsedData = JSON.parse(rawChartData);
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+
+            // Create Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(244, 63, 94, 0.4)'); // brand-500 semi-transparent
+            gradient.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: parsedData.labels,
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: parsedData.data,
+                        borderColor: '#f43f5e', // brand-500
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#f43f5e',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4 // Smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Quicksand', size: 13 },
+                            bodyFont: { family: 'Quicksand', size: 14, weight: 'bold' },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function (context) {
+                                    return '₹ ' + context.parsed.y.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f1f5f9',
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                font: { family: 'Quicksand', size: 11, weight: 'bold' },
+                                color: '#94a3b8',
+                                callback: function (value) {
+                                    if (value >= 1000) {
+                                        return '₹' + (value / 1000) + 'k';
+                                    }
+                                    return '₹' + value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                font: { family: 'Quicksand', size: 12, weight: 'bold' },
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
