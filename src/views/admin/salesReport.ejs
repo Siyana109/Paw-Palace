@@ -84,16 +84,19 @@
                 </div>
 
                 <!-- STATS CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
                     <!-- Total Sales Amount -->
                     <div
                         class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between">
                         <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Revenue
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Gross Revenue
                             </p>
                             <h3 class="text-3xl font-extrabold text-brand-500">₹<%= stats.totalRevenue.toLocaleString()
                                     %>
                             </h3>
+                            <p class="text-[10px] font-bold text-gray-400 mt-1">Net: ₹<%= (stats.totalRevenue -
+                                    (stats.totalRefunded || 0)).toLocaleString() %>
+                            </p>
                         </div>
                         <div
                             class="w-12 h-12 bg-brand-50 text-brand-500 rounded-2xl flex items-center justify-center text-xl">
@@ -129,6 +132,22 @@
                         <div
                             class="w-12 h-12 bg-orange-50 text-orange-400 rounded-2xl flex items-center justify-center text-xl">
                             <i class="fa-solid fa-tags"></i>
+                        </div>
+                    </div>
+
+                    <!-- Total Refunds -->
+                    <div
+                        class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Refunds
+                            </p>
+                            <h3 class="text-3xl font-extrabold text-red-500">₹<%= (stats.totalRefunded ||
+                                    0).toLocaleString() %>
+                            </h3>
+                        </div>
+                        <div
+                            class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-arrow-rotate-left"></i>
                         </div>
                     </div>
 
@@ -179,6 +198,7 @@
                                     <th class="px-6 py-4">Order ID</th>
                                     <th class="px-6 py-4">Date</th>
                                     <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Refunded</th>
                                     <th class="px-6 py-4">Amount</th>
                                     <th class="px-6 py-4">Method</th>
                                     <th class="px-6 py-4">Status</th>
@@ -196,6 +216,10 @@
                                             <td class="px-6 py-4 text-sm font-bold text-accent-navy">
                                                 <%= order.userId?.fullName || 'Guest' %>
                                             </td>
+                                            <td class="px-6 py-4 text-sm font-bold text-red-500">
+                                                <%= order.refundSummary?.totalRefunded> 0 ?
+                                                    `₹${order.refundSummary.totalRefunded}` : '-' %>
+                                            </td>
                                             <td class="px-6 py-4 text-sm font-extrabold text-accent-navy">₹<%=
                                                     order.totalAmount %>
                                             </td>
@@ -212,7 +236,7 @@
                                         <% }) %>
                                             <% } else { %>
                                                 <tr>
-                                                    <td colspan="6" class="text-center py-10 text-gray-400 font-bold">No
+                                                    <td colspan="7" class="text-center py-10 text-gray-400 font-bold">No
                                                         sales data found for this period</td>
                                                 </tr>
                                                 <% } %>
@@ -336,23 +360,33 @@
         const salesData = JSON.parse('<%- salesChart %>');
         const paymentData = JSON.parse('<%- paymentChart %>');
 
-        // Sales Line Chart
+        // Sales and Refunds Line Chart
         new Chart(document.getElementById('salesChart'), {
             type: 'line',
             data: {
                 labels: salesData.map(d => d._id),
-                datasets: [{
-                    label: 'Sales (₹)',
-                    data: salesData.map(d => d.dailySales),
-                    borderColor: '#f43f5e',
-                    backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
+                datasets: [
+                    {
+                        label: 'Sales (₹)',
+                        data: salesData.map(d => d.dailySales),
+                        borderColor: '#2dd4bf', // Teal for sales
+                        backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Refunds (₹)',
+                        data: salesData.map(d => d.dailyRefunds || 0),
+                        borderColor: '#ef4444', // Red for refunds
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { display: true, position: 'top' } },
                 scales: {
                     y: { beginAtZero: true, grid: { display: false } },
                     x: { grid: { display: false } }

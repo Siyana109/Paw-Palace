@@ -56,10 +56,8 @@ const getSalesReport = async (req, res) => {
         // Only consider valid orders for sales report
         const matchStage = {
             ...dateQuery,
-            // Exclude non-sales statuses. 
-            // 'Returned' is excluded to avoid counting fully returned orders if their amount wasn't 0'd out correctly, 
-            // or if the user wants strictly "Net Valid Sales" count.
-            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending', 'Returned'] },
+            // Include Returned/Partially Returned so we can calculate their refunds against the revenue.
+            orderStatus: { $nin: ['Cancelled', 'Failed', 'Pending'] },
             "payment.status": { $ne: "Failed" }
         };
 
@@ -72,12 +70,13 @@ const getSalesReport = async (req, res) => {
                     totalOrders: { $sum: 1 },
                     totalRevenue: { $sum: "$totalAmount" },
                     totalDiscount: { $sum: "$discount" },
+                    totalRefunded: { $sum: "$refundSummary.totalRefunded" },
                     productsSold: { $sum: { $size: "$items" } } // Approximate, better to unwind if exact qty needed
                 }
             }
         ]);
 
-        const stats = metrics[0] || { totalOrders: 0, totalRevenue: 0, totalDiscount: 0, productsSold: 0 };
+        const stats = metrics[0] || { totalOrders: 0, totalRevenue: 0, totalDiscount: 0, totalRefunded: 0, productsSold: 0 };
 
         // 3. Paginated Order List
         const limit = 10;
@@ -102,6 +101,7 @@ const getSalesReport = async (req, res) => {
                 $group: {
                     _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
                     dailySales: { $sum: "$totalAmount" },
+                    dailyRefunds: { $sum: "$refundSummary.totalRefunded" },
                     dailyOrders: { $sum: 1 }
                 }
             },
@@ -173,6 +173,7 @@ const downloadReport = async (req, res) => {
         // Calculate Totals
         const totalSales = orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
         const totalDiscount = orders.reduce((acc, order) => acc + (order.discount || 0), 0);
+        const totalRefunded = orders.reduce((acc, order) => acc + (order.refundSummary?.totalRefunded || 0), 0);
         const totalOrders = orders.length;
 
         if (format === 'excel') {
@@ -180,13 +181,13 @@ const downloadReport = async (req, res) => {
             const worksheet = workbook.addWorksheet('Sales Report');
 
             // Title and Date Range
-            worksheet.mergeCells('A1', 'G1');
+            worksheet.mergeCells('A1', 'H1');
             const titleCell = worksheet.getCell('A1');
             titleCell.value = 'PawPalace Sales Report';
             titleCell.font = { size: 16, bold: true };
             titleCell.alignment = { horizontal: 'center' };
 
-            worksheet.mergeCells('A2', 'G2');
+            worksheet.mergeCells('A2', 'H2');
             const dateCell = worksheet.getCell('A2');
             dateCell.value = `Date Range: ${dateRangeStr}`;
             dateCell.font = { size: 12, italic: true };
@@ -194,13 +195,13 @@ const downloadReport = async (req, res) => {
 
             worksheet.addRow([]); // Spacing row
 
-            // Totals row
-            worksheet.addRow(['Total Orders:', totalOrders, 'Total Revenue:', `Rs. ${totalSales}`, 'Total Discount:', `Rs. ${totalDiscount}`]);
+            // Totals row (spanning 8 columns)
+            worksheet.addRow(['Total Orders:', totalOrders, 'Total Revenue:', `Rs. ${totalSales}`, 'Total Discount:', `Rs. ${totalDiscount}`, 'Total Refunded:', `Rs. ${totalRefunded}`]);
             worksheet.getRow(4).font = { bold: true };
             worksheet.addRow([]); // Spacing row
 
             // Headers
-            const headerRow = worksheet.addRow(['Order ID', 'Date', 'Customer', 'Amount', 'Discount', 'Method', 'Status']);
+            const headerRow = worksheet.addRow(['Order ID', 'Date', 'Customer', 'Amount', 'Discount', 'Refunded', 'Method', 'Status']);
             headerRow.font = { bold: true };
             headerRow.eachCell((cell) => {
                 cell.fill = {
@@ -216,6 +217,7 @@ const downloadReport = async (req, res) => {
                 { key: 'customer', width: 25 },
                 { key: 'amount', width: 15 },
                 { key: 'discount', width: 15 },
+                { key: 'refunded', width: 15 },
                 { key: 'method', width: 15 },
                 { key: 'status', width: 15 }
             ];
@@ -227,6 +229,7 @@ const downloadReport = async (req, res) => {
                     customer: order.userId?.fullName || 'Guest',
                     amount: order.totalAmount,
                     discount: order.discount,
+                    refunded: order.refundSummary?.totalRefunded || 0,
                     method: order.payment.method,
                     status: order.orderStatus
                 });
@@ -258,29 +261,33 @@ const downloadReport = async (req, res) => {
 
             // Summary Boxes
             const summaryTop = 130;
-            doc.rect(30, summaryTop, 150, 60).fillAndStroke('#f8fafc', '#e2e8f0');
-            doc.rect(200, summaryTop, 150, 60).fillAndStroke('#f8fafc', '#e2e8f0');
-            doc.rect(370, summaryTop, 150, 60).fillAndStroke('#f8fafc', '#e2e8f0');
+            doc.rect(30, summaryTop, 120, 60).fillAndStroke('#f8fafc', '#e2e8f0');
+            doc.rect(160, summaryTop, 120, 60).fillAndStroke('#f8fafc', '#e2e8f0');
+            doc.rect(290, summaryTop, 120, 60).fillAndStroke('#f8fafc', '#e2e8f0');
+            doc.rect(420, summaryTop, 120, 60).fillAndStroke('#f8fafc', '#e2e8f0');
 
             doc.fillColor('#64748b').fontSize(10).font('Helvetica');
             doc.text('Total Orders', 40, summaryTop + 15);
-            doc.text('Total Revenue', 210, summaryTop + 15);
-            doc.text('Total Discount', 380, summaryTop + 15);
+            doc.text('Total Revenue', 170, summaryTop + 15);
+            doc.text('Total Discount', 300, summaryTop + 15);
+            doc.text('Total Refunds', 430, summaryTop + 15);
 
-            doc.fillColor('#0f172a').fontSize(16).font('Helvetica-Bold');
+            doc.fillColor('#0f172a').fontSize(14).font('Helvetica-Bold');
             doc.text(totalOrders.toString(), 40, summaryTop + 35);
-            doc.text(`Rs. ${totalSales.toFixed(2)}`, 210, summaryTop + 35);
-            doc.text(`Rs. ${totalDiscount.toFixed(2)}`, 380, summaryTop + 35);
+            doc.text(`Rs. ${totalSales.toFixed(2)}`, 170, summaryTop + 35);
+            doc.text(`Rs. ${totalDiscount.toFixed(2)}`, 300, summaryTop + 35);
+            doc.text(`Rs. ${totalRefunded.toFixed(2)}`, 430, summaryTop + 35);
 
             // Table Settings
             doc.moveDown(3);
             const tableTop = 220;
             const columns = [
                 { header: 'Order ID', x: 30, width: 140 }, // Expanded for long IDs
-                { header: 'Date', x: 170, width: 80 },
-                { header: 'Customer', x: 250, width: 120 },
-                { header: 'Method', x: 370, width: 80 },
-                { header: 'Amount', x: 450, width: 80 }
+                { header: 'Date', x: 160, width: 60 },
+                { header: 'Customer', x: 230, width: 100 },
+                { header: 'Method', x: 340, width: 60 },
+                { header: 'Refund', x: 410, width: 60 },
+                { header: 'Amount', x: 480, width: 60 }
             ];
 
             // Table Header Background
@@ -315,7 +322,11 @@ const downloadReport = async (req, res) => {
                 doc.text(new Date(order.createdAt).toLocaleDateString(), columns[1].x, y, { width: columns[1].width });
                 doc.text((order.userId?.fullName || 'Guest'), columns[2].x, y, { width: columns[2].width });
                 doc.text(order.payment?.method || 'N/A', columns[3].x, y, { width: columns[3].width });
-                doc.text(`Rs. ${order.totalAmount}`, columns[4].x, y, { width: columns[4].width });
+
+                const refundStr = order.refundSummary?.totalRefunded > 0 ? `Rs. ${order.refundSummary.totalRefunded}` : '-';
+                doc.text(refundStr, columns[4].x, y, { width: columns[4].width });
+
+                doc.text(`Rs. ${order.totalAmount}`, columns[5].x, y, { width: columns[5].width });
 
                 y += 20;
             });
