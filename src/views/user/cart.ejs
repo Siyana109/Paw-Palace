@@ -107,19 +107,26 @@
                                         </div>
 
                                         <!-- Stock Limit Message -->
-                                        <% if (item.variant.stock===0) { %>
-                                            <p class="text-[10px] font-bold text-red-500">
-                                                Out of stock
+                                        <% if (!item.variant || !item.variant.isActive || !item.product ||
+                                            !item.product.isActive || !item.product.categoryId ||
+                                            !item.product.categoryId.isActive) { %>
+                                            <p class="text-xs font-bold text-red-500 mt-1">
+                                                <i class="fa-solid fa-circle-exclamation"></i> Product is no longer
+                                                available
                                             </p>
-                                            <% } else if (item.quantity>= 10 && item.variant.stock >= 10) { %>
-                                                <p class="text-[10px] font-bold text-red-400">
-                                                    Max limit reached (10)
+                                            <% } else if (item.variant.stock===0) { %>
+                                                <p class="text-[10px] font-bold text-red-500 mt-1">
+                                                    Out of stock
                                                 </p>
-                                                <% } else if (item.quantity>= item.variant.stock) { %>
-                                                    <p class="text-[10px] font-bold text-red-400">
-                                                        Stock limit reached
+                                                <% } else if (item.quantity>= 10 && item.variant.stock >= 10) { %>
+                                                    <p class="text-[10px] font-bold text-red-400 mt-1">
+                                                        Max limit reached (10)
                                                     </p>
-                                                    <% } %>
+                                                    <% } else if (item.quantity>= item.variant.stock) { %>
+                                                        <p class="text-[10px] font-bold text-red-400 mt-1">
+                                                            Stock limit reached
+                                                        </p>
+                                                        <% } %>
                                     </div>
                                 </div>
 
@@ -190,7 +197,7 @@
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Subtotal</span>
                                         <span id="summary-subtotal" class="text-accent-navy">₹<%= subtotal.toFixed(2) %>
-                                                </span>
+                                        </span>
                                     </div>
 
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
@@ -203,7 +210,7 @@
                                         <span>Shipping</span>
 
                                         <span id="summary-shipping" class="text-accent-navy">₹<%= shipping.toFixed(2) %>
-                                                </span>
+                                        </span>
                                     </div>
 
                                 </div>

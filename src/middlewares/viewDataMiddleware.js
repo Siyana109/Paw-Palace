@@ -8,14 +8,28 @@ const viewDataMiddleware = async (req, res, next) => {
   if (req.session?.user?.id) {
     const userId = req.session.user.id;
 
-    const cart = await Cart.findOne({ user: userId });
-    const wishlist = await Wishlist.findOne({ user: userId });
+    const cart = await Cart.findOne({ user: userId })
+      .populate({ path: "items.product", populate: { path: "categoryId" } })
+      .populate("items.variant");
 
-    res.locals.cartCount = cart
-      ? cart.items.length
-      : 0;
+    const wishlist = await Wishlist.findOne({ user: userId })
+      .populate({ path: "items.product", populate: { path: "categoryId" } })
+      .populate("items.variant");
 
-    res.locals.wishlistCount = wishlist ? wishlist.items.length : 0;
+    const validCartItems = cart ? cart.items.filter(item =>
+      item.variant && item.variant.isActive &&
+      item.product && item.product.isActive &&
+      item.product.categoryId && item.product.categoryId.isActive
+    ) : [];
+
+    const validWishlistItems = wishlist ? wishlist.items.filter(item =>
+      item.variant && item.variant.isActive &&
+      item.product && item.product.isActive &&
+      item.product.categoryId && item.product.categoryId.isActive
+    ) : [];
+
+    res.locals.cartCount = validCartItems.length;
+    res.locals.wishlistCount = validWishlistItems.length;
   } else {
     res.locals.cartCount = 0;
     res.locals.wishlistCount = 0;

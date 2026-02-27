@@ -208,7 +208,7 @@ WEEK-11:
 WEEK-11 PENDINGS:
     User:
     ✔ Page should not refresh while updating the qty in cart @done (2/24/2026, 8:23:30 PM)
-    ☐ Category unlist is not working
+    ✔ Category unlist is not working @done (2/27/2026, 10:56:22 AM)
     ✔ Product unlist is not working, still accessible through url. @done (2/24/2026, 8:55:13 PM)
 
     Admin:

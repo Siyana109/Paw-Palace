@@ -68,7 +68,9 @@ const getCheckoutPage = async (req, res) => {
     let stockIssues = [];
 
     cart.items.forEach(item => {
-      if (!item.variant || !item.variant.isActive || item.variant.stock === 0) {
+      if (!item.variant || !item.variant.isActive || item.variant.stock === 0 ||
+        !item.product || !item.product.isActive ||
+        !item.product.categoryId || !item.product.categoryId.isActive) {
         stockIssues.push({
           type: "OOS",
           productId: item.product._id,
@@ -198,6 +200,14 @@ const applyCoupon = async (req, res) => {
       .populate({ path: "items.product", populate: { path: "categoryId" } })
       .populate("items.variant");
 
+    if (cart) {
+      cart.items = cart.items.filter(item =>
+        item.variant && item.variant.isActive &&
+        item.product && item.product.isActive &&
+        item.product.categoryId && item.product.categoryId.isActive
+      );
+    }
+
     if (!cart || !cart.items.length) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
@@ -280,7 +290,10 @@ const placeOrder = async (req, res) => {
 
     // FETCH CART
     const cart = await Cart.findOne({ user: userId })
-      .populate("items.product")
+      .populate({
+        path: "items.product",
+        populate: { path: "categoryId" }
+      })
       .populate("items.variant");
 
     if (!cart || cart.items.length === 0) {
@@ -291,12 +304,15 @@ const placeOrder = async (req, res) => {
     const addressDoc = await Address.findOne({ _id: addressId, userId });
     if (!addressDoc) return res.redirect("/checkout");
 
-    // VALIDATE STOCK (ONLY CHECK)
+    // VALIDATE CATEGORY & STOCK (STRICT)
     for (const item of cart.items) {
       const variant = await Variant.findById(item.variant._id);
 
-      if (!variant || !variant.isActive || variant.stock < item.quantity) {
-        throw new Error("OUT_OF_STOCK");
+      if (!variant || !variant.isActive ||
+        !item.product || !item.product.isActive ||
+        !item.product.categoryId || !item.product.categoryId.isActive ||
+        variant.stock < item.quantity) {
+        throw new Error("UNAVAILABLE_OR_OUT_OF_STOCK");
       }
     }
 

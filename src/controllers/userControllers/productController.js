@@ -17,7 +17,7 @@ const getProductDetails = async (req, res) => {
       .populate("brandId")
       .populate("categoryId");
 
-    if (!product || !product.isActive) {
+    if (!product || !product.isActive || (product.categoryId && !product.categoryId.isActive)) {
       return res.redirect("/home");
     }
 
@@ -59,10 +59,14 @@ const getProductDetails = async (req, res) => {
       ? product.petType
       : [product.petType];
 
-    // Related Products (ONLY IN-STOCK VARIANTS)
+    const activeCategories = await import("../../model/categoryModel.js").then(m => m.default.find({ isActive: true }).select('_id'));
+    const activeCategoryIds = activeCategories.map(cat => cat._id);
+
+    // Related Products (ONLY IN-STOCK VARIANTS + ACTIVE CATEGORY)
     const relatedBaseProducts = await Product.find({
       _id: { $ne: productId },
       isActive: true,
+      categoryId: { $in: activeCategoryIds },
       petType: { $in: petTypes }
     }).limit(6);
 
@@ -162,7 +166,11 @@ const addToCart = async (req, res) => {
         ? req.session.user.id
         : req.session.user;
 
-    const variant = await Variant.findById(variantId).populate("product");
+    const variant = await Variant.findById(variantId)
+      .populate({
+        path: "product",
+        populate: { path: "categoryId" }
+      });
 
     if (!productId || !variantId) {
       return res.status(400).json({
@@ -171,9 +179,10 @@ const addToCart = async (req, res) => {
       });
     }
 
-    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive) {
+    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive)) {
       return res.status(400).json({
         success: false,
+        message: "This product is currently unavailable",
         redirect: "/home"
       });
     }
@@ -267,6 +276,8 @@ const getCartPage = async (req, res) => {
       return res.render('user/cart', { cart: null, hasOutOfStock: false });
     }
 
+
+
     // Fetch active offers ONCE
     const activeOffers = await Offer.find({
       status: "active",
@@ -288,7 +299,10 @@ const getCartPage = async (req, res) => {
     });
 
     const stockIssues = cart.items.filter(item =>
-      !item.variant || !item.variant.isActive || item.variant.stock === 0 || item.quantity > item.variant.stock
+      !item.variant || !item.variant.isActive ||
+      !item.product || !item.product.isActive ||
+      !item.product.categoryId || !item.product.categoryId.isActive ||
+      item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
     res.render('user/cart', {
@@ -346,9 +360,13 @@ const updateCartQuantity = async (req, res) => {
       return res.status(404).json({ success: false });
     }
 
-    const variant = await Variant.findById(variantId);
+    const variant = await Variant.findById(variantId)
+      .populate({
+        path: "product",
+        populate: { path: "categoryId" }
+      });
 
-    if (!variant || !variant.isActive) {
+    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive)) {
       return res.status(404).json({
         success: false,
         message: "Product unavailable"
@@ -418,7 +436,11 @@ const getWishlist = async (req, res) => {
       })
       .populate("items.variant");
 
-    const wishlistItems = wishlistDoc ? wishlistDoc.items.filter(item => item.variant && item.variant.isActive) : [];
+    const wishlistItems = wishlistDoc ? wishlistDoc.items.filter(item =>
+      item.variant && item.variant.isActive &&
+      item.product && item.product.isActive &&
+      item.product.categoryId && item.product.categoryId.isActive
+    ) : [];
 
     // Active offers
     const activeOffers = await Offer.find({

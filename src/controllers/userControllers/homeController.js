@@ -22,15 +22,28 @@ const homePage = async (req, res) => {
     const limit = 8;
     const skip = (page - 1) * limit;
 
+    // Get Active Categories first
+    const activeCategories = await Category.find({ isActive: true }).select('_id');
+    const activeCategoryIds = activeCategories.map(cat => cat._id);
+
     // PRODUCT MATCH
-    const productMatch = { isActive: true };
+    const productMatch = {
+      isActive: true,
+      categoryId: { $in: activeCategoryIds }
+    };
 
     if (search) {
       productMatch.productName = { $regex: search, $options: "i" };
     }
 
     if (category) {
-      productMatch.categoryId = new mongoose.Types.ObjectId(category);
+      // If user filters by category, ensure it's actually an active one
+      if (activeCategoryIds.some(id => id.toString() === category)) {
+        productMatch.categoryId = new mongoose.Types.ObjectId(category);
+      } else {
+        // Force no match if category is inactive
+        productMatch.categoryId = null;
+      }
     }
 
     const petTypes = [].concat(petType || []);
@@ -201,8 +214,9 @@ const homePage = async (req, res) => {
     ];
 
     const totalProducts = (await Product.aggregate(countPipeline)).length;
-    const totalPages = Math.ceil(totalProducts / limit);
+    const totalPages = Math.ceil(totalProducts / limit) || 1;
 
+    // We already fetched activeCategories earlier, but we need full objects for the view
     const categories = await Category.find({ isActive: true });
 
     res.render("user/home", {
