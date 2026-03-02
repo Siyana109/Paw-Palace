@@ -202,9 +202,23 @@ const updateOffer = async (req, res) => {
             });
         }
 
+        // Clean up formatting to prevent Mongoose Casting Errors
+        if (data.offerType === "category") {
+            data.productId = [];
+            data.categoryId = data.categoryId || null;
+        } else if (data.offerType === "product") {
+            data.categoryId = null;
+            // ensure productId is array
+            if (data.productId && !Array.isArray(data.productId)) {
+                data.productId = [data.productId];
+            } else if (!data.productId) {
+                data.productId = [];
+            }
+        }
+
         const updatedOffer = await Offer.findByIdAndUpdate(
             id,
-            data,
+            { $set: data },
             { new: true, runValidators: true }
         );
 
