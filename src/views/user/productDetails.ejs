@@ -406,24 +406,10 @@
                     renderSizeSelectors(sizes);
                     renderColorSelectors(colors);
 
-                    // If only one variant exists, auto-select it.
-                    // Otherwise, leave it unselected so the user has to choose.
-                    if (variants.length === 1) {
-                        selectVariant(variants[0]._id);
-                    } else {
-                        // Clear active variant initially so user must select
-                        activeVariant = null;
-                        document.getElementById('cartVariantId').value = "";
-                        document.getElementById('wishlistBtn').dataset.variant = "";
-
-                        // Disable Add to Cart button initially if multiple variants
-                        const btn = document.getElementById('addToCartBtn');
-                        if (btn) {
-                            btn.disabled = true;
-                            btn.innerHTML = 'Select Variant';
-                            btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                            btn.classList.remove('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
-                        }
+                    // Auto-select the default variant initially as requested
+                    if (variants.length > 0) {
+                        const defaultId = (activeVariant && activeVariant._id) ? activeVariant._id : variants[0]._id;
+                        selectVariant(defaultId);
                     }
                 }
 
