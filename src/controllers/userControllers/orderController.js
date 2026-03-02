@@ -110,7 +110,7 @@ const getOrderDetails = async (req, res) => {
 const requestReturnItem = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
-        const { reason } = req.body;
+        const { reason, quantity } = req.body;
         const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
@@ -118,9 +118,52 @@ const requestReturnItem = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        const item = order.items.id(itemId);
+        let item = order.items.id(itemId);
         if (!item || item.itemStatus !== "Delivered") {
             return res.status(400).json({ success: false, message: "Invalid return request" });
+        }
+
+        const returnQty = quantity ? parseInt(quantity, 10) : item.quantity;
+        if (returnQty <= 0 || returnQty > item.quantity) {
+            return res.status(400).json({ success: false, message: "Invalid return quantity" });
+        }
+
+        // If partial return, split the item
+        if (returnQty < item.quantity) {
+            const originalQty = item.quantity;
+            const remainingQty = originalQty - returnQty;
+            const perItemPrice = item.price;
+
+            // Reduce original item to the non-returned amount
+            item.quantity = remainingQty;
+            item.totalAmount = remainingQty * perItemPrice;
+            if (item.couponDiscount) {
+                item.couponDiscount = (item.couponDiscount / originalQty) * remainingQty;
+            }
+            if (item.shippingShare) {
+                item.shippingShare = (item.shippingShare / originalQty) * remainingQty;
+            }
+
+            // Create a brand new item for the returned portion
+            let returnedItemObj = item.toObject();
+            delete returnedItemObj._id;      // Let mongoose generate a new ID
+            delete returnedItemObj.createdAt;
+            delete returnedItemObj.updatedAt;
+
+            returnedItemObj.quantity = returnQty;
+            returnedItemObj.totalAmount = returnQty * perItemPrice;
+            if (returnedItemObj.couponDiscount) {
+                returnedItemObj.couponDiscount = (item.couponDiscount / remainingQty) * returnQty;
+            }
+            if (returnedItemObj.shippingShare) {
+                returnedItemObj.shippingShare = (item.shippingShare / remainingQty) * returnQty;
+            }
+
+            // Push the new cloned item, and set THAT item to the requested return one
+            order.items.push(returnedItemObj);
+
+            // Re-fetch the item we just pushed so it has an _id and model methods
+            item = order.items[order.items.length - 1];
         }
 
         item.itemStatus = "Return Requested";
@@ -181,7 +224,7 @@ const cancelReturnRequest = async (req, res) => {
 const cancelOrderOrItem = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const { itemId, reason } = req.body;
+        const { itemId, reason, quantity } = req.body;
         const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
@@ -192,12 +235,62 @@ const cancelOrderOrItem = async (req, res) => {
         console.log("orderId:", orderId);
         console.log("userId:", userId);
 
-        // Decide which items to cancel
-        const itemsToCancel = itemId
-            ? [order.items.id(itemId)]
-            : order.items.filter(
+        let itemsToCancel = [];
+        if (itemId) {
+            let item = order.items.id(itemId);
+            if (!item) {
+                return res.json({ success: false, message: "Item not found" });
+            }
+
+            const cancelQty = quantity ? parseInt(quantity, 10) : item.quantity;
+            if (cancelQty <= 0 || cancelQty > item.quantity) {
+                return res.json({ success: false, message: "Invalid cancel quantity" });
+            }
+
+            // If partial cancellation, split the item
+            if (cancelQty < item.quantity) {
+                const originalQty = item.quantity;
+                const remainingQty = originalQty - cancelQty;
+                const perItemPrice = item.price;
+
+                // Reduce original item to the non-cancelled amount
+                item.quantity = remainingQty;
+                item.totalAmount = remainingQty * perItemPrice;
+                if (item.couponDiscount) {
+                    item.couponDiscount = (item.couponDiscount / originalQty) * remainingQty;
+                }
+                if (item.shippingShare) {
+                    item.shippingShare = (item.shippingShare / originalQty) * remainingQty;
+                }
+
+                // Create a brand new item for the cancelled portion
+                let cancelledItemObj = item.toObject();
+                delete cancelledItemObj._id;
+                delete cancelledItemObj.createdAt;
+                delete cancelledItemObj.updatedAt;
+
+                cancelledItemObj.quantity = cancelQty;
+                cancelledItemObj.totalAmount = cancelQty * perItemPrice;
+                if (cancelledItemObj.couponDiscount) {
+                    cancelledItemObj.couponDiscount = (item.couponDiscount / remainingQty) * cancelQty;
+                }
+                if (cancelledItemObj.shippingShare) {
+                    cancelledItemObj.shippingShare = (item.shippingShare / remainingQty) * cancelQty;
+                }
+
+                // Push the new cloned item, and set THAT item to be the one we cancel
+                order.items.push(cancelledItemObj);
+                const newlyAllocatedItem = order.items[order.items.length - 1];
+                itemsToCancel = [newlyAllocatedItem];
+            } else {
+                itemsToCancel = [item];
+            }
+        } else {
+            // Cancel the entire order (all active items)
+            itemsToCancel = order.items.filter(
                 i => !["Cancelled", "Returned"].includes(i.itemStatus)
             );
+        }
 
         if (!itemsToCancel.length) {
             return res.json({ success: false, message: "No cancellable items" });
