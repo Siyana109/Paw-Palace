@@ -255,6 +255,13 @@ TODO :
         ✔ order detailing page calculations @done (2/23/2026, 11:51:04 PM)
         ✔ coupon controller @done (2/26/2026, 11:39:30 AM)
         ☐ ONLINE , RAZORPAY in db (placeOrder)
+        ✔ min & max price validation in home page @done (3/2/2026, 6:15:46 PM)
+        ☐ home page need to be responsive
+        ☐ offer validation
+        ☐ coupon validation
+        ☐ in order history status failed card is showing package is on the way
+        ☐ return and cancel validation in comment
+        ☐ 
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

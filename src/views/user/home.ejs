@@ -128,15 +128,16 @@
                                             <i class="fa-solid fa-chevron-up text-[10px]"></i>
                                         </h3>
 
-                                        <div class="flex gap-2 items-center mb-3">
-                                            <input type="number" name="minPrice" placeholder="Min ₹"
+                                        <div class="flex gap-2 items-center mb-1">
+                                            <input type="number" name="minPrice" placeholder="Min ₹" min="0"
                                                 value="<%= query.minPrice || '' %>"
                                                 class="w-24 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm" />
 
-                                            <input type="number" name="maxPrice" placeholder="Max ₹"
+                                            <input type="number" name="maxPrice" placeholder="Max ₹" min="0"
                                                 value="<%= query.maxPrice || '' %>"
                                                 class="w-24 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm" />
                                         </div>
+                                        <p id="priceError" class="text-xs text-red-500 font-bold mb-3 hidden"></p>
 
                                         <div class="flex gap-2">
                                             <button type="submit"
@@ -430,6 +431,27 @@
                 }
 
                 function cleanFilterForm(form) {
+                    const minEl = form.elements['minPrice'];
+                    const maxEl = form.elements['maxPrice'];
+                    const errorEl = document.getElementById('priceError');
+
+                    if (errorEl) {
+                        errorEl.classList.add('hidden');
+                        errorEl.textContent = '';
+                    }
+
+                    if (minEl && maxEl && minEl.value && maxEl.value) {
+                        const minVal = parseFloat(minEl.value);
+                        const maxVal = parseFloat(maxEl.value);
+                        if (maxVal < minVal) {
+                            if (errorEl) {
+                                errorEl.textContent = "Maximum price cannot be less than minimum price.";
+                                errorEl.classList.remove('hidden');
+                            }
+                            return false;
+                        }
+                    }
+
                     Array.from(form.elements).forEach(el => {
                         if (el.name && !el.value && el.type !== 'radio' && el.type !== 'checkbox') {
                             el.disabled = true;
