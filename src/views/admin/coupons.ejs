@@ -289,8 +289,7 @@
                     <!-- Value & Max Discount -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount
-                                Amount</label>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount</label>
                             <input type="number" id="editDiscountValue" name="discountValue"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-bold">
                         </div>
@@ -690,7 +689,11 @@
 
             if (!data.code || data.code.trim().length < 4) errors.push("Coupon Code must be at least 4 characters.");
             if (!data.discountValue || data.discountValue <= 0) errors.push("Discount Amount must be positive.");
-            if (data.discountType === 'percentage' && data.discountValue > 100) errors.push("Percentage cannot exceed 100%.");
+            if (data.discountType === 'percentage' && data.discountValue > 90) errors.push("Percentage cannot exceed 90%.");
+
+            if (data.discountType === 'fixed' && data.minimumPurchase && Number(data.discountValue) >= Number(data.minimumPurchase)) {
+                errors.push("Discount amount must be less than minimum purchase amount.");
+            }
 
             // Validate Max Discount only if provided AND type is percentage
             if (data.discountType === 'percentage') {

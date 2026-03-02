@@ -43,8 +43,12 @@ const addCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: "Discount value must be positive" });
         }
 
-        if (discountType === 'percentage' && Number(discountValue) > 100) {
-            return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
+        if (discountType === 'percentage' && Number(discountValue) > 90) {
+            return res.status(400).json({ success: false, message: "Percentage cannot exceed 90%" });
+        }
+
+        if (discountType === 'fixed' && minimumPurchase && Number(discountValue) >= Number(minimumPurchase)) {
+            return res.status(400).json({ success: false, message: "Discount amount must be less than the minimum purchase amount" });
         }
 
         if (discountType === 'percentage' && maximumDiscount && Number(maximumDiscount) <= 0) {
@@ -110,8 +114,12 @@ const editCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: "Discount value must be positive" });
         }
 
-        if (discountType === 'percentage' && Number(discountValue) > 100) {
-            return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
+        if (discountType === 'percentage' && Number(discountValue) > 90) {
+            return res.status(400).json({ success: false, message: "Percentage cannot exceed 90%" });
+        }
+
+        if (discountType === 'fixed' && minimumPurchase && Number(discountValue) >= Number(minimumPurchase)) {
+            return res.status(400).json({ success: false, message: "Discount amount must be less than the minimum purchase amount" });
         }
 
         if (discountType === 'percentage' && maximumDiscount && Number(maximumDiscount) <= 0) {
