@@ -44,12 +44,14 @@
                 <!-- SIDEBAR FILTER FORM -->
                 <aside class="w-full lg:w-64 space-y-8">
 
-                    <form method="GET" action="/home" id="filterForm">
+                    <form method="GET" action="/home" id="filterForm" onsubmit="return cleanFilterForm(this)">
                         <!-- Preserve Search & Sort & Price in Side Filters -->
                         <% Object.keys(query || {}).forEach(key=> {
                             if (
                             key !== 'page' &&
                             key !== 'category' &&
+                            key !== 'minPrice' &&
+                            key !== 'maxPrice' &&
                             !key.startsWith('petType')
                             ) {
                             if (Array.isArray(query[key])) {
@@ -167,7 +169,8 @@
                     <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
 
                         <!-- 🔍 SEARCH (LEFT SIDE) -->
-                        <form method="GET" action="/home" class="relative w-full max-w-md">
+                        <form method="GET" action="/home" class="relative w-full max-w-md"
+                            onsubmit="return cleanFilterForm(this)">
 
                             <input type="text" name="search" value="<%= query.search || '' %>"
                                 placeholder="Search products..."
@@ -196,7 +199,7 @@
                         </form>
 
                         <!-- SORT FORM -->
-                        <form method="GET" action="/home">
+                        <form method="GET" action="/home" onsubmit="return cleanFilterForm(this)">
                             <% Object.keys(query || {}).forEach(key=> {
                                 if (key !== 'sort' && key !== 'page') {
                                 if (Array.isArray(query[key])) {
@@ -424,6 +427,18 @@
                     } catch (error) {
                         console.error(error);
                     }
+                }
+
+                function cleanFilterForm(form) {
+                    Array.from(form.elements).forEach(el => {
+                        if (el.name && !el.value && el.type !== 'radio' && el.type !== 'checkbox') {
+                            el.disabled = true;
+                        }
+                        if (el.type === 'radio' && el.checked && !el.value) {
+                            el.disabled = true;
+                        }
+                    });
+                    return true;
                 }
             </script>
 </body>

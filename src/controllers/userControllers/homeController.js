@@ -36,7 +36,7 @@ const homePage = async (req, res) => {
       productMatch.productName = { $regex: search, $options: "i" };
     }
 
-    if (category) {
+    if (category && category !== 'all') {
       // If user filters by category, ensure it's actually an active one
       if (activeCategoryIds.some(id => id.toString() === category)) {
         productMatch.categoryId = new mongoose.Types.ObjectId(category);
