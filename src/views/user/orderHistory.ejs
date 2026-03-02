@@ -185,9 +185,11 @@
                                                             You cancelled this order.
                                                             <% } else if (order.orderStatus==='Out for Delivery' ) { %>
                                                                 Your package is out for delivery today.
-                                                                <% } else { %>
-                                                                    Package is on the way.
-                                                                    <% } %>
+                                                                <% } else if (order.payment.status==='Failed' ) {
+                                                                    %> Your order attempt was failed.
+                                                                    <% } else { 
+                                                                        %> Package is on the way.
+                                                                        <% } %>
                                                 </p>
                                             </div>
 

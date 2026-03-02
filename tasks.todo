@@ -257,9 +257,9 @@ TODO :
         ☐ ONLINE , RAZORPAY in db (placeOrder)
         ✔ min & max price validation in home page @done (3/2/2026, 6:15:46 PM)
         ☐ home page need to be responsive
-        ☐ offer validation
+        ✔ offer validation @done (3/2/2026, 7:14:10 PM)
         ☐ coupon validation
-        ☐ in order history status failed card is showing package is on the way
+        ✔ in order history status failed card is showing package is on the way @done (3/2/2026, 6:33:44 PM)
         ☐ return and cancel validation in comment
         ☐ 
 

@@ -145,13 +145,11 @@ const createOffer = async (req, res) => {
         }
 
         // Percentage Validation
-        if (discountType === "percentage") {
-            if (discountValue > 100) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Percentage discount cannot exceed 100%"
-                });
-            }
+        if (discountValue > 90) {
+            return res.status(400).json({
+                success: false,
+                message: "Percentage discount cannot exceed 90%"
+            });
         }
 
         // FIXED AMOUNT VALIDATION (IMPORTANT)
@@ -162,7 +160,7 @@ const createOffer = async (req, res) => {
             offerName,
             discount: discountValue,
             offerType,
-            discountType,
+            discountType: 'percentage',
             categoryId: categoryId || null,
             productId: productId || [],
             startDate,
@@ -195,12 +193,14 @@ const updateOffer = async (req, res) => {
 
         const discountValue = Number(data.discount);
 
-        if (data.discountType === "percentage" && discountValue > 100) {
+        if (discountValue > 90) {
             return res.status(400).json({
                 success: false,
-                message: "Percentage discount cannot exceed 100%"
+                message: "Percentage discount cannot exceed 90%"
             });
         }
+
+        data.discountType = 'percentage';
 
         // Clean up formatting to prevent Mongoose Casting Errors
         if (data.offerType === "category") {

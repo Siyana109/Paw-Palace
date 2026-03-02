@@ -22,10 +22,7 @@ export const applyOfferToPrice = ({ price, productId, categoryId, activeOffers }
     };
   }
 
-  let finalPrice =
-    appliedOffer.discountType === "percentage"
-      ? price - (price * appliedOffer.discount) / 100
-      : price - appliedOffer.discount;
+  let finalPrice = price - (price * appliedOffer.discount) / 100;
 
   return {
     offerApplied: true,
