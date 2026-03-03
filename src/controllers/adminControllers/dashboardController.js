@@ -26,7 +26,7 @@ const getDashboard = async (req, res) => {
 
         // 3. Count products and users
         const totalProducts = await Product.countDocuments();
-        const totalUsers = await User.countDocuments({ role: 'user' });
+        const totalUsers = await User.countDocuments({ isAdmin: false });
 
         // 4. Fetch Recent 5 Orders
         const recentOrders = await Order.find()
