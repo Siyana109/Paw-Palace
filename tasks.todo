@@ -210,9 +210,9 @@ WEEK-11 PENDINGS:
     ✔ Page should not refresh while updating the qty in cart @done (2/24/2026, 8:23:30 PM)
     ✔ Category unlist is not working @done (2/27/2026, 10:56:22 AM)
     ✔ Product unlist is not working, still accessible through url. @done (2/24/2026, 8:55:13 PM)
-    ☐ retry the payment directly
-    ☐ there should be option to retry option for failed orders
-    ☐ keep it as singel order id for failed orders
+    ✔ retry the payment directly @done (3/4/2026, 1:35:56 PM)
+    ✔ there should be option to retry option for failed orders @done (3/4/2026, 1:35:58 PM)
+    ✔ keep it as singel order id for failed orders @done (3/4/2026, 1:36:00 PM)
     ☐ apply the coupen as per the limit
     ☐ add proper error and success message
     ☐ handle place order error

@@ -809,7 +809,6 @@
                             return;
                         }
 
-                        // Success
                         if (data.success) {
                             // Update header badge
                             if (typeof window.updateCartCount === 'function' && data.cartCount !== undefined) {
@@ -850,6 +849,87 @@
                         });
                     }
                 });
+
+
+                async function buyNow() {
+                    if (!isLoggedIn) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Login Required',
+                            text: 'Please login to purchase items',
+                            confirmButtonText: 'Login',
+                            confirmButtonColor: '#ff4d6d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/login';
+                            }
+                        });
+                        return;
+                    }
+
+                    const variantId = document.getElementById('cartVariantId').value;
+                    if (!variantId) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Select Variant',
+                            text: 'Please select a size and color before buying',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        return;
+                    }
+
+                    const payload = {
+                        productId: "<%= product._id %>",
+                        variantId: document.getElementById('cartVariantId').value,
+                        quantity: document.getElementById('formQuantity').value
+                    };
+
+                    try {
+                        const res = await fetch('/checkout/buy-now-init', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await res.json();
+
+                        // Not logged in → redirect
+                        if (res.status === 401 && data.redirect) {
+                            window.location.href = data.redirect;
+                            return;
+                        }
+
+                        if (!data.success && data.message) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Product Unavailable',
+                                text: data.message,
+                                confirmButtonColor: '#ff4d6d'
+                            });
+                            return;
+                        }
+
+                        // Success -> Go to Checkout natively
+                        if (data.success) {
+                            window.location.href = '/checkout?buyNow=true';
+                        } else {
+                            // If add-to-cart failed for some reason (e.g., stock limit)
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops!',
+                                text: data.message || 'Something went wrong'
+                            });
+                        }
+
+                    } catch (err) {
+                        console.error("Buy Now Error:", err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: 'Could not process Buy Now request'
+                        });
+                    }
+                }
 
             </script>
 

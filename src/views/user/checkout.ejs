@@ -196,6 +196,8 @@
 
                     <form action="/checkout/place-order" method="POST" id="checkoutForm">
                         <input type="hidden" name="paymentDetails" id="paymentDetailsInput">
+                        <input type="hidden" name="isBuyNow" id="isBuyNowInput"
+                            value="<%= typeof isBuyNow !== 'undefined' ? isBuyNow : false %>">
                         <% if (stockIssues.length) { %>
                             <div
                                 class="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold">
@@ -526,7 +528,7 @@
 
     // --- Data Initialization ---
     // Safe parse of addresses from server
-    const allAddresses = <%-JSON.stringify(addresses || []) %>;
+    const allAddresses = <%- JSON.stringify(addresses || []) %>;
     let selectedAddressIndex = allAddresses.findIndex(a => a.isDefault);
 
     if (selectedAddressIndex === -1) {

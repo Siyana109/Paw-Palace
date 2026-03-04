@@ -1,4 +1,5 @@
 import Address from "../../model/addressModel.js";
+import Product from "../../model/productModel.js";
 import Cart from "../../model/cartModel.js";
 import Coupon from "../../model/couponModel.js";
 import Offer from "../../model/offerModel.js";
@@ -12,15 +13,25 @@ import { applyOfferToPrice } from "../../../utils/applyOffer.js";
 const getCheckoutPage = async (req, res) => {
   try {
     const userId = req.session.user.id;
+    const isBuyNow = req.query.buyNow === 'true';
 
     const addresses = await Address.find({ userId }).sort({ isDefault: -1 });
 
-    const cart = await Cart.findOne({ user: userId })
-      .populate({
-        path: "items.product",
-        populate: { path: "categoryId" }
-      })
-      .populate("items.variant");
+    let cart;
+    if (isBuyNow && req.session.buyNowItem) {
+      // Create a mock cart object from the session item
+      cart = {
+        items: [req.session.buyNowItem]
+      };
+    } else {
+      // Normal flow
+      cart = await Cart.findOne({ user: userId })
+        .populate({
+          path: "items.product",
+          populate: { path: "categoryId" }
+        })
+        .populate("items.variant");
+    }
 
     const allCoupons = await Coupon.find({ isActive: true });
 
@@ -95,7 +106,8 @@ const getCheckoutPage = async (req, res) => {
       cart,
       coupons,
       walletBalance: wallet ? wallet.balance : 0,
-      stockIssues
+      stockIssues,
+      isBuyNow
     });
 
   } catch (error) {
@@ -146,8 +158,9 @@ const getOrderConfirmationPage = async (req, res) => {
 
 const applyCoupon = async (req, res) => {
   try {
-    const { couponCode } = req.body;
+    const { couponCode, isBuyNow } = req.body;
     const userId = req.session.user.id;
+    const isBuyNowFlow = isBuyNow === 'true';
 
     if (!couponCode) {
       return res.status(400).json({ success: false, message: "Coupon code is required" });
@@ -177,11 +190,6 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Coupon has expired" });
     }
 
-    // Validate Global Usage Limit
-    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return res.status(400).json({ success: false, message: "Coupon limit reached" });
-    }
-
     // Validate Usage Limit (Per User)
     // Count how many times THIS USER used this coupon
     const userUsageCount = coupon.usedBy
@@ -196,16 +204,24 @@ const applyCoupon = async (req, res) => {
     }
 
     // --- Calculate Cart Total (Securely) ---
-    const cart = await Cart.findOne({ user: userId })
-      .populate({ path: "items.product", populate: { path: "categoryId" } })
-      .populate("items.variant");
+    let cart;
+    if (isBuyNowFlow) {
+      if (!req.session.buyNowItem) {
+        return res.status(400).json({ success: false, message: "Session expired" });
+      }
+      cart = { items: [req.session.buyNowItem] };
+    } else {
+      cart = await Cart.findOne({ user: userId })
+        .populate({ path: "items.product", populate: { path: "categoryId" } })
+        .populate("items.variant");
 
-    if (cart) {
-      cart.items = cart.items.filter(item =>
-        item.variant && item.variant.isActive &&
-        item.product && item.product.isActive &&
-        item.product.categoryId && item.product.categoryId.isActive
-      );
+      if (cart) {
+        cart.items = cart.items.filter(item =>
+          item.variant && item.variant.isActive &&
+          item.product && item.product.isActive &&
+          item.product.categoryId && item.product.categoryId.isActive
+        );
+      }
     }
 
     if (!cart || !cart.items.length) {
@@ -278,7 +294,8 @@ const applyCoupon = async (req, res) => {
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { addressId, paymentDetails, couponCode } = req.body;
+    const { addressId, paymentDetails, couponCode, isBuyNow } = req.body;
+    const isBuyNowFlow = isBuyNow === 'true';
 
     const allowedMethods = ["COD", "ONLINE", "WALLET"];
     if (!allowedMethods.includes(paymentDetails)) {
@@ -288,16 +305,24 @@ const placeOrder = async (req, res) => {
     let paymentMethod =
       paymentDetails === "ONLINE" ? "RAZORPAY" : paymentDetails;
 
-    // FETCH CART
-    const cart = await Cart.findOne({ user: userId })
-      .populate({
-        path: "items.product",
-        populate: { path: "categoryId" }
-      })
-      .populate("items.variant");
+    // FETCH CART OR SESSION
+    let cart;
+    if (isBuyNowFlow) {
+      if (!req.session.buyNowItem) {
+        return res.redirect("/checkout");
+      }
+      cart = { items: [req.session.buyNowItem] };
+    } else {
+      cart = await Cart.findOne({ user: userId })
+        .populate({
+          path: "items.product",
+          populate: { path: "categoryId" }
+        })
+        .populate("items.variant");
 
-    if (!cart || cart.items.length === 0) {
-      return res.redirect("/cart");
+      if (!cart || cart.items.length === 0) {
+        return res.redirect("/cart");
+      }
     }
 
     // FETCH ADDRESS
@@ -372,8 +397,9 @@ const placeOrder = async (req, res) => {
         throw new Error("COUPON_EXPIRED");
       }
 
-      if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-        throw new Error("COUPON_LIMIT_REACHED");
+      const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
+      if (coupon.usageLimit && userUsageCount >= coupon.usageLimit) {
+        throw new Error("USER_COUPON_LIMIT_REACHED");
       }
 
       const postOfferSubtotal = subtotal - offerDiscount;
@@ -474,22 +500,29 @@ const placeOrder = async (req, res) => {
 
       // deduct stock
       for (const item of cart.items) {
-        await Variant.findByIdAndUpdate(item.variant._id, {
+        await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
           $inc: { stock: -item.quantity },
         });
       }
 
-      await Cart.deleteOne({ user: userId });
+      if (!isBuyNowFlow) {
+        await Cart.deleteOne({ user: userId });
+      } else {
+        req.session.buyNowItem = null; // Clear buy now item
+      }
+
+      if (couponId) {
+        await Coupon.findByIdAndUpdate(couponId, {
+          $inc: { usageCount: 1 },
+          $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
+        });
+      }
 
       return res.json({ success: true, orderId: order._id });
     }
 
     // ONLINE (RAZORPAY)
-
-
-
     if (paymentMethod === "RAZORPAY") {
-
       // Create Order in DB with Pending status
       const order = await Order.create({
         ...orderPayload,
@@ -520,12 +553,23 @@ const placeOrder = async (req, res) => {
 
     // Deduct stock now
     for (const item of cart.items) {
-      await Variant.findByIdAndUpdate(item.variant._id, {
+      await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
         $inc: { stock: -item.quantity },
       });
     }
 
-    await Cart.deleteOne({ user: userId });
+    if (!isBuyNowFlow) {
+      await Cart.deleteOne({ user: userId });
+    } else {
+      req.session.buyNowItem = null;
+    }
+
+    if (couponId) {
+      await Coupon.findByIdAndUpdate(couponId, {
+        $inc: { usageCount: 1 },
+        $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
+      });
+    }
 
     return res.json({ success: true, orderId: order._id });
 
@@ -582,8 +626,26 @@ const verifyPayment = async (req, res) => {
       });
     }
 
-    // Delete cart
-    await Cart.deleteOne({ user: order.userId });
+    // Since we don't have isBuyNowFlow in verifyPayment payload easily without
+    // DB changes, we check if there's a buyNowItem in session for this user.
+    // However, Razorpay webhooks/callbacks might not have the session easily, 
+    // but this is a frontend callback.
+    if (req.session && req.session.buyNowItem) {
+      req.session.buyNowItem = null;
+    } else {
+      // Delete cart only if it wasn't a buy now order
+      // To be absolutely safe, we could delete cart items that match the order items, 
+      // but typically a Buy Now order implies the cart is untouched.
+      // For now, if buyNowItem exists in session we assume it was a buy now order.
+      await Cart.deleteOne({ user: order.userId });
+    }
+
+    if (order.couponId) {
+      await Coupon.findByIdAndUpdate(order.couponId, {
+        $inc: { usageCount: 1 },
+        $push: { usedBy: { userId: order.userId, orderId: order._id, usedAt: new Date() } }
+      });
+    }
 
     return res.json({ success: true, orderId: order._id });
 
@@ -607,7 +669,7 @@ const getPaymentFailedPage = async (req, res) => {
       });
     }
 
-    res.render("user/paymentFailed");
+    res.render("user/paymentFailed", { orderId: orderId || null });
 
   } catch (error) {
     console.error("Payment failed page error:", error);
@@ -617,13 +679,85 @@ const getPaymentFailedPage = async (req, res) => {
 
 
 
+const retryPayment = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { orderId } = req.body;
+
+    const order = await Order.findOne({ _id: orderId, userId });
+    if (!order) {
+      return res.json({ success: false, message: "Order not found" });
+    }
+
+    if (order.payment.status !== "Failed" && order.orderStatus !== "Payment Failed" && order.orderStatus !== "Failed") {
+      return res.json({ success: false, message: "Order is not in a failed state" });
+    }
+
+    // Check stock availability before allowing retry
+    for (const item of order.items) {
+      const variant = await Variant.findById(item.variantId);
+      if (!variant || variant.stock < item.quantity) {
+        return res.json({ success: false, message: `Insufficient stock for ${item.productName}` });
+      }
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: Math.round(order.totalAmount * 100),
+      currency: "INR",
+      receipt: order._id.toString()
+    });
+
+    return res.json({
+      success: true,
+      razorpayOrder,
+      key: process.env.RAZORPAY_KEY_ID,
+      orderId: order._id
+    });
+  } catch (error) {
+    console.error("Retry Payment Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to initiate retry" });
+  }
+};
+
+const initBuyNow = async (req, res) => {
+  try {
+    const { productId, variantId, quantity } = req.body;
+    const userId = req.session.user.id;
+
+    const product = await Product.findById(productId).populate('categoryId');
+    if (!product || !product.isActive) {
+      return res.json({ success: false, message: "Product not available" });
+    }
+
+    const variant = await Variant.findById(variantId);
+    if (!variant || variant.stock < quantity || !variant.isActive) {
+      return res.json({ success: false, message: "Requested quantity not available in stock" });
+    }
+
+    // Store item specifically formatted exactly like a populated Cart Item in the session
+    req.session.buyNowItem = {
+      product: product,
+      variant: variant,
+      quantity: Number(quantity)
+    };
+
+    return res.json({ success: true });
+
+  } catch (error) {
+    console.error("Init Buy Now Error:", error);
+    return res.status(500).json({ success: false, message: "Could not initiate custom checkout" });
+  }
+};
+
 export default {
   getCheckoutPage,
   getOrderConfirmationPage,
   applyCoupon,
   placeOrder,
   verifyPayment,
-  getPaymentFailedPage
+  getPaymentFailedPage,
+  retryPayment,
+  initBuyNow
 };
 
 

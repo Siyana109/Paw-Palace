@@ -71,6 +71,7 @@ router.post("/verify-payment", userMiddleware.checkSession, checkoutController.v
 router.get('/checkout/payment-failed', userMiddleware.checkSession, checkoutController.getPaymentFailedPage);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
 router.post('/checkout/retry-payment', userMiddleware.checkSession, checkoutController.retryPayment);
+router.post('/checkout/buy-now-init', userMiddleware.checkSession, checkoutController.initBuyNow);
 
 
 router.get('/orders', userMiddleware.checkSession, orderController.getOrderHistory);
