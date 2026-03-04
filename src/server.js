@@ -63,8 +63,16 @@ app.use(passport.session());
 
 app.use(viewDataMiddleware);
 app.use(attachUserToViews);
-app.use('/',userRoutes)
-app.use('/admin',adminRoutes)
+
+// Middleware to prevent browser caching for authenticated pages
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  next();
+});
+
+
+app.use('/', userRoutes)
+app.use('/admin', adminRoutes)
 
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
@@ -73,5 +81,5 @@ app.use((req, res, next) => {
 
 
 app.listen(port, () => {
-    console.log(`Express server started at http://localhost:${port}`);
+  console.log(`Express server started at http://localhost:${port}`);
 });
