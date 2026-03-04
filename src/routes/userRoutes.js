@@ -70,6 +70,7 @@ router.post('/checkout/place-order', userMiddleware.checkSession, checkoutContro
 router.post("/verify-payment", userMiddleware.checkSession, checkoutController.verifyPayment);
 router.get('/checkout/payment-failed', userMiddleware.checkSession, checkoutController.getPaymentFailedPage);
 router.get('/order-confirmation/:id', userMiddleware.checkSession, checkoutController.getOrderConfirmationPage);
+router.post('/checkout/retry-payment', userMiddleware.checkSession, checkoutController.retryPayment);
 
 
 router.get('/orders', userMiddleware.checkSession, orderController.getOrderHistory);

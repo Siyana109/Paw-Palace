@@ -39,60 +39,84 @@
         </div>
 
         <!-- Success Icon -->
-        <div class="relative z-10 mb-6">
-            <div
-                class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-500/30 animate-bounce-slow">
-                <i class="fa-solid fa-check text-4xl text-white"></i>
+        <% if (['Failed', 'Payment Failed' ].includes(order.orderStatus) || (order.payment &&
+            order.payment.status==='Failed' )) { %>
+            <div class="relative z-10 mb-6">
+                <div
+                    class="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-red-500/30 animate-pulse">
+                    <i class="fa-solid fa-xmark text-4xl text-white"></i>
+                </div>
             </div>
-        </div>
+            <h1 class="text-3xl font-black text-accent-navy mb-2 relative z-10">
+                Payment Failed <i class="fa-solid fa-face-frown text-2xl text-gray-400 rotate-12 ml-1"></i>
+            </h1>
+            <p class="text-gray-500 font-medium mb-8 relative z-10">
+                Your order payment has failed. Please retry your payment.
+            </p>
+            <% } else { %>
+                <div class="relative z-10 mb-6">
+                    <div
+                        class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-500/30 animate-bounce-slow">
+                        <i class="fa-solid fa-check text-4xl text-white"></i>
+                    </div>
+                </div>
 
-        <!-- Title -->
-        <h1 class="text-3xl font-black text-accent-navy mb-2 relative z-10">
-            Purr-fect! <i class="fa-solid fa-paw text-2xl text-gray-400 rotate-12 ml-1"></i>
-        </h1>
-        <p class="text-gray-500 font-medium mb-8 relative z-10">
-            Your order has been placed successfully.
-        </p>
+                <!-- Title -->
+                <h1 class="text-3xl font-black text-accent-navy mb-2 relative z-10">
+                    Purr-fect! <i class="fa-solid fa-paw text-2xl text-gray-400 rotate-12 ml-1"></i>
+                </h1>
+                <p class="text-gray-500 font-medium mb-8 relative z-10">
+                    Your order has been placed successfully.
+                </p>
+                <% } %>
 
-        <!-- Order Card -->
-        <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100 mb-8 relative z-10">
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2">Order Number</p>
-            <h2 class="text-2xl font-black text-accent-navy mb-4 tracking-tight">
-                #<%= order.orderId %>
-                <!-- #<%=order._id.toString().slice(-6).toUpperCase() %> -->
-            </h2>
+                    <!-- Order Card -->
+                    <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100 mb-8 relative z-10">
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2">Order Number</p>
+                        <h2 class="text-2xl font-black text-accent-navy mb-4 tracking-tight">
+                            #<%= order.orderId %>
+                                <!-- #<%=order._id.toString().slice(-6).toUpperCase() %> -->
+                        </h2>
 
-            <div class="border-t border-gray-200 my-4"></div>
+                        <div class="border-t border-gray-200 my-4"></div>
 
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-gray-500 font-bold">Estimated Delivery:</span>
-                <span class="text-teal-600 font-bold">
-                    <%= new Date(new Date().setDate(new Date().getDate() + 5)).toLocaleDateString('en-US', {
-                        month: 'short' , day: 'numeric' }) %> -
-                        <%= new Date(new Date().setDate(new Date().getDate() + 7)).toLocaleDateString('en-US', {
-                            month: 'short' , day: 'numeric' }) %>
-                </span>
-            </div>
-        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-bold">Estimated Delivery:</span>
+                            <span class="text-teal-600 font-bold">
+                                <%= new Date(new Date().setDate(new Date().getDate() + 5)).toLocaleDateString('en-US', {
+                                    month: 'short' , day: 'numeric' }) %> -
+                                    <%= new Date(new Date().setDate(new Date().getDate() +
+                                        7)).toLocaleDateString('en-US', { month: 'short' , day: 'numeric' }) %>
+                            </span>
+                        </div>
+                    </div>
 
-        <p class="text-gray-400 text-xs mb-8 leading-relaxed px-4">
-            We've sent a confirmation email to <span class="font-bold text-gray-600">
-                <%= user.email %>
-            </span>.
-            We'll let you know when your treats are on the way!
-        </p>
+                    <p class="text-gray-400 text-xs mb-8 leading-relaxed px-4">
+                        We've sent a confirmation email to <span class="font-bold text-gray-600">
+                            <%= user.email %>
+                        </span>.
+                        We'll let you know when your treats are on the way!
+                    </p>
 
-        <!-- Actions -->
-        <div class="flex gap-3">
-            <a href="/orders/<%= order._id %>"
-                class="flex-1 bg-emerald-400 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg shadow-emerald-400/30 text-sm">
-                Track Order
-            </a>
-            <a href="/home"
-                class="flex-1 bg-white text-gray-600 border border-gray-200 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition text-sm">
-                Continue Shopping
-            </a>
-        </div>
+                    <!-- Actions -->
+                    <div class="flex gap-3">
+                        <% if (['Failed', 'Payment Failed' ].includes(order.orderStatus) || (order.payment &&
+                            order.payment.status==='Failed' )) { %>
+                            <button onclick="retryPayment('<%= order._id %>')"
+                                class="flex-1 bg-red-500 text-white py-3.5 rounded-xl font-bold hover:bg-red-600 transition shadow-lg shadow-red-500/30 text-sm">
+                                Retry Payment
+                            </button>
+                            <% } else { %>
+                                <a href="/orders/<%= order._id %>"
+                                    class="flex-1 bg-emerald-400 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg shadow-emerald-400/30 text-sm">
+                                    Track Order
+                                </a>
+                                <% } %>
+                                    <a href="/home"
+                                        class="flex-1 bg-white text-gray-600 border border-gray-200 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition text-sm">
+                                        Continue Shopping
+                                    </a>
+                    </div>
 
     </div>
 
@@ -102,6 +126,56 @@
         © 2025 PawPalace. Spreading joy one wag at a time.
     </div>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function retryPayment(orderId) {
+            try {
+                const res = await fetch('/checkout/retry-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    return Swal.fire("Error", data.message || "Something went wrong", "error");
+                }
+
+                const options = {
+                    key: data.key,
+                    amount: data.razorpayOrder.amount,
+                    currency: "INR",
+                    name: "PawPalace",
+                    description: "Order Payment Retry",
+                    order_id: data.razorpayOrder.id,
+                    handler: async function (response) {
+                        const verifyRes = await fetch('/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...response, orderId: data.orderId })
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (verifyData.success) {
+                            window.location.href = `/order-confirmation/${verifyData.orderId}`;
+                        } else {
+                            window.location.reload();
+                        }
+                    },
+                    theme: { color: "#f43f5e" }
+                };
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    console.log(response.error);
+                    Swal.fire("Payment Failed", "Please try again.", "error");
+                });
+                rzp.open();
+            } catch (err) {
+                console.error(err);
+                Swal.fire("Error", "Could not initiate payment", "error");
+            }
+        }
+    </script>
 </body>
 
 </html>
