@@ -213,7 +213,7 @@ WEEK-11 PENDINGS:
     ✔ retry the payment directly @done (3/4/2026, 1:35:56 PM)
     ✔ there should be option to retry option for failed orders @done (3/4/2026, 1:35:58 PM)
     ✔ keep it as singel order id for failed orders @done (3/4/2026, 1:36:00 PM)
-    ☐ apply the coupen as per the limit
+    ✔ apply the coupen as per the limit @done (3/4/2026, 7:35:25 PM)
     ☐ add proper error and success message
     ☐ handle place order error
 

@@ -539,6 +539,26 @@ const placeOrder = async (req, res) => {
         receipt: order._id.toString()
       });
 
+      // Deduct stock now
+      for (const item of cart.items) {
+        await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
+          $inc: { stock: -item.quantity },
+        });
+      }
+
+      if (!isBuyNowFlow) {
+        await Cart.deleteOne({ user: userId });
+      } else {
+        req.session.buyNowItem = null;
+      }
+
+      if (couponId) {
+        await Coupon.findByIdAndUpdate(couponId, {
+          $inc: { usageCount: 1 },
+          $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
+        });
+      }
+
       return res.json({
         success: true,
         razorpayOrder,
@@ -618,34 +638,6 @@ const verifyPayment = async (req, res) => {
     order.orderStatus = "Processing";
 
     await order.save();
-
-    // Deduct stock
-    for (const item of order.items) {
-      await Variant.findByIdAndUpdate(item.variantId, {
-        $inc: { stock: -item.quantity }
-      });
-    }
-
-    // Since we don't have isBuyNowFlow in verifyPayment payload easily without
-    // DB changes, we check if there's a buyNowItem in session for this user.
-    // However, Razorpay webhooks/callbacks might not have the session easily, 
-    // but this is a frontend callback.
-    if (req.session && req.session.buyNowItem) {
-      req.session.buyNowItem = null;
-    } else {
-      // Delete cart only if it wasn't a buy now order
-      // To be absolutely safe, we could delete cart items that match the order items, 
-      // but typically a Buy Now order implies the cart is untouched.
-      // For now, if buyNowItem exists in session we assume it was a buy now order.
-      await Cart.deleteOne({ user: order.userId });
-    }
-
-    if (order.couponId) {
-      await Coupon.findByIdAndUpdate(order.couponId, {
-        $inc: { usageCount: 1 },
-        $push: { usedBy: { userId: order.userId, orderId: order._id, usedAt: new Date() } }
-      });
-    }
 
     return res.json({ success: true, orderId: order._id });
 
