@@ -10,6 +10,8 @@ const getDashboard = async (req, res) => {
             "payment.status": { $ne: "Failed" }
         };
 
+        console.log(validOrderMatch)
+
         // 2. Aggregate Total Revenue and Total Orders (valid)
         const metrics = await Order.aggregate([
             { $match: validOrderMatch },
@@ -79,6 +81,111 @@ const getDashboard = async (req, res) => {
             currentMonth.setMonth(currentMonth.getMonth() + 1);
         }
 
+        // 6. Top 10 Best Selling Products
+        const topProducts = await Order.aggregate([
+            { $match: validOrderMatch },
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.productId",
+                    totalSold: { $sum: "$items.quantity" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $project: {
+                    name: "$productInfo.productName",
+                    totalSold: 1
+                }
+            }
+        ]);
+
+        // 7. Top 10 Best Selling Categories
+        const topCategories = await Order.aggregate([
+            { $match: validOrderMatch },
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $group: {
+                    _id: "$productInfo.categoryId",
+                    totalSold: { $sum: "$items.quantity" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryInfo"
+                }
+            },
+            { $unwind: "$categoryInfo" },
+            {
+                $project: {
+                    name: "$categoryInfo.categoryName",
+                    totalSold: 1
+                }
+            }
+        ]);
+
+        // 8. Top 10 Best Selling Brands
+        const topBrands = await Order.aggregate([
+            { $match: validOrderMatch },
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $group: {
+                    _id: "$productInfo.brandId",
+                    totalSold: { $sum: "$items.quantity" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "brands",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "brandInfo"
+                }
+            },
+            { $unwind: "$brandInfo" },
+            {
+                $project: {
+                    name: "$brandInfo.brandName",
+                    totalSold: 1
+                }
+            }
+        ]);
+
         res.render('admin/dashboard', {
             title: 'Admin Dashboard | PawPalace',
             stats: {
@@ -91,7 +198,10 @@ const getDashboard = async (req, res) => {
             chartData: JSON.stringify({
                 labels: chartLabels,
                 data: chartData
-            })
+            }),
+            topProducts,
+            topCategories,
+            topBrands
         });
 
     } catch (error) {

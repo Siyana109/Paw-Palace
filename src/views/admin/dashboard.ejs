@@ -196,6 +196,97 @@
 
                 </div>
 
+                <!-- TOP SELLING section -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <!-- Top Products -->
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-80">
+                        <h2 class="text-lg font-bold text-accent-navy mb-4 border-b border-gray-100 pb-2">Top 10
+                            Products</h2>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+                            <% if (typeof topProducts !=='undefined' && topProducts.length> 0) { %>
+                                <% topProducts.forEach((item, index)=> { %>
+                                    <div class="flex justify-between items-center group">
+                                        <div class="flex items-center gap-3 w-3/4">
+                                            <span
+                                                class="text-xs font-black text-gray-300 w-4 group-hover:text-brand-500 transition">
+                                                <%= index + 1 %>
+                                            </span>
+                                            <p class="text-sm font-bold text-accent-navy truncate w-full"
+                                                title="<%= item.name %>">
+                                                <%= item.name %>
+                                            </p>
+                                        </div>
+                                        <span class="text-xs font-bold bg-brand-50 text-brand-500 px-2 py-1 rounded-md">
+                                            <%= item.totalSold %> Sold
+                                        </span>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p class="text-sm text-gray-400 text-center mt-4">No data available.</p>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Top Categories -->
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-80">
+                        <h2 class="text-lg font-bold text-accent-navy mb-4 border-b border-gray-100 pb-2">Top 10
+                            Categories</h2>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+                            <% if (typeof topCategories !=='undefined' && topCategories.length> 0) { %>
+                                <% topCategories.forEach((item, index)=> { %>
+                                    <div class="flex justify-between items-center group">
+                                        <div class="flex items-center gap-3 w-3/4">
+                                            <span
+                                                class="text-xs font-black text-gray-300 w-4 group-hover:text-blue-500 transition">
+                                                <%= index + 1 %>
+                                            </span>
+                                            <p class="text-sm font-bold text-accent-navy truncate w-full"
+                                                title="<%= item.name %>">
+                                                <%= item.name %>
+                                            </p>
+                                        </div>
+                                        <span class="text-xs font-bold bg-blue-50 text-blue-500 px-2 py-1 rounded-md">
+                                            <%= item.totalSold %> Sold
+                                        </span>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p class="text-sm text-gray-400 text-center mt-4">No data available.</p>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Top Brands -->
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-80">
+                        <h2 class="text-lg font-bold text-accent-navy mb-4 border-b border-gray-100 pb-2">Top 10 Brands
+                        </h2>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+                            <% if (typeof topBrands !=='undefined' && topBrands.length> 0) { %>
+                                <% topBrands.forEach((item, index)=> { %>
+                                    <div class="flex justify-between items-center group">
+                                        <div class="flex items-center gap-3 w-3/4">
+                                            <span
+                                                class="text-xs font-black text-gray-300 w-4 group-hover:text-emerald-500 transition">
+                                                <%= index + 1 %>
+                                            </span>
+                                            <p class="text-sm font-bold text-accent-navy truncate w-full"
+                                                title="<%= item.name %>">
+                                                <%= item.name %>
+                                            </p>
+                                        </div>
+                                        <span
+                                            class="text-xs font-bold bg-emerald-50 text-emerald-500 px-2 py-1 rounded-md">
+                                            <%= item.totalSold %> Sold
+                                        </span>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p class="text-sm text-gray-400 text-center mt-4">No data available.</p>
+                                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
             </main>
     </div>
 
