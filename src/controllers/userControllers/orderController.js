@@ -318,19 +318,19 @@ const cancelOrderOrItem = async (req, res) => {
                 };
             }
 
-            // 📉 Adjust order totals
+            // Adjust order totals
             // Regardless of payment method, the order's valid total decreases
             order.subtotal -= item.totalAmount;
             order.discount -= itemDiscountShare;
             order.totalAmount -= itemEffectiveValue; // Deduct effective value (price - discount)
 
-            // 📦 Restore Stock
+            // Restore Stock
             if (item.variantId) {
                 await Variant.findByIdAndUpdate(item.variantId, { $inc: { stock: item.quantity } });
             }
         }
 
-        // 🔁 Update order status
+        // Update order status
         const remaining = order.items.filter(
             i => !["Cancelled", "Returned"].includes(i.itemStatus)
         );
@@ -338,7 +338,7 @@ const cancelOrderOrItem = async (req, res) => {
         order.orderStatus =
             remaining.length === 0 ? "Cancelled" : "Partially Cancelled";
 
-        // 🚚🚚 Shipping Refund Logic 🚚🚚
+        // Shipping Refund Logic
         // Refund shipping if the ENTIRE order is now cancelled and it's prepaid
         if (remaining.length === 0 && order.shipping > 0 && order.payment.method !== "COD") {
             const shippingRefund = order.shipping;

@@ -11,20 +11,20 @@ const getBrandsPage = async (req, res) => {
     const search = req.query.search || "";
     const sort = req.query.sort || "newest";
 
-    /* ------------------ FILTER ------------------ */
+    //  FILTER
     const filter = {};
 
     if (search) {
       filter.brandName = { $regex: search, $options: "i" };
     }
 
-    /* ------------------ SORT ------------------ */
+    // SORT
     let sortOption = { createdAt: -1 }; // newest (default)
 
     if (sort === "name_asc") sortOption = { brandName: 1 };
     if (sort === "name_desc") sortOption = { brandName: -1 };
 
-    /* ------------------ QUERY ------------------ */
+    //  QUERY 
     const totalBrands = await Brand.countDocuments(filter);
 
     const brands = await Brand.find(filter)
@@ -33,7 +33,7 @@ const getBrandsPage = async (req, res) => {
       .limit(limit)
       .lean();
 
-    /* ------------------ PRODUCT COUNT ------------------ */
+    // PRODUCT COUNT
     const brandsWithCount = await Promise.all(
       brands.map(async (brand) => {
         const productCount = await Product.countDocuments({
@@ -49,8 +49,8 @@ const getBrandsPage = async (req, res) => {
 
     const totalPages = Math.ceil(totalBrands / limit);
 
-    /* ------------------ AJAX RESPONSE ------------------ */
-    if (req.headers["x-requested-with"] === "XMLHttpRequest") {
+    //  AJAX RESPONSE 
+     if (req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({
         success: true,
         brands: brandsWithCount,
@@ -63,7 +63,7 @@ const getBrandsPage = async (req, res) => {
       });
     }
 
-    /* ------------------ NORMAL PAGE LOAD ------------------ */
+    // NORMAL PAGE LOAD
     const totalProducts = await Product.countDocuments();
 
     res.render("admin/brands", {

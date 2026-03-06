@@ -10,8 +10,6 @@ const getDashboard = async (req, res) => {
             "payment.status": { $ne: "Failed" }
         };
 
-        console.log(validOrderMatch)
-
         // 2. Aggregate Total Revenue and Total Orders (valid)
         const metrics = await Order.aggregate([
             { $match: validOrderMatch },

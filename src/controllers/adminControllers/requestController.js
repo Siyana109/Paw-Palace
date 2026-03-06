@@ -187,7 +187,7 @@ const handleReturnAction = async (req, res) => {
         order.refundSummary.refundedAt = new Date();
 
         // Restore Stock (Only if restock is true)
-        if (req.body.restock !== false) { // Default to true if not specified
+        if (req.body.restock !== false) {
             await Variant.findByIdAndUpdate(
                 item.variantId,
                 { $inc: { stock: item.quantity } }

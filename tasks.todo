@@ -51,7 +51,7 @@ WEEK - 9
     ✔ price, @done (1/30/2026, 4:23:26 PM)
     ✔ discounts/coupons, @done (2/10/2026, 5:42:44 PM)
     ✔ reviews, @done (1/30/2026, 4:23:21 PM)
-    ☐ stock info
+    ✔ stock info @done (3/6/2026, 12:52:50 PM)
     ✔ Error handling for sold out/unavailable/out of stock @done (1/30/2026, 3:26:55 PM)
 
 
@@ -109,7 +109,7 @@ WEEK 10:
     ✔ Place an order with Cash on Delivery @done (2/9/2026, 2:00:25 PM)
     ✔ Order success page with thank-you statement, illustration, buttons to order details, and continue shopping @done (2/9/2026, 2:00:28 PM)
     ✔ Order management @done (2/11/2026, 3:05:05 AM)
-    ☐ Order listing with unique, consistent orderID, status, and order date
+    ✔ Order listing with unique, consistent orderID, status, and order date @done (3/6/2026, 12:52:41 PM)
     ✔ Cancel order or specific products (stock increment on cancellation) @done (2/19/2026, 2:35:08 PM)
     ✔ Reason (optional) for cancellation @done (2/15/2026, 11:16:14 PM)
     ✔ Return order (mandatory reason) when delivered @done (2/15/2026, 11:16:11 PM)

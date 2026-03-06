@@ -231,7 +231,7 @@ const addToCart = async (req, res) => {
 
     await cart.save();
 
-    /* ✅ REMOVE FROM WISHLIST AFTER ADDING TO CART */
+    // REMOVE FROM WISHLIST AFTER ADDING TO CART
     await Wishlist.updateOne(
       { user: userId },
       { $pull: { items: { variant: variantId } } }

@@ -12,7 +12,7 @@ const getOffers = async (req, res) => {
             limit = 5
         } = req.query;
 
-        // 🔄 Lazy Update: Expire offers that are past their end date
+        // Lazy Update: Expire offers that are past their end date
         await Offer.updateMany(
             { status: 'active', endDate: { $lt: new Date() } },
             { $set: { status: 'expired' } }

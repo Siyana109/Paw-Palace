@@ -151,7 +151,7 @@
                             <% if (recentOrders && recentOrders.length> 0) { %>
                                 <% recentOrders.forEach(order=> { %>
                                     <div class="p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition cursor-pointer"
-                                        onclick="window.location.href='/admin/orders/<%= order._id %>/details'">
+                                        >
                                         <div class="flex justify-between items-start mb-2">
                                             <div>
                                                 <p class="text-xs font-bold text-gray-400">#<%= order.orderId %>

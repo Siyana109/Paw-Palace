@@ -531,7 +531,7 @@ const verifyResetOtp = async (req, res) => {
     const { otp } = req.body;
     const { email } = req.session.resetPassword;
 
-    // 🔐 Fetch ONLY reset-password OTP
+    // Fetch ONLY reset-password OTP
     const otpData = await OTP.findOne({
       email
     });
@@ -559,7 +559,7 @@ const verifyResetOtp = async (req, res) => {
       });
     }
 
-    // ✅ OTP VERIFIED
+    // OTP VERIFIED
     req.session.resetPassword.verified = true;
 
     res.redirect("/reset-password");

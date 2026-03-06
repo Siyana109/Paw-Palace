@@ -16,7 +16,7 @@ const postAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        /* ---------- Validation ---------- */
+        // Validation
         if (!email || !password) {
             return res.status(400).render('admin/login', {
                 title: 'Admin Login | PawPalace',
@@ -32,7 +32,7 @@ const postAdmin = async (req, res) => {
             });
         }
 
-        /* ---------- Credential Check ---------- */
+        // Credential Check
         if (
             email === process.env.ADMIN_EMAIL &&
             password === process.env.ADMIN_PASSWORD
@@ -41,7 +41,7 @@ const postAdmin = async (req, res) => {
             return res.redirect('/admin/dashboard');
         }
 
-        /* ---------- Invalid credentials ---------- */
+        // Invalid credentials
         return res.status(401).render('admin/login', {
             title: 'Admin Login | PawPalace',
             error: 'Invalid email or password'
