@@ -217,8 +217,17 @@
                                                 <%= order.userId?.fullName || 'Guest' %>
                                             </td>
                                             <td class="px-6 py-4 text-sm font-bold text-red-500">
-                                                <%= order.refundSummary?.totalRefunded> 0 ?
-                                                    `₹${order.refundSummary.totalRefunded}` : '-' %>
+                                                <% let itemRefunds=0; if (order.items && order.items.length> 0) {
+                                                    order.items.forEach(item => {
+                                                    if (item.refund && item.refund.amount > 0) {
+                                                    itemRefunds += item.refund.amount;
+                                                    }
+                                                    });
+                                                    }
+                                                    const totalRef = Math.max(order.refundSummary?.totalRefunded || 0,
+                                                    itemRefunds);
+                                                    %>
+                                                    <%= totalRef> 0 ? `₹${totalRef}` : '-' %>
                                             </td>
                                             <td class="px-6 py-4 text-sm font-extrabold text-accent-navy">₹<%=
                                                     order.totalAmount %>
