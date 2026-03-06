@@ -343,7 +343,7 @@ export const postLogin = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // ❗ Check user first
+    // Check user first
     if (!user) {
       return res.render("user/login", {
         error: "Invalid credentials",
@@ -377,9 +377,6 @@ export const postLogin = async (req, res) => {
     });
   }
 };
-
-
-
 
 
 
@@ -433,41 +430,6 @@ const verifyEmailSendOtp = async (req, res) => {
   }
 };
 
-
-
-
-// const verifyResetOtp = async (req, res) => {
-//   try {
-//     if (!req.session.resetPassword) {
-//       return res.redirect("/forgot-password");
-//     }
-
-//     const { otp } = req.body;
-//     const { email } = req.session.resetPassword;
-
-//     const otpData = await OTP.findOne({ email });
-
-//     if (
-//       !otpData ||
-//       otpData.otp !== String(otp).trim() ||
-//       otpData.expiresAt < Date.now()
-//     ) {
-//       return res.render("user/otp", {
-//         error: "Invalid or expired OTP",
-//         email
-//       });
-//     }
-
-//     // OTP verified → allow password reset
-//     req.session.resetPassword.verified = true;
-
-//     res.redirect("/reset-password");
-
-//   } catch (error) {
-//     console.error("Verify reset OTP error:", error);
-//     res.redirect("/forgot-password");
-//   }
-// };
 
 
 const getResetOtp = (req, res) => {
@@ -609,8 +571,7 @@ const resetPassword = async (req, res) => {
 
 
 
-
-export const logout = (req, res) => {
+const logout = (req, res) => {
   req.session.destroy(err => {
     if (err) {
       return res.redirect("/home");
