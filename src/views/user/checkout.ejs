@@ -999,12 +999,20 @@
             payload.paymentDetails = paymentValue;
 
             // Add addressId explicitly if needed (it is a hidden input, so should be in formData)
-            // But let's be safe
-            const addressId = document.querySelector("input[name='addressId']").value;
-            payload.addressId = addressId;
-
+            const addressId = document.querySelector("input[name='addressId']");
+            if (addressId) payload.addressId = addressId.value;
 
             try {
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing Order...',
+                    text: 'Please wait while we confirm your order.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 const response = await fetch("/checkout/place-order", {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
@@ -1014,13 +1022,32 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    window.location.href = `/order-confirmation/${data.orderId}`;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: 'Your order has been placed successfully.',
+                        confirmButtonColor: '#2dd4bf',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = `/order-confirmation/${data.orderId}`;
+                    });
                 } else {
-                    Swal.fire("Error", data.message || "Failed to place order", "error");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Order Failed',
+                        text: data.message || "Failed to place order",
+                        confirmButtonColor: '#f43f5e'
+                    });
                 }
             } catch (error) {
                 console.error(error);
-                Swal.fire("Error", "Something went wrong", "error");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: "Something went wrong while placing your order. Please try again.",
+                    confirmButtonColor: '#f43f5e'
+                });
             }
             return;
         }
@@ -1030,11 +1057,20 @@
 
             try {
 
+                // Show loading state for Razorpay initialization
+                Swal.fire({
+                    title: 'Initializing Payment...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 const formData = new FormData(form);
                 const payload = Object.fromEntries(formData.entries());
                 payload.paymentDetails = paymentValue;
-                const addressId = document.querySelector("input[name='addressId']").value;
-                payload.addressId = addressId;
+                const addressId = document.querySelector("input[name='addressId']");
+                if (addressId) payload.addressId = addressId.value;
 
                 const response = await fetch("/checkout/place-order", {
                     method: "POST",
@@ -1044,8 +1080,16 @@
 
                 const data = await response.json();
 
+                // Close loading alert
+                Swal.close();
+
                 if (!data.success) {
-                    Swal.fire("Error", data.message || "Something went wrong!", "error");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Order Failed',
+                        text: data.message || "Something went wrong while placing your order!",
+                        confirmButtonColor: '#f43f5e'
+                    });
                     return;
                 }
 
@@ -1097,7 +1141,13 @@
 
             } catch (error) {
                 console.error(error);
-                Swal.fire("Error", "Payment initialization failed", "error");
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Error',
+                    text: 'Payment initialization failed. Please try again.',
+                    confirmButtonColor: '#f43f5e'
+                });
             }
         }
 

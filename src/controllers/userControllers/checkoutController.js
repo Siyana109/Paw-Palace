@@ -299,7 +299,7 @@ const placeOrder = async (req, res) => {
 
     const allowedMethods = ["COD", "ONLINE", "WALLET"];
     if (!allowedMethods.includes(paymentDetails)) {
-      return res.redirect("/checkout");
+      return res.status(400).json({ success: false, message: "Invalid payment method selected." });
     }
 
     let paymentMethod =
@@ -309,7 +309,7 @@ const placeOrder = async (req, res) => {
     let cart;
     if (isBuyNowFlow) {
       if (!req.session.buyNowItem) {
-        return res.redirect("/checkout");
+        return res.status(400).json({ success: false, message: "Your session has expired. Please try again." });
       }
       cart = { items: [req.session.buyNowItem] };
     } else {
@@ -321,23 +321,25 @@ const placeOrder = async (req, res) => {
         .populate("items.variant");
 
       if (!cart || cart.items.length === 0) {
-        return res.redirect("/cart");
+        return res.status(400).json({ success: false, message: "Your cart is empty. Please add items before checking out." });
       }
     }
 
     // FETCH ADDRESS
     const addressDoc = await Address.findOne({ _id: addressId, userId });
-    if (!addressDoc) return res.redirect("/checkout");
+    if (!addressDoc) return res.status(400).json({ success: false, message: "Please select a valid delivery address." });
 
     // VALIDATE CATEGORY & STOCK (STRICT)
     for (const item of cart.items) {
       const variant = await Variant.findById(item.variant._id);
 
-      if (!variant || !variant.isActive ||
-        !item.product || !item.product.isActive ||
-        !item.product.categoryId || !item.product.categoryId.isActive ||
-        variant.stock < item.quantity) {
-        throw new Error("UNAVAILABLE_OR_OUT_OF_STOCK");
+      if (!item.product || !item.product.isActive ||
+        !item.product.categoryId || !item.product.categoryId.isActive) {
+        throw new Error("One or more items in your cart are currently unavailable.");
+      }
+
+      if (!variant || !variant.isActive || variant.stock < item.quantity) {
+        throw new Error(`Item ${item.product.productName} is out of stock. Please adjust your cart.`);
       }
     }
 
@@ -390,22 +392,22 @@ const placeOrder = async (req, res) => {
       });
 
       if (!coupon) {
-        throw new Error("INVALID_COUPON");
+        throw new Error("The entered coupon code is invalid.");
       }
 
       if (new Date() > new Date(coupon.expiryDate)) {
-        throw new Error("COUPON_EXPIRED");
+        throw new Error("This coupon code has expired.");
       }
 
       const userUsageCount = coupon.usedBy.filter(u => u.userId.toString() === userId).length;
       if (coupon.usageLimit && userUsageCount >= coupon.usageLimit) {
-        throw new Error("USER_COUPON_LIMIT_REACHED");
+        throw new Error("You have reached the usage limit for this coupon.");
       }
 
       const postOfferSubtotal = subtotal - offerDiscount;
 
       if (postOfferSubtotal < coupon.minimumPurchase) {
-        throw new Error("MINIMUM_NOT_MET");
+        throw new Error(`A minimum purchase of ₹${coupon.minimumPurchase} is required for this coupon.`);
       }
 
       if (coupon.discountType === "percentage") {
@@ -595,7 +597,7 @@ const placeOrder = async (req, res) => {
 
   } catch (error) {
     console.error("Place Order Error:", error);
-    return res.status(500).json({ success: false, message: error.message || "Failed to place order" });
+    return res.status(500).json({ success: false, message: error.message || "An unexpected error occurred while placing your order." });
   }
 };
 
