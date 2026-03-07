@@ -242,13 +242,13 @@ WEEK-11 PENDINGS:
 
 
 TODO :
-        ☐ session handling
+        ✔ session handling @done (3/7/2026, 10:41:52 AM)
 
     User:
         ☐ otp resent and submitting attempt limit
         ✔ confirm logout @done (1/31/2026, 2:26:10 AM)
         ✔ edit phone no: @done (1/31/2026, 2:42:48 AM)
-        ☐ product detailing page
+        ✔ product detailing page @done (3/7/2026, 10:41:59 AM)
         ✔ manage out of stock profucts (display it in last and low transparency) @done (2/3/2026, 11:45:49 AM)
         ☐ filter products based on size in shop page
         ✔ show selected variant highlighted @done (2/22/2026, 11:48:47 PM)
@@ -273,6 +273,7 @@ TODO :
         ✔ in order history status failed card is showing package is on the way @done (3/2/2026, 6:33:44 PM)
         ☐ return and cancel validation in comment
         ✔ returning each product quanitty @done (3/2/2026, 8:27:36 PM)
+        ☐ buy now option in cart (optional)
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

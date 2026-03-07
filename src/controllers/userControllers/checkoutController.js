@@ -442,7 +442,7 @@ const placeOrder = async (req, res) => {
     // Construct Order Data (Common for all methods)
     const orderPayload = {
       userId,
-      orderId: "ORD-" + Date.now(),
+      orderId: `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       items: orderItems,
       subtotal,
       discount,
