@@ -602,6 +602,55 @@ const placeOrder = async (req, res) => {
 };
 
 
+
+
+const restoreStock = async (order) => {
+
+  for (const item of order.items) {
+    await Variant.findByIdAndUpdate(item.variantId, {
+      $inc: { stock: item.quantity }
+    });
+  }
+
+};
+
+
+
+
+const restoreCart = async (order) => {
+
+  let cart = await Cart.findOne({ user: order.userId });
+
+  if (!cart) {
+    cart = new Cart({
+      user: order.userId,
+      items: []
+    });
+  }
+
+  for (const item of order.items) {
+
+    const existingItem = cart.items.find(
+      i => i.variant.toString() === item.variantId.toString()
+    );
+
+    if (existingItem) {
+      existingItem.quantity += item.quantity;
+    } else {
+      cart.items.push({
+        product: item.productId,
+        variant: item.variantId,
+        quantity: item.quantity
+      });
+    }
+
+  }
+
+  await cart.save();
+};
+
+
+
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -619,6 +668,18 @@ const verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
+
+      const order = await Order.findById(orderId);
+
+      if (order) {
+        await restoreStock(order);
+        await restoreCart(order);
+
+        order.payment.status = "Failed";
+        order.orderStatus = "Payment Failed";
+        await order.save();
+      }
+
       return res.json({ success: false });
     }
 
@@ -654,16 +715,30 @@ const verifyPayment = async (req, res) => {
 
 const getPaymentFailedPage = async (req, res) => {
   try {
+
     const { orderId } = req.query;
 
     if (orderId) {
-      await Order.findByIdAndUpdate(orderId, {
-        orderStatus: "Payment Failed",
-        "payment.status": "Failed"
-      });
+
+      const order = await Order.findById(orderId);
+
+      if (order && order.payment.status !== "Paid" && order.orderStatus !== "Payment Failed") {
+
+        // restore stock
+        await restoreStock(order);
+
+        // restore cart
+        await restoreCart(order);
+
+        order.orderStatus = "Payment Failed";
+        order.payment.status = "Failed";
+
+        await order.save();
+      }
+
     }
 
-    res.render("user/paymentFailed", { orderId: orderId || null });
+    res.render("user/paymentFailed", { orderId });
 
   } catch (error) {
     console.error("Payment failed page error:", error);
