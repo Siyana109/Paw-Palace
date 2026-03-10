@@ -166,7 +166,9 @@
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Coupon
                                 Code</label>
-                            <input type="text" id="addCode" name="code" placeholder="e.g. SUMMER20"
+                            <input type="text" id="addCode" name="code"
+                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase()"
+                                placeholder="e.g. SUMMER20"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-brand-500 focus:bg-white transition outline-none font-bold text-accent-navy uppercase">
                         </div>
                         <div>
@@ -272,7 +274,7 @@
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Coupon
                                 Code</label>
-                            <input type="text" id="editCode" name="code"
+                            <input type="text" id="editCode" name="code" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase()"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-bold text-accent-navy uppercase">
                         </div>
                         <div>
@@ -289,7 +291,8 @@
                     <!-- Value & Max Discount -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount</label>
+                            <label
+                                class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Discount</label>
                             <input type="number" id="editDiscountValue" name="discountValue"
                                 class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl focus:border-pink-500 focus:bg-white transition outline-none font-bold">
                         </div>
@@ -685,40 +688,78 @@
         }
 
         function validateCouponData(data) {
+
             const errors = [];
 
-            if (!data.code || data.code.trim().length < 4) errors.push("Coupon Code must be at least 4 characters.");
-            if (!data.discountValue || data.discountValue <= 0) errors.push("Discount Amount must be positive.");
-            if (data.discountType === 'percentage' && data.discountValue > 90) errors.push("Percentage cannot exceed 90%.");
+            const discountValue = Number(data.discountValue);
+            const minimumPurchase = Number(data.minimumPurchase) || 0;
+            const usageLimit = Number(data.usageLimit);
+            const code = data.code.trim().toUpperCase();
+            const couponRegex = /^[A-Z0-9]{4,20}$/;
 
-            if (data.discountType === 'fixed' && data.minimumPurchase && Number(data.discountValue) >= Number(data.minimumPurchase)) {
-                errors.push("Discount amount must be less than minimum purchase amount.");
+            if (!couponRegex.test(code)) {
+                errors.push(
+                    "Coupon code must contain only letters and numbers (4–20 characters)."
+                );
             }
 
-            // Validate Max Discount only if provided AND type is percentage
-            if (data.discountType === 'percentage') {
-                if (data.maximumDiscount && data.maximumDiscount <= 0) {
-                    errors.push("Maximum Discount must be positive.");
+            if (!data.code || data.code.trim().length < 4) {
+                errors.push("Coupon code must be at least 4 characters.");
+            }
+
+            if (!discountValue || discountValue <= 0) {
+                errors.push("Discount value must be positive.");
+            }
+
+            if (data.discountType === "percentage" && discountValue > 90) {
+                errors.push("Percentage discount cannot exceed 90%");
+            }
+
+            if (data.discountType === "fixed") {
+
+                if (minimumPurchase <= 0) {
+                    errors.push("Minimum purchase must be greater than 0 for fixed coupons.");
+                }
+
+                const maxDiscount = minimumPurchase * 0.9;
+
+                if (discountValue > maxDiscount) {
+                    errors.push("Discount cannot exceed 90% of minimum purchase amount.");
                 }
             }
 
-            if (!data.minimumPurchase || data.minimumPurchase < 0) errors.push("Min. Purchase Amount cannot be negative.");
+            if (data.usageLimit && usageLimit <= 0) {
+                errors.push("Usage limit should be greater than 0");
+            }
 
-            if (!data.startDate) errors.push("Valid From date is required.");
-            if (!data.expiryDate) errors.push("Valid Until date is required.");
+            if (!data.startDate) {
+                errors.push("Start date is required.");
+            }
+
+            if (!data.expiryDate) {
+                errors.push("Expiry date is required.");
+            }
 
             if (data.startDate && data.expiryDate) {
+
                 const start = new Date(data.startDate);
                 const end = new Date(data.expiryDate);
+
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
-                if (end < today) errors.push("Valid Until date cannot be in the past.");
-                if (start > end) errors.push("Valid From date must be before Valid Until date.");
+                if (end < today) {
+                    errors.push("Expiry date cannot be in the past.");
+                }
+
+                if (start > end) {
+                    errors.push("Start date must be before expiry date.");
+                }
             }
 
             return errors;
         }
+
 
         async function handleAddCoupon(e) {
             e.preventDefault();
