@@ -193,7 +193,7 @@ const cancelReturnRequest = async (req, res) => {
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
         const item = order.items.id(itemId);
-        
+
         if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
         if (item.itemStatus !== 'Return Requested') {
@@ -223,7 +223,7 @@ const cancelReturnRequest = async (req, res) => {
 const cancelOrderOrItem = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const { itemId, reason } = req.body;
+        const { itemId, reason, quantity } = req.body;
         const userId = req.session.user.id;
 
         const order = await Order.findOne({ _id: orderId, userId });
@@ -233,28 +233,70 @@ const cancelOrderOrItem = async (req, res) => {
 
         // Decide which items to cancel
         const itemsToCancel = itemId
-            ? [order.items.id(itemId)]
-            : order.items.filter(
-                i => !["Cancelled", "Returned"].includes(i.itemStatus)
-            );
+            ? order.items.filter(i => i._id.toString() === itemId)
+            : order.items.filter(i => !["Cancelled", "Returned"].includes(i.itemStatus));
 
         if (!itemsToCancel.length) {
             return res.json({ success: false, message: "No cancellable items" });
         }
 
-        for (const item of itemsToCancel) {
+        for (let item of itemsToCancel) {
             if (!item) continue;
 
             // Safety: prevent double cancel/refund
             if (["Cancelled", "Returned"].includes(item.itemStatus)) continue;
 
-            item.itemStatus = "Cancelled";
-            item.cancelRequest = {
-                isRequested: true,
-                reason,
-                status: "Approved",
-                processedAt: new Date()
-            };
+            const cancelQty = quantity ? parseInt(quantity, 10) : item.quantity;
+
+            if (cancelQty <= 0 || cancelQty > item.quantity) {
+                return res.json({ success: false, message: "Invalid cancel quantity" });
+            }
+
+            // PARTIAL CANCEL
+            if (cancelQty < item.quantity) {
+
+                const originalQty = item.quantity;
+                const remainingQty = originalQty - cancelQty;
+                const perItemPrice = item.price;
+
+                // reduce original item
+                item.quantity = remainingQty;
+                item.totalAmount = remainingQty * perItemPrice;
+
+                // create cancelled item
+                const originalItemData = item.toObject();
+
+                const cancelledItem = {
+                    ...originalItemData,
+                    quantity: cancelQty,
+                    totalAmount: cancelQty * perItemPrice,
+                    itemStatus: "Cancelled",
+                    cancelRequest: {
+                        isRequested: true,
+                        reason,
+                        status: "Approved",
+                        processedAt: new Date()
+                    }
+                };
+
+                delete cancelledItem._id;
+
+                order.items.push(cancelledItem);
+
+                // use the new cancelled item
+                item = order.items[order.items.length - 1];
+
+            } else {
+
+                item.itemStatus = "Cancelled";
+                item.cancelRequest = {
+                    isRequested: true,
+                    reason,
+                    status: "Approved",
+                    processedAt: new Date()
+                };
+
+            }
 
             let refundAmount = 0;
             let itemDiscountShare = 0;
@@ -314,15 +356,18 @@ const cancelOrderOrItem = async (req, res) => {
                 };
             }
 
+
+            const cancelledAmount = cancelQty * item.price;
+
             // Adjust order totals
             // Regardless of payment method, the order's valid total decreases
-            order.subtotal = Math.max(0, order.subtotal - item.totalAmount);
+            order.subtotal = Math.max(0, order.subtotal - cancelledAmount);
             order.discount = Math.max(0, order.discount - itemDiscountShare);
             order.totalAmount = Math.max(0, order.totalAmount - itemEffectiveValue); // Deduct effective value (price - discount)
 
             // Restore Stock
             if (item.variantId) {
-                await Variant.findByIdAndUpdate(item.variantId, { $inc: { stock: item.quantity } });
+                await Variant.findByIdAndUpdate(item.variantId, { $inc: { stock: cancelQty } });
             }
         }
 
