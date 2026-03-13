@@ -5,11 +5,13 @@ export const applyOfferToPrice = ({ price, productId, categoryId, activeOffers }
     o.productId.some(id => id.toString() === productId.toString())
   );
 
+  const normalizedCategoryId = categoryId?._id || categoryId;
+
   // Category offer (only if no product offer)
   const categoryOffer = !productOffer
     ? activeOffers.find(o =>
       o.offerType === "category" &&
-      categoryId && o.categoryId?.toString() === categoryId.toString()
+      normalizedCategoryId && o.categoryId?.toString() === normalizedCategoryId?.toString()
     )
     : null;
 

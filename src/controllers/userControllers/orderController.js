@@ -1,6 +1,4 @@
 import Order from "../../model/orderModel.js";
-import Cart from "../../model/cartModel.js";
-import Wallet from "../../model/walletModel.js";
 import Variant from "../../model/variantModel.js";
 import walletController from "../userControllers/walletController.js";
 import PDFDocument from 'pdfkit';
@@ -9,7 +7,7 @@ import PDFDocument from 'pdfkit';
 const getOrderHistory = async (req, res) => {
     try {
         const userId = req.session.user?.id;
-        console.log(req.session.user.id)
+
         if (!userId) return res.redirect('/login');
 
         const page = parseInt(req.query.page) || 1;
@@ -34,7 +32,7 @@ const getOrderHistory = async (req, res) => {
         }
 
         if (search) {
-            const searchRegex = new RegExp(search, 'i')
+            const searchRegex = new RegExp(search.trim(), 'i')
 
             const searchQuery = {
                 $or: [
@@ -145,7 +143,7 @@ const requestReturnItem = async (req, res) => {
             }
 
             // Create a brand new item for the returned portion
-            let returnedItemObj = item.toObject();
+            let returnedItemObj = { ...item.toObject() };
             delete returnedItemObj._id;      // Let mongoose generate a new ID
             delete returnedItemObj.createdAt;
             delete returnedItemObj.updatedAt;
@@ -153,7 +151,8 @@ const requestReturnItem = async (req, res) => {
             returnedItemObj.quantity = returnQty;
             returnedItemObj.totalAmount = returnQty * perItemPrice;
             if (returnedItemObj.couponDiscount) {
-                returnedItemObj.couponDiscount = (item.couponDiscount / remainingQty) * returnQty;
+                const originalCouponDiscount = item.couponDiscount || 0;
+                returnedItemObj.couponDiscount = (originalCouponDiscount / originalQty) * returnQty;
             }
             if (returnedItemObj.shippingShare) {
                 returnedItemObj.shippingShare = (item.shippingShare / remainingQty) * returnQty;
@@ -194,7 +193,7 @@ const cancelReturnRequest = async (req, res) => {
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
         const item = order.items.id(itemId);
-        console.log(itemId)
+        
         if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
         if (item.itemStatus !== 'Return Requested') {
@@ -231,9 +230,6 @@ const cancelOrderOrItem = async (req, res) => {
         if (!order) {
             return res.json({ success: false, message: "Order not found" });
         }
-
-        console.log("orderId:", orderId);
-        console.log("userId:", userId);
 
         // Decide which items to cancel
         const itemsToCancel = itemId
@@ -320,9 +316,9 @@ const cancelOrderOrItem = async (req, res) => {
 
             // Adjust order totals
             // Regardless of payment method, the order's valid total decreases
-            order.subtotal -= item.totalAmount;
-            order.discount -= itemDiscountShare;
-            order.totalAmount -= itemEffectiveValue; // Deduct effective value (price - discount)
+            order.subtotal = Math.max(0, order.subtotal - item.totalAmount);
+            order.discount = Math.max(0, order.discount - itemDiscountShare);
+            order.totalAmount = Math.max(0, order.totalAmount - itemEffectiveValue); // Deduct effective value (price - discount)
 
             // Restore Stock
             if (item.variantId) {

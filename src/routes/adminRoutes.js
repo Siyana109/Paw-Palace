@@ -16,6 +16,7 @@ import orderController from "../controllers/adminControllers/orderController.js"
 import requestController from "../controllers/adminControllers/requestController.js"
 import salesController from "../controllers/adminControllers/salesController.js"
 import dashboardController from "../controllers/adminControllers/dashboardController.js"
+import transactionController from "../controllers/adminControllers/transactionController.js"
 
 import { variantUpload, upload } from "../middlewares/upload.js"
 
@@ -40,28 +41,20 @@ router.post('/categories/add', adminMiddleware.adminSession, brandCategoryContro
 router.post('/categories/edit/:id', adminMiddleware.adminSession, brandCategoryController.editCategory);
 router.post('/categories/delete/:id', adminMiddleware.adminSession, brandCategoryController.deleteCategory);
 
-
-
 router.get("/products", adminMiddleware.adminSession, productController.listProducts);
 router.post("/products/add", adminMiddleware.adminSession, upload.none(), productController.postAddProduct);
 router.post("/products/edit/:id", adminMiddleware.adminSession, upload.none(), productController.updateProduct);
 router.post("/products/delete/:productId", adminMiddleware.adminSession, productController.deleteProduct);
 
 router.get("/products/:productId/variants/json", adminMiddleware.adminSession, variantController.getVariantsByProduct);
-
 router.post("/products/add-variant", adminMiddleware.adminSession, variantUpload.fields([
   { name: "coverImage", maxCount: 1 },
-  { name: "subImages", maxCount: 5 }
-]), variantController.postAddVariant);
-
+  { name: "subImages", maxCount: 5 }]), variantController.postAddVariant);
 router.post("/products/variants/delete/:variantId", variantController.deleteVariant);
 router.post("/products/variants/edit/:variantId", adminMiddleware.adminSession, variantUpload.fields([
   { name: "coverImage", maxCount: 1 },
   { name: "subImages", maxCount: 5 }
 ]), variantController.updateVariant);
-
-
-
 router.post("/products/variants/status/:variantId", adminMiddleware.adminSession, variantController.toggleVariantStatus);
 
 router.get("/offers", adminMiddleware.adminSession, offerController.getOffers);
@@ -70,26 +63,20 @@ router.post("/offers/add", adminMiddleware.adminSession, offerController.createO
 router.put("/offers/edit/:id", adminMiddleware.adminSession, offerController.updateOffer);
 router.delete("/offers/delete/:id", adminMiddleware.adminSession, offerController.deleteOffer);
 
-
-
 router.get('/coupons', adminMiddleware.adminSession, couponController.loadCoupons)
 router.post('/coupons/add', adminMiddleware.adminSession, couponController.addCoupon)
 router.put("/coupons/edit/:id", adminMiddleware.adminSession, couponController.editCoupon);
 router.delete("/coupons/delete/:id", adminMiddleware.adminSession, couponController.deleteCoupon);
 
+router.get('/transactions', adminMiddleware.adminSession, transactionController.getTransactions);
 
-// Order Routes
 router.get('/orders', adminMiddleware.adminSession, orderController.getAllOrders);
 router.get('/orders/:id/details', adminMiddleware.adminSession, orderController.getOrderDetails);
 router.put('/orders/:id/status', adminMiddleware.adminSession, orderController.updateOrderStatus);
 
-
-// Return Management
 router.get('/returns', adminMiddleware.adminSession, requestController.getReturnRequests);
 router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.adminSession, requestController.handleReturnAction);
 
-
-// Sales Report
 router.get('/sales-report', adminMiddleware.adminSession, salesController.getSalesReport);
 router.get('/sales-report/download', adminMiddleware.adminSession, salesController.downloadReport);
 

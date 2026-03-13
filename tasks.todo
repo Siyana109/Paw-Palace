@@ -274,6 +274,9 @@ TODO :
         ☐ return and cancel validation in comment
         ✔ returning each product quanitty @done (3/2/2026, 8:27:36 PM)
         ☐ buy now option in cart (optional)
+        ☐ do not show expired coupons
+        ☐ wallet failed payment
+        ☐ in buynow cannot apply coupon ?
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

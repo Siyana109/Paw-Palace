@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' },
+                        accent: { navy: '#0f172a', cream: '#fffdf5' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy flex min-h-screen selection:bg-brand-500 selection:text-white">
+
+    <%- include('../partials/adminSidebar', { currentPath }) %>
+
+        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+
+            <header class="bg-white border-b border-gray-100 flex-none z-10">
+                <div class="flex items-center justify-between px-8 py-4">
+                    <div>
+                        <h1 class="text-2xl font-black text-accent-navy tracking-tight">Financial Ledger</h1>
+                        <p class="text-sm font-bold text-gray-400 mt-1">All Platform Transactions & Wallet Activities
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="px-4 py-2 bg-brand-50 text-brand-700 rounded-xl font-bold text-sm shadow-sm border border-brand-100">
+                            <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Total Records: <%= totalTransactions %>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto w-full p-8 scroll-smooth transition-all duration-300">
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div
+                        class="mb-4 bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 shadow-sm font-bold flex items-center gap-3">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <div
+                            class="bg-white rounded-[2rem] shadow-xl shadow-brand-500/5 border border-gray-100 overflow-hidden relative">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50/50 border-b border-gray-100">
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider">
+                                                Date & Time</th>
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider">
+                                                Reference ID</th>
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider">
+                                                User</th>
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider">
+                                                Type & Description</th>
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider text-right">
+                                                Amount</th>
+                                            <th
+                                                class="py-5 px-6 font-bold text-xs text-gray-400 uppercase tracking-wider text-center">
+                                                Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-50">
+                                        <% if (transactions && transactions.length> 0) { %>
+                                            <% transactions.forEach((txn)=> { %>
+                                                <tr class="hover:bg-brand-50/30 transition-colors group">
+
+                                                    <!-- DATE -->
+                                                    <td class="py-4 px-6">
+                                                        <div class="font-bold text-accent-navy text-sm">
+                                                            <%= new Date(txn.date).toLocaleDateString('en-US', {
+                                                                day: '2-digit' , month: 'short' , year: 'numeric' }) %>
+                                                        </div>
+                                                        <div class="text-xs font-bold text-gray-400">
+                                                            <%= new Date(txn.date).toLocaleTimeString('en-US', {
+                                                                hour: '2-digit' , minute: '2-digit' }) %>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- TXN ID -->
+                                                    <td class="py-4 px-6">
+                                                        <span
+                                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100/80 text-gray-600 font-mono text-xs font-bold font-semibold border border-gray-200/50">
+                                                            <i class="fa-solid fa-hashtag text-[10px] opacity-70"></i>
+                                                            <%= txn.transactionId.toString().slice(-8).toUpperCase() %>
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- USER -->
+                                                    <td class="py-4 px-6">
+                                                        <div
+                                                            class="font-bold text-accent-navy text-sm truncate max-w-[150px]">
+                                                            <%= txn.userDetails ? txn.userDetails.fullName : 'Unknown User' %>
+                                                        </div>
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 truncate max-w-[150px]">
+                                                            <%= txn.userDetails ? txn.userDetails.email : 'N/A' %>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- DESCRIPTION -->
+                                                    <td class="py-4 px-6">
+                                                        <div class="flex items-center gap-3">
+                                                            <% if (txn.type==='Order' ) { %>
+                                                                <div
+                                                                    class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+                                                                    <i class="fa-solid fa-cart-shopping text-xs"></i>
+                                                                </div>
+                                                                <% } else { %>
+                                                                    <div
+                                                                        class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
+                                                                        <i class="fa-solid fa-wallet text-xs"></i>
+                                                                    </div>
+                                                                    <% } %>
+                                                                        <div>
+                                                                            <div
+                                                                                class="font-bold text-accent-navy text-sm">
+                                                                                <%= txn.type %>
+                                                                            </div>
+                                                                            <div class="text-xs font-bold text-gray-500 truncate max-w-[200px]"
+                                                                                title="<%= txn.description %>">
+                                                                                <%= txn.description %>
+                                                                            </div>
+                                                                        </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- AMOUNT -->
+                                                    <td class="py-4 px-6 text-right">
+                                                        <span class="font-black text-accent-navy">₹<%=
+                                                                txn.amount.toFixed(2) %></span>
+                                                        <div
+                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+                                                            <%= txn.method %>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- STATUS -->
+                                                    <td class="py-4 px-6 text-center">
+                                                        <% let statusColor='bg-gray-100 text-gray-600' ; let
+                                                            icon='fa-circle-dot' ; const s=txn.status.toUpperCase(); if
+                                                            (s==='PAID' || s==='COMPLETED' || s==='CREDIT' ) {
+                                                            statusColor='bg-green-50 text-green-600 border border-green-200/50'
+                                                            ; icon='fa-check-circle' ; } else if (s==='FAILED' ||
+                                                            s==='CANCELLED' ) {
+                                                            statusColor='bg-red-50 text-red-600 border border-red-200/50'
+                                                            ; icon='fa-circle-xmark' ; } else if (s==='PENDING' ) {
+                                                            statusColor='bg-yellow-50 text-yellow-600 border border-yellow-200/50'
+                                                            ; icon='fa-clock' ; } else if (s==='REFUNDED' ) {
+                                                            statusColor='bg-purple-50 text-purple-600 border border-purple-200/50'
+                                                            ; icon='fa-rotate-left' ; } %>
+                                                            <span
+                                                                class="inline-flex flex-col items-center justify-center gap-1">
+                                                                <span
+                                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase <%= statusColor %>">
+                                                                    <i class="fa-solid <%= icon %>"></i>
+                                                                    <%= txn.status %>
+                                                                </span>
+                                                            </span>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <tr>
+                                                            <td colspan="6" class="py-16 text-center">
+                                                                <div
+                                                                    class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-4 shadow-inner border border-gray-100">
+                                                                    <i
+                                                                        class="fa-solid fa-receipt text-3xl text-gray-300"></i>
+                                                                </div>
+                                                                <p class="text-gray-400 font-bold text-lg">No
+                                                                    transactions found</p>
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <% if (totalPages> 1) { %>
+                                <div
+                                    class="border-t border-gray-100 bg-gray-50/50 p-4 p-6 flex items-center justify-between">
+                                    <p class="text-sm font-bold text-gray-500">
+                                        Showing <span class="text-accent-navy font-black">
+                                            <%= ((currentPage - 1) * 15) + 1 %>
+                                        </span>
+                                        to <span class="text-accent-navy font-black">
+                                            <%= Math.min(currentPage * 15, totalTransactions) %>
+                                        </span>
+                                        of <span class="text-accent-navy font-black">
+                                            <%= totalTransactions %>
+                                        </span>
+                                    </p>
+
+                                    <div class="flex items-center gap-2">
+                                        <% if (currentPage> 1) { %>
+                                            <a href="?page=<%= currentPage - 1 %>"
+                                                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:border-brand-500 hover:text-brand-500 hover:shadow-lg hover:shadow-brand-500/20 transition-all font-bold">
+                                                <i class="fa-solid fa-chevron-left"></i>
+                                            </a>
+                                            <% } %>
+
+                                                <!-- Static window for simplicity -->
+                                                <div class="px-4 py-2 font-black text-sm text-accent-navy">
+                                                    Page <%= currentPage %> of <%= totalPages %>
+                                                </div>
+
+                                                <% if (currentPage < totalPages) { %>
+                                                    <a href="?page=<%= currentPage + 1 %>"
+                                                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:border-brand-500 hover:text-brand-500 hover:shadow-lg hover:shadow-brand-500/20 transition-all font-bold">
+                                                        <i class="fa-solid fa-chevron-right"></i>
+                                                    </a>
+                                                    <% } %>
+                                    </div>
+                                </div>
+                                <% } %>
+                        </div>
+            </div>
+        </main>
+</body>
+
+</html>

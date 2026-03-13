@@ -1,6 +1,7 @@
 import Wallet from "../../model/walletModel.js";
 import User from "../../model/userModel.js";
 import razorpay from "../../config/razorpay.js";
+import Transaction from "../../model/transactionModel.js"
 import crypto from "crypto";
 
 const getWalletPage = async (req, res) => {
@@ -57,6 +58,18 @@ const creditWallet = async ({ userId, amount, description, orderId }) => {
   });
 
   await wallet.save();
+
+  const walletTxnId = `WAL-${Date.now()}`;
+
+  await Transaction.create({
+    userId,
+    type: "Wallet",
+    transactionId: walletTxnId,
+    amount: amount,
+    method: "WALLET",
+    status: "Completed",
+    description
+  })
 };
 
 
@@ -86,6 +99,16 @@ const debitWallet = async ({
   });
 
   await wallet.save();
+
+  await Transaction.create({
+  userId,
+  type: "Wallet",
+  transactionId: `WAL-${Date.now()}`,
+  amount,
+  method: "WALLET",
+  status: "Completed",
+  description
+});
 
   console.log("Wallet balance:", wallet.balance);
   console.log("Trying to deduct:", amount);

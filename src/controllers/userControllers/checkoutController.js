@@ -7,6 +7,7 @@ import Order from "../../model/orderModel.js";
 import Variant from "../../model/variantModel.js";
 import razorpay from "../../config/razorpay.js"
 import Wallet from "../../model/walletModel.js"
+import Transaction from "../../model/transactionModel.js";
 import crypto from "crypto"
 import { applyOfferToPrice } from "../../../utils/applyOffer.js";
 
@@ -291,6 +292,51 @@ const applyCoupon = async (req, res) => {
 };
 
 
+
+const deductStock = async (items) => {
+  for (const item of items) {
+    const variantId = item.variant?._id || item.variantId;
+    await Variant.findByIdAndUpdate(variantId,
+      { $inc: { stock: -item.quantity } }
+    );
+  }
+};
+
+
+
+const finalizeOrder = async ({
+  order,
+  cart,
+  userId,
+  couponId,
+  isBuyNowFlow,
+  req
+}) => {
+
+  await deductStock(cart.items);
+
+  if (!isBuyNowFlow) {
+    await Cart.deleteOne({ user: userId });
+  } else {
+    req.session.buyNowItem = null;
+  }
+
+  if (couponId) {
+    await Coupon.findByIdAndUpdate(couponId, {
+      $inc: { usageCount: 1 },
+      $push: {
+        usedBy: {
+          userId,
+          orderId: order._id,
+          usedAt: new Date()
+        }
+      }
+    });
+  }
+};
+
+
+
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -474,14 +520,6 @@ const placeOrder = async (req, res) => {
     // WALLET LOGIC
     if (paymentMethod === "WALLET") {
 
-      const order = await Order.create({
-        ...orderPayload,
-        payment: {
-          method: "WALLET",
-          status: "Pending"
-        }
-      });
-
       const wallet = await Wallet.findOne({ user: userId });
 
       if (!wallet || wallet.balance < finalTotal) {
@@ -489,36 +527,42 @@ const placeOrder = async (req, res) => {
       }
 
       wallet.balance -= finalTotal;
+
       wallet.transactions.push({
         type: "Debit",
         amount: finalTotal,
         description: "Order Payment",
+        date: new Date()
       });
 
       await wallet.save();
 
-      order.payment.status = "Paid";
-      await order.save();
+      const order = await Order.create({
+        ...orderPayload,
+        payment: {
+          method: "WALLET",
+          status: "Paid"
+        }
+      });
 
-      // deduct stock
-      for (const item of cart.items) {
-        await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
-          $inc: { stock: -item.quantity },
-        });
-      }
+      await Transaction.create({
+        userId,
+        type: "Wallet",
+        transactionId: `WAL-${Date.now()}`,
+        amount: finalTotal,
+        method: "WALLET",
+        status: "Completed",
+        description: "Wallet Debit - Order Payment"
+      });
 
-      if (!isBuyNowFlow) {
-        await Cart.deleteOne({ user: userId });
-      } else {
-        req.session.buyNowItem = null; // Clear buy now item
-      }
-
-      if (couponId) {
-        await Coupon.findByIdAndUpdate(couponId, {
-          $inc: { usageCount: 1 },
-          $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
-        });
-      }
+      await finalizeOrder({
+        order,
+        cart,
+        userId,
+        couponId,
+        isBuyNowFlow,
+        req
+      });
 
       return res.json({ success: true, orderId: order._id });
     }
@@ -541,26 +585,6 @@ const placeOrder = async (req, res) => {
         receipt: order._id.toString()
       });
 
-      // Deduct stock now
-      for (const item of cart.items) {
-        await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
-          $inc: { stock: -item.quantity },
-        });
-      }
-
-      if (!isBuyNowFlow) {
-        await Cart.deleteOne({ user: userId });
-      } else {
-        req.session.buyNowItem = null;
-      }
-
-      if (couponId) {
-        await Coupon.findByIdAndUpdate(couponId, {
-          $inc: { usageCount: 1 },
-          $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
-        });
-      }
-
       return res.json({
         success: true,
         razorpayOrder,
@@ -573,25 +597,24 @@ const placeOrder = async (req, res) => {
 
     const order = await Order.create(orderPayload);
 
-    // Deduct stock now
-    for (const item of cart.items) {
-      await Variant.findByIdAndUpdate(item.variant._id || item.variantId, {
-        $inc: { stock: -item.quantity },
-      });
-    }
+    await Transaction.create({
+      userId,
+      type: "Order",
+      transactionId: order.orderId,
+      amount: order.totalAmount,
+      method: order.payment.method,
+      status: order.payment.status,
+      description: `Order Payment (${order.payment.method})`
+    })
 
-    if (!isBuyNowFlow) {
-      await Cart.deleteOne({ user: userId });
-    } else {
-      req.session.buyNowItem = null;
-    }
-
-    if (couponId) {
-      await Coupon.findByIdAndUpdate(couponId, {
-        $inc: { usageCount: 1 },
-        $push: { usedBy: { userId, orderId: order._id, usedAt: new Date() } }
-      });
-    }
+    await finalizeOrder({
+      order,
+      cart,
+      userId,
+      couponId,
+      isBuyNowFlow,
+      req
+    });
 
     return res.json({ success: true, orderId: order._id });
 
@@ -697,6 +720,21 @@ const verifyPayment = async (req, res) => {
 
     // Update payment status
     order.payment.status = "Paid";
+
+    await deductStock(order.items); 
+
+    await Cart.deleteOne({ user: order.userId });
+
+    await Transaction.create({
+      userId: order.userId,
+      type: "Order",
+      transactionId: order.orderId,
+      amount: order.totalAmount,
+      method: "RAZORPAY",
+      status: "Paid",
+      description: "Order Payment (RAZORPAY)"
+    });
+
     order.payment.razorpayPaymentId = razorpay_payment_id;
     order.orderStatus = "Processing";
 

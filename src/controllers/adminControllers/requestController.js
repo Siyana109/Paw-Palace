@@ -133,11 +133,11 @@ const handleReturnAction = async (req, res) => {
 
                 // SAFETY: If this is the LAST active item,
                 // refund ALL remaining shipping
-                const remainingActiveItems = order.items.filter(
+                const remainingItemsForShipping = order.items.filter(
                     i => !["Cancelled", "Returned"].includes(i.itemStatus)
                 );
 
-                if (remainingActiveItems.length === 1) {
+                if (remainingItemsForShipping.length === 1) {
                     // Refund whatever shipping is left
                     shippingRefund = originalShippingFee;
                 }
@@ -146,6 +146,9 @@ const handleReturnAction = async (req, res) => {
 
         refundAmount += shippingRefund;
 
+        if (item.refund?.status === "Completed") {
+            return res.json({ success: false, message: "Already refunded" });
+        }
 
         // Wallet credit
         await walletController.creditWallet({
@@ -154,10 +157,6 @@ const handleReturnAction = async (req, res) => {
             description: "Item Return Refund",
             orderId: order._id
         });
-
-        if (item.refund?.status === "Completed") {
-            return res.json({ success: false, message: "Already refunded" });
-        }
 
         // Update item
         item.itemStatus = "Returned";
@@ -173,14 +172,14 @@ const handleReturnAction = async (req, res) => {
         };
 
         // Update order totals
-        order.subtotal -= item.totalAmount;
+        order.subtotal = Math.max(0, order.subtotal - item.totalAmount);
         if (order.discount >= itemDiscountShare) {
             order.discount -= itemDiscountShare;
         } else {
             order.discount = 0;
         }
-        order.totalAmount -= refundAmount;
-        order.shipping -= shippingRefund;
+        order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
+        order.shipping = Math.max(0, order.shipping - shippingRefund);
 
 
         order.refundSummary.totalRefunded += refundAmount;
