@@ -56,10 +56,25 @@ const postAdmin = async (req, res) => {
     }
 };
 
-const getLogout = (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/admin/login');
+const adminLogout = (req, res) => {
+  try {
+
+    req.session.destroy((err) => {
+
+      if (err) {
+        console.error("Admin logout error:", err);
+        return res.redirect("/admin/dashboard");
+      }
+
+      res.clearCookie("pawpalace.sid");
+      return res.redirect("/admin/login");
+
     });
+
+  } catch (error) {
+    console.error("Admin logout failed:", error);
+    res.redirect("/admin/login");
+  }
 };
 
-export default { getAdmin, postAdmin, getLogout };
+export default { getAdmin, postAdmin, adminLogout };

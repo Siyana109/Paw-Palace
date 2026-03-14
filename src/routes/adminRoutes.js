@@ -24,6 +24,8 @@ import { variantUpload, upload } from "../middlewares/upload.js"
 router.get('/login', adminMiddleware.isAdminLoggedIn, authController.getAdmin)
 router.post('/login', authController.postAdmin)
 
+router.get("/logout", adminMiddleware.adminSession, authController.adminLogout);
+
 router.get('/dashboard', adminMiddleware.adminSession, dashboardController.getDashboard)
 
 router.get('/users', adminMiddleware.adminSession, userController.getUsers)
