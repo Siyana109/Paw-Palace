@@ -827,10 +827,11 @@
         }
 
         try {
+            const isBuyNow = document.getElementById("isBuyNowInput").value;
             const response = await fetch('/checkout/apply-coupon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ couponCode })
+                body: JSON.stringify({ couponCode, isBuyNow })
             });
             const data = await response.json();
 
@@ -1137,6 +1138,24 @@
                 };
 
                 const rzp = new Razorpay(options);
+
+                // If payment natively fails (bad card, insufficient funds), we MUST trigger the failure route immediately to restock!
+                rzp.on('payment.failed', async function (response) {
+                    console.log("Razorpay Payment Failed:", response.error);
+
+                    try {
+                        // Secretly trigger the webhook so backend can restock before redirect
+                        await fetch(`/checkout/payment-failed?orderId=${data.orderId}`, { method: 'GET' });
+                    } catch (err) {
+                        console.error("Failed to notify backend of failure:", err);
+                    }
+
+                    // Razorpay modal stays open by default. The user can retry inside it, or close it.
+                    // But since we just restocked, if they retry inside it we would have a loophole!
+                    // Thus, we force redirect them to our Native failure retry page.
+                    window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
+                });
+
                 rzp.open();
 
             } catch (error) {

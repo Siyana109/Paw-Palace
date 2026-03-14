@@ -34,18 +34,12 @@ const getCheckoutPage = async (req, res) => {
         .populate("items.variant");
     }
 
-    const allCoupons = await Coupon.find({ isActive: true });
-
-    // Timezone-safe date validation (matching the Exact Calendar Date)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    const coupons = allCoupons.filter(c => {
-      const startDate = new Date(c.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      const expiryDate = new Date(c.expiryDate);
-      expiryDate.setHours(0, 0, 0, 0);
-      return startDate <= today && expiryDate >= today;
+    const coupons = await Coupon.find({
+      isActive: true,
+      startDate: { $lte: today },
+      expiryDate: { $gte: today }
     });
 
     // Optional: Filter coupons user has already exhausted?
@@ -721,7 +715,7 @@ const verifyPayment = async (req, res) => {
     // Update payment status
     order.payment.status = "Paid";
 
-    await deductStock(order.items); 
+    await deductStock(order.items);
 
     await Cart.deleteOne({ user: order.userId });
 
