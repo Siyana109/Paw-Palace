@@ -467,11 +467,27 @@ const placeOrder = async (req, res) => {
       discount = Math.min(discount, postOfferSubtotal);
 
       couponId = coupon._id;
+
+      // Partition coupon discount across items
+      let remainingDiscount = discount;
+      for (let i = 0; i < orderItems.length; i++) {
+        const item = orderItems[i];
+        if (i === orderItems.length - 1) {
+          item.couponDiscount = Math.round(remainingDiscount * 100) / 100;
+        } else {
+          const itemShare = (item.totalAmount / postOfferSubtotal) * discount;
+          const roundedShare = Math.round(itemShare * 100) / 100;
+          item.couponDiscount = roundedShare;
+          remainingDiscount -= roundedShare;
+        }
+      }
     }
 
-    const postDiscountAmount = subtotal - offerDiscount - discount;
+
+    const postDiscountAmount = Math.max(0, subtotal - offerDiscount - discount);
     const shipping = 0; // Flat shipping rate
-    const finalTotal = postDiscountAmount + shipping;
+    const finalTotal = Math.round((postDiscountAmount + shipping) * 100) / 100;
+
 
     // Distribute shipping fee across items
     const totalQuantity = orderItems.reduce((acc, item) => acc + item.quantity, 0);

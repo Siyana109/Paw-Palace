@@ -146,12 +146,18 @@ const requestReturnItem = async (req, res) => {
 
             // Reduce original item to the non-returned amount
             item.quantity = remainingQty;
-            item.totalAmount = remainingQty * perItemPrice;
-            if (item.couponDiscount) {
-                item.couponDiscount = (item.couponDiscount / originalQty) * remainingQty;
+            item.totalAmount = Math.round((remainingQty * perItemPrice) * 100) / 100;
+
+            const originalCouponDiscount = item.couponDiscount || 0;
+            const originalShippingShare = item.shippingShare || 0;
+
+            if (originalCouponDiscount > 0) {
+                const remainingCouponDisc = Math.round((originalCouponDiscount / originalQty) * remainingQty * 100) / 100;
+                item.couponDiscount = remainingCouponDisc;
             }
-            if (item.shippingShare) {
-                item.shippingShare = (item.shippingShare / originalQty) * remainingQty;
+            if (originalShippingShare > 0) {
+                const remainingShippingShare = Math.round((originalShippingShare / originalQty) * remainingQty * 100) / 100;
+                item.shippingShare = remainingShippingShare;
             }
 
             // Create a brand new item for the returned portion
@@ -161,14 +167,15 @@ const requestReturnItem = async (req, res) => {
             delete returnedItemObj.updatedAt;
 
             returnedItemObj.quantity = returnQty;
-            returnedItemObj.totalAmount = returnQty * perItemPrice;
-            if (returnedItemObj.couponDiscount) {
-                const originalCouponDiscount = item.couponDiscount || 0;
-                returnedItemObj.couponDiscount = (originalCouponDiscount / originalQty) * returnQty;
+            returnedItemObj.totalAmount = Math.round((returnQty * perItemPrice) * 100) / 100;
+            
+            if (originalCouponDiscount > 0) {
+                returnedItemObj.couponDiscount = Math.round((originalCouponDiscount - item.couponDiscount) * 100) / 100;
             }
-            if (returnedItemObj.shippingShare) {
-                returnedItemObj.shippingShare = (item.shippingShare / remainingQty) * returnQty;
+            if (originalShippingShare > 0) {
+                returnedItemObj.shippingShare = Math.round((originalShippingShare - item.shippingShare) * 100) / 100;
             }
+
 
             // Push the new cloned item, and set THAT item to the requested return one
             order.items.push(returnedItemObj);
@@ -273,7 +280,18 @@ const cancelOrderOrItem = async (req, res) => {
 
                 // reduce original item
                 item.quantity = remainingQty;
-                item.totalAmount = remainingQty * perItemPrice;
+                item.totalAmount = Math.round((remainingQty * perItemPrice) * 100) / 100;
+
+                const origCouponDiscount = item.couponDiscount || 0;
+                const origShippingShare = item.shippingShare || 0;
+
+                if (origCouponDiscount > 0) {
+                    item.couponDiscount = Math.round((origCouponDiscount / originalQty) * remainingQty * 100) / 100;
+                }
+                if (origShippingShare > 0) {
+                    item.shippingShare = Math.round((origShippingShare / originalQty) * remainingQty * 100) / 100;
+                }
+
 
                 // create cancelled item
                 const originalItemData = item.toObject();
@@ -281,7 +299,10 @@ const cancelOrderOrItem = async (req, res) => {
                 const cancelledItem = {
                     ...originalItemData,
                     quantity: cancelQty,
-                    totalAmount: cancelQty * perItemPrice,
+                    totalAmount: Math.round((cancelQty * perItemPrice) * 100) / 100,
+                    couponDiscount: Math.round((origCouponDiscount - (item.couponDiscount || 0)) * 100) / 100,
+                    shippingShare: Math.round((origShippingShare - (item.shippingShare || 0)) * 100) / 100,
+
                     itemStatus: "Cancelled",
                     cancelRequest: {
                         isRequested: true,

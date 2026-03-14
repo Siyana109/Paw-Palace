@@ -525,17 +525,14 @@
                                     }
                                     });
 
-                                    // Deduct global discount that might not be partitioned in items
-                                    // if items don't store couponDiscount. But if they do, use the sum.
-                                    // For safety, let's use the accumulated couponDiscount. If 0, fallback to
-                                    // order.discount for active items logic if needed, but since we partition it on
-                                    // cancel, order.discount is current active discount.
-                                    const activeCouponDiscount = order.discount || couponDiscount;
-
-                                    const shipping = order.shipping || 0;
+                                    // activeTotal is the source of truth for what the user actually paid
                                     const activeTotal = order.totalAmount;
-                                    // order.totalAmount is already aggressively maintained by cancel logic
+                                    const shipping = order.shipping || 0;
+                                    
+                                    // Coupon discount should be what is stored in the order
+                                    const activeCouponDiscount = order.discount || 0;
                                     %>
+
 
                                     <div class="space-y-3 text-sm">
                                         <div class="flex justify-between items-center text-xs font-bold text-gray-400">

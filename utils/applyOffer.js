@@ -25,6 +25,7 @@ export const applyOfferToPrice = ({ price, productId, categoryId, activeOffers }
   }
 
   let finalPrice = price - (price * appliedOffer.discount) / 100;
+  finalPrice = Math.round(finalPrice * 100) / 100;
 
   return {
     offerApplied: true,

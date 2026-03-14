@@ -84,6 +84,10 @@ const getSalesReport = async (req, res) => {
         ]);
 
         const stats = metrics[0] || { totalOrders: 0, totalRevenue: 0, totalDiscount: 0, totalRefunded: 0, productsSold: 0 };
+        stats.totalRevenue = Math.round(stats.totalRevenue * 100) / 100;
+        stats.totalDiscount = Math.round(stats.totalDiscount * 100) / 100;
+        stats.totalRefunded = Math.round(stats.totalRefunded * 100) / 100;
+
 
         // 3. Paginated Order List
         const limit = 10;
