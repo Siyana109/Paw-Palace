@@ -203,13 +203,14 @@
                                                 <td class="py-5 align-top">
                                                     <div class="flex items-start gap-4">
                                                         <div
-                                                            class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 <%= txn.type === 'Credit' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500' %>">
+                                                            class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 <%= txn.type === 'Credit' ? 'bg-emerald-50 text-emerald-500' : txn.type === 'Failed' ? 'bg-red-50 text-red-500' : 'bg-rose-50 text-rose-500' %>">
                                                             <i
-                                                                class="fa-solid <%= txn.type === 'Credit' ? 'fa-arrow-down' : 'fa-arrow-up' %> transform <%= txn.type === 'Credit' ? '' : 'rotate-45' %>"></i>
+                                                                class="fa-solid <%= txn.type === 'Credit' ? 'fa-arrow-down' : txn.type === 'Failed' ? 'fa-xmark' : 'fa-arrow-up transform rotate-45' %>"></i>
                                                         </div>
                                                         <div>
                                                             <p class="font-bold text-slate-800 mb-0.5">
-                                                                <%= txn.type==='Credit' ? 'Received' : 'Sent' %>
+                                                                <%= txn.type==='Credit' ? 'Received' :
+                                                                    txn.type==='Failed' ? 'Failed' : 'Sent' %>
                                                             </p>
                                                             <p
                                                                 class="text-xs text-slate-500 font-medium leading-relaxed max-w-[200px]">
@@ -234,9 +235,9 @@
                                                 <!-- Amount -->
                                                 <td class="py-5 pr-4 text-right align-top">
                                                     <span
-                                                        class="font-black text-lg <%= txn.type === 'Credit' ? 'text-emerald-500' : 'text-slate-800' %>">
-                                                        <%= txn.type==='Credit' ? '+' : '-' %> ₹<%=
-                                                                txn.amount.toFixed(2) %>
+                                                        class="font-black text-lg <%= txn.type === 'Credit' ? 'text-emerald-500' : txn.type === 'Failed' ? 'text-red-500' : 'text-slate-800' %>">
+                                                        <%= txn.type==='Credit' ? '+' : txn.type==='Failed' ? '' : '-'
+                                                            %> ₹<%= txn.amount.toFixed(2) %>
                                                     </span>
                                                     <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">
                                                         <%= txn.type %>
@@ -395,18 +396,47 @@
                             handler: async function (response) {
                                 verifyPayment(response, amount);
                             },
+                            modal: {
+                                ondismiss: async function () {
+                                    console.log("Recharge Modal Closed");
+                                    try {
+                                        await fetch('/wallet/recharge-failed', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ amount: amount, reason: "Cancelled by User" })
+                                        });
+                                    } catch (err) {
+                                        console.error("Failed to notify backend", err);
+                                    }
+                                    btn.disabled = false;
+                                    btn.innerHTML = '<span>Proceed to Pay</span><i class="fa-solid fa-arrow-right"></i>';
+                                    window.location.reload();
+                                }
+                            },
                             theme: { color: "#f43f5e" }
                         };
 
                         const rzp1 = new Razorpay(options);
                         rzp1.open();
 
-                        rzp1.on('payment.failed', function (response) {
+                        rzp1.on('payment.failed', async function (response) {
+                            try {
+                                await fetch('/wallet/recharge-failed', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ amount: amount, reason: response.error.description })
+                                });
+                            } catch (err) {
+                                console.error("Failed to notify backend", err);
+                            }
+
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Payment Failed',
                                 text: response.error.description,
                                 confirmButtonColor: '#f43f5e'
+                            }).then(() => {
+                                window.location.reload();
                             });
                             btn.disabled = false;
                             btn.innerHTML = '<span>Proceed to Pay</span><i class="fa-solid fa-arrow-right"></i>';

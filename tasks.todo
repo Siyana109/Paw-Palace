@@ -271,12 +271,11 @@ TODO :
         ✔ offer validation @done (3/2/2026, 7:14:10 PM)
         ✔ coupon validation @done (3/2/2026, 7:47:53 PM)
         ✔ in order history status failed card is showing package is on the way @done (3/2/2026, 6:33:44 PM)
-        ☐ return and cancel validation in comment
+        ✔ return and cancel validation in comment @done (3/14/2026, 10:38:36 AM)
         ✔ returning each product quanitty @done (3/2/2026, 8:27:36 PM)
         ☐ buy now option in cart (optional)
         ☐ do not show expired coupons
         ☐ wallet failed payment
-        ☐ in buynow cannot apply coupon ?
         ☐ breadcrumbs in single order page is not correct
         ☐ profile photo not showing in order related pages
         ☐ 

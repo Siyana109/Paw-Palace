@@ -101,14 +101,14 @@ const debitWallet = async ({
   await wallet.save();
 
   await Transaction.create({
-  userId,
-  type: "Wallet",
-  transactionId: `WAL-${Date.now()}`,
-  amount,
-  method: "WALLET",
-  status: "Completed",
-  description
-});
+    userId,
+    type: "Wallet",
+    transactionId: `WAL-${Date.now()}`,
+    amount,
+    method: "WALLET",
+    status: "Completed",
+    description
+  });
 
   console.log("Wallet balance:", wallet.balance);
   console.log("Trying to deduct:", amount);
@@ -191,10 +191,50 @@ const verifyRecharge = async (req, res) => {
   }
 };
 
+const rechargeFailed = async (req, res) => {
+  try {
+    const { amount, reason } = req.body;
+    const userId = req.session.user.id;
+
+    if (!amount) {
+      return res.status(400).json({ success: false, message: "Amount missing" });
+    }
+
+    let wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) {
+      wallet = await Wallet.create({ user: userId, balance: 0, transactions: [] });
+    }
+
+    wallet.transactions.push({
+      type: "Failed",
+      amount: Number(amount),
+      description: `Recharge Failed${reason ? ' (' + reason + ')' : ''}`,
+      date: new Date()
+    });
+    await wallet.save();
+
+    await Transaction.create({
+      userId,
+      type: "Wallet",
+      transactionId: `WAL-F-${Date.now()}`,
+      amount: Number(amount),
+      method: "WALLET",
+      status: "Failed",
+      description: `Recharge Failed${reason ? ' (' + reason + ')' : ''}`
+    });
+
+    res.json({ success: true, message: "Failure logged" });
+  } catch (error) {
+    console.error("Recharge Failure Hook Error:", error);
+    res.status(500).json({ success: false, message: "Failed to log" });
+  }
+};
+
 export default {
   getWalletPage,
   creditWallet,
   debitWallet,
   createRechargeOrder,
-  verifyRecharge
+  verifyRecharge,
+  rechargeFailed
 }

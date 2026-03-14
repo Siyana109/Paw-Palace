@@ -18,7 +18,7 @@ const walletSchema = new mongoose.Schema({
     {
       type: {
         type: String,
-        enum: ["Credit", "Debit"],
+        enum: ["Credit", "Debit", "Failed"],
         required: true
       },
       amount: {
