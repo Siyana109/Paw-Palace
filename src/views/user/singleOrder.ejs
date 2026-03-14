@@ -545,7 +545,9 @@
 
                                         <div class="flex justify-between items-center text-xs font-bold text-gray-400">
                                             <span>Shipping</span>
-                                            <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
+                                            <span class="text-gray-600">
+                                                <%= shipping===0 ? 'Free' : `₹${shipping.toFixed(2)}` %>
+                                            </span>
                                         </div>
 
                                         <div class="flex justify-between items-center text-xs font-bold text-gray-400">

@@ -552,7 +552,7 @@ const downloadInvoice = async (req, res) => {
         y += 15;
 
         doc.text('Shipping:', summaryX, y);
-        doc.text(`Rs.${(order.shipping || 50).toFixed(2)}`, valueX, y);
+        doc.text(`Rs.${(order.shipping || 0).toFixed(2)}`, valueX, y);
         y += 15;
 
         // Store current Y for lines

@@ -202,7 +202,7 @@
 
                                 const postOfferTotal = subtotal - offerDiscount;
 
-                                const shipping = 50;
+                                const shipping = 0;
 
                                 const total = postOfferTotal + shipping;
                                 %>
@@ -224,7 +224,8 @@
                                     <div class="flex justify-between items-center text-sm font-bold text-gray-500">
                                         <span>Shipping</span>
 
-                                        <span id="summary-shipping" class="text-accent-navy">₹<%= shipping.toFixed(2) %>
+                                        <span id="summary-shipping" class="text-accent-navy">
+                                            <%= shipping===0 ? 'Free' : '₹' + shipping.toFixed(2) %>
                                         </span>
                                     </div>
 
@@ -303,11 +304,12 @@
                     });
 
                     const postOfferTotal = subtotal - offerDiscount;
-                    const shipping = 50;
+                    const shipping = 0;
                     const total = postOfferTotal + shipping;
 
                     document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
                     document.getElementById('summary-discount').innerText = `-₹${offerDiscount.toFixed(2)}`;
+                    document.getElementById('summary-shipping').innerText = shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`;
                     document.getElementById('summary-total').innerText = `₹${total.toFixed(2)}`;
                 }
 

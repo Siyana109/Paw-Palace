@@ -470,7 +470,7 @@ const placeOrder = async (req, res) => {
     }
 
     const postDiscountAmount = subtotal - offerDiscount - discount;
-    const shipping = 50; // Flat shipping rate
+    const shipping = 0; // Flat shipping rate
     const finalTotal = postDiscountAmount + shipping;
 
     // Distribute shipping fee across items

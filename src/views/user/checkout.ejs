@@ -281,7 +281,7 @@
 
                                         const postOfferTotal = subtotal - offerDiscount;
 
-                                        const shipping = 50;
+                                        const shipping = 0;
 
                                         const couponDiscount = 0;
                                         const total = postOfferTotal + shipping - couponDiscount;
@@ -296,7 +296,9 @@
                                             <div
                                                 class="flex justify-between items-center text-xs font-bold text-gray-400">
                                                 <span>Shipping</span>
-                                                <span class="text-gray-600">₹<%= shipping.toFixed(2) %></span>
+                                                <span class="text-gray-600">
+                                                    <%= shipping===0 ? 'Free' : `₹${shipping.toFixed(2)}` %>
+                                                </span>
                                             </div>
                                             <!-- Tax Removed -->
                                             <div
@@ -455,20 +457,29 @@
                                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
                                 placeholder="Full Name">
 
-                            <input id="addrPhone" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="Phone">
+                            <input id="addrPhone"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                                placeholder="Phone">
 
                             <textarea id="addrAddress"
                                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none h-20"
                                 placeholder="Address"></textarea>
 
-                            <input id="addrLandmark" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                            <input id="addrLandmark"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
                                 placeholder="Landmark (optional)">
 
-                            <input id="addrCity" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="City">
+                            <input id="addrCity"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                                placeholder="City">
 
-                            <input id="addrState" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="State">
+                            <input id="addrState"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                                placeholder="State">
 
-                            <input id="addrZip" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="Pincode">
+                            <input id="addrZip"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                                placeholder="Pincode">
 
                             <div class="flex gap-3">
                                 <button type="button"
@@ -477,12 +488,14 @@
                                     Home
                                 </button>
 
-                                <button type="button" class="addr-type-btn px-5 text-sm py-1.5 rounded-lg font-bold border"
+                                <button type="button"
+                                    class="addr-type-btn px-5 text-sm py-1.5 rounded-lg font-bold border"
                                     data-type="Work">
                                     Work
                                 </button>
 
-                                <button type="button" class="addr-type-btn text-sm px-5 py-1.5 rounded-lg font-bold border"
+                                <button type="button"
+                                    class="addr-type-btn text-sm px-5 py-1.5 rounded-lg font-bold border"
                                     data-type="Other">
                                     Other
                                 </button>
@@ -853,7 +866,7 @@
 
                 // Update Total Logic
                 currentDiscount = data.discount;
-                const shipping = 50;
+                const shipping = 0;
                 const newTotal = data.subtotal + shipping - data.discount;
                 document.getElementById('totalAmountDisplay').innerText = `₹${newTotal.toFixed(2)}`;
 
