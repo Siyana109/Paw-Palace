@@ -602,22 +602,20 @@
                     </div>
                 </div>
 
-                <form id="returnForm" onsubmit="submitReturnRequest(event)">
+                <form id="returnForm" onsubmit="submitReturnRequest(event)" novalidate>
                     <input type="hidden" id="returnOrderId" name="orderId">
                     <input type="hidden" id="returnItemId" name="itemId">
 
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Quantity to Return</label>
-                        <input type="number" name="returnQuantity" id="returnQuantity" required min="1" max="1"
-                            value="1"
+                        <input type="number" name="returnQuantity" id="returnQuantity" value="1"
                             class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Return</label>
                         <div class="relative">
-                            <select name="returnReason" id="returnReasonSelect" required
-                                onchange="toggleOtherReason(this)"
+                            <select name="returnReason" id="returnReasonSelect" onchange="toggleOtherReason(this)"
                                 class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none appearance-none transition cursor-pointer">
                                 <option value="" disabled selected>Select a reason</option>
                                 <option value="Defective or Damaged">Defective or Damaged Product</option>
@@ -633,7 +631,8 @@
                     </div>
 
                     <div class="mb-6" id="otherReasonContainer">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Additional Comments (Optional)</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Additional Comments
+                            (Optional)</label>
                         <textarea name="comments" id="returnComments" rows="3"
                             class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition resize-none"
                             placeholder="Please provide any extra details or concerns..."></textarea>
@@ -673,21 +672,20 @@
                     </div>
                 </div>
 
-                <form id="cancelForm" onsubmit="submitCancelRequest(event)">
+                <form id="cancelForm" onsubmit="submitCancelRequest(event)" novalidate>
                     <input type="hidden" id="cancelOrderId" name="orderId">
                     <input type="hidden" id="cancelItemId" name="itemId">
 
                     <div class="mb-4" id="cancelQuantityContainer">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Quantity to Cancel</label>
-                        <input type="number" name="cancelQuantity" id="cancelQuantity" required min="1" max="1"
-                            value="1"
+                        <input type="number" name="cancelQuantity" id="cancelQuantity" value="1"
                             class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none transition">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Cancellation</label>
                         <div class="relative">
-                            <select name="cancelReason" id="cancelReasonSelect" required
+                            <select name="cancelReason" id="cancelReasonSelect"
                                 class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none appearance-none transition cursor-pointer">
                                 <option value="" disabled selected>Select a reason</option>
                                 <option value="Found a better price">Found a better price</option>
@@ -703,7 +701,8 @@
                     </div>
 
                     <div class="mb-6" id="cancelCommentsContainer">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Additional Comments (Optional)</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Additional Comments
+                            (Optional)</label>
                         <textarea name="otherReason" id="cancelComments" rows="3"
                             class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none transition resize-none"
                             placeholder="Please provide any extra details or concerns..."></textarea>
@@ -745,15 +744,52 @@
                 // ... Existing Toggle Other Reason ...
 
                 async function submitReturnRequest(event) {
-                    // ... existing logic ...
-                    event.preventDefault();
-                    const form = event.target;
-                    const orderId = form.orderId.value;
-                    const itemId = form.itemId.value;
 
+                    event.preventDefault();
+
+                    const form = event.target;
+
+                    const quantity = parseInt(form.returnQuantity.value, 10);
                     const reasonSelect = form.returnReason.value;
                     const commentsValue = form.comments.value.trim();
-                    const quantity = parseInt(form.returnQuantity.value, 10);
+
+                    if (!reasonSelect) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Reason Required",
+                            text: "Please select a return reason.",
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
+
+                    const maxQty = parseInt(form.returnQuantity.max);
+
+                    if (isNaN(quantity)) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Quantity Required",
+                            text: "Please enter a quantity to return.",
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
+
+                    if (quantity <= 0) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Invalid Quantity",
+                            text: "Quantity must be greater than 0.",
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
+
+                    if (quantity > maxQty) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Quantity Too Large",
+                            text: `You can return only up to ${maxQty} item(s).`,
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
 
                     // Validation for optional comments
                     if (commentsValue.length > 0 && commentsValue.length < 10) {
@@ -780,6 +816,8 @@
                     }
 
                     try {
+                        const orderId = form.orderId.value;
+                        const itemId = form.itemId.value;
                         const response = await fetch(`/orders/${orderId}/items/${itemId}/return`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -895,14 +933,34 @@
                 }
 
                 async function submitCancelRequest(event) {
-                    event.preventDefault();
-                    const form = event.target;
-                    const orderId = form.orderId.value;
-                    const itemId = form.itemId.value; // Can be empty for full order
-                    const quantity = parseInt(form.cancelQuantity.value, 10);
 
+                    event.preventDefault();
+
+                    const form = event.target;
+
+                    const orderId = form.orderId.value;
+                    const itemId = form.itemId.value;
+                    const quantity = parseInt(form.cancelQuantity.value, 10);
                     const reasonSelect = form.cancelReason.value;
                     const additionalComments = form.otherReason.value.trim();
+
+                    if (!reasonSelect) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Reason Required",
+                            text: "Please select a cancellation reason.",
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
+
+                    if (itemId && (!quantity || quantity <= 0)) {
+                        return Swal.fire({
+                            icon: "warning",
+                            title: "Invalid Quantity",
+                            text: "Please enter a valid quantity to cancel.",
+                            confirmButtonColor: "#f43f5e"
+                        });
+                    }
 
                     // Validation for optional comments
                     if (additionalComments.length > 0 && additionalComments.length < 10) {

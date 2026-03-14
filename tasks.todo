@@ -277,6 +277,9 @@ TODO :
         ☐ do not show expired coupons
         ☐ wallet failed payment
         ☐ in buynow cannot apply coupon ?
+        ☐ breadcrumbs in single order page is not correct
+        ☐ profile photo not showing in order related pages
+        ☐ 
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
