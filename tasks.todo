@@ -264,22 +264,19 @@ TODO :
         ✔ order tracking statuses @done (2/20/2026, 3:17:19 PM)
         ☐ reviews
         ✔ order detailing page calculations @done (2/23/2026, 11:51:04 PM)
-        ✔ coupon controller @done (2/26/2026, 11:39:30 AM)
-        ☐ ONLINE , RAZORPAY in db (placeOrder)
+        ✔ coupon controller @done (2/26/2026, 11:39:30 AM
         ✔ min & max price validation in home page @done (3/2/2026, 6:15:46 PM)
-        ☐ home page need to be responsive
         ✔ offer validation @done (3/2/2026, 7:14:10 PM)
         ✔ coupon validation @done (3/2/2026, 7:47:53 PM)
         ✔ in order history status failed card is showing package is on the way @done (3/2/2026, 6:33:44 PM)
         ✔ return and cancel validation in comment @done (3/14/2026, 10:38:36 AM)
         ✔ returning each product quanitty @done (3/2/2026, 8:27:36 PM)
-        ☐ buy now option in cart (optional)
+        ✔ buy now option in cart (optional) @done (3/14/2026, 12:29:16 PM)
         ✔ do not show expired coupons @done (3/14/2026, 11:32:32 AM)
         ✔ wallet failed payment @done (3/14/2026, 11:23:17 AM)
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
-        ☐ breadcrumbs in single order page is not correct
+        ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
-        ☐ 
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
@@ -289,6 +286,7 @@ TODO :
         ✔ offer filtering sorting pagination @done (2/11/2026, 3:51:43 AM)
         ✔ online filtering in admin order @done (2/11/2026, 3:51:50 AM)
         ☐ dashboard total orders ??
+        ☐ top brand in admin brands
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
 
 
