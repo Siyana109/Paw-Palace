@@ -44,11 +44,11 @@
 
                     <% wishlist.forEach(item=> { %>
                         <% if (item.variant && item.product) { %>
-                            <div
-                                class="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl transition-shadow duration-300 relative group border border-gray-100 flex flex-col h-full">
+                            <div class="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl transition-shadow duration-300 relative group border border-gray-100 flex flex-col h-full cursor-pointer"
+                                onclick="window.location.href='/product/<%= item.product._id %>'">
 
                                 <!-- REMOVE BUTTON -->
-                                <button onclick="removeFromWishlist('<%= item.variant._id %>')"
+                                <button onclick="event.stopPropagation(); removeFromWishlist('<%= item.variant._id %>')"
                                     class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition shadow-sm border border-gray-100">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
@@ -111,7 +111,7 @@
                                     <!-- ADD TO CART BTN -->
                                     <% if (item.variant.stock> 0) { %>
                                         <button
-                                            onclick="addToCart('<%= item.product._id %>', '<%= item.variant._id %>')"
+                                            onclick="event.stopPropagation(); addToCart('<%= item.product._id %>', '<%= item.variant._id %>')"
                                             class="w-full h-12 bg-accent-navy text-white text-sm font-bold rounded-xl hover:bg-black transition shadow-lg shadow-accent-navy/20 flex items-center justify-center gap-2">
                                             Add to Cart
                                         </button>

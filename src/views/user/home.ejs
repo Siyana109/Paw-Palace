@@ -231,7 +231,8 @@
                         <% if (products.length> 0) { %>
                             <% products.forEach(product=> { %>
                                 <div class="bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-xl
-                    transition-all duration-500 group relative flex flex-col">
+                    transition-all duration-500 group relative flex flex-col cursor-pointer"
+                                    onclick="window.location.href='/product/<%= product._id %>'">
 
                                     <div class="relative aspect-square rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
 
@@ -261,7 +262,7 @@
 
                                                     <!-- WISHLIST BUTTON (FIXED TOP-RIGHT) -->
                                                     <button
-                                                        onclick="toggleWishlist('<%= product._id %>', '<%= product.variantId %>', this)"
+                                                        onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', '<%= product.variantId %>', this)"
                                                         class="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md z-20 hover:scale-110 transition-transform duration-300 group/btn">
                                                         <i
                                                             class="<%= product.inWishlist ? 'fa-solid text-brand-500' : 'fa-regular text-gray-400' %> fa-heart text-xl transition-colors duration-300"></i>

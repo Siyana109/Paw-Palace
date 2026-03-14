@@ -341,65 +341,87 @@
                                                             <!-- Actions Area -->
                                                             <div
                                                                 class="pt-3 border-t border-gray-50 flex flex-wrap gap-2 mt-auto z-20 relative">
-                                                                <% if (['Delivered'].includes(order.orderStatus) &&
-                                                                    !['Cancelled', 'Returned'
-                                                                    ].includes(item.itemStatus)) { %>
-                                                                    <% if (!item.returnRequest ||
-                                                                        !item.returnRequest.isRequested) { %>
-                                                                        <button
-                                                                            onclick="openReturnModal('<%= order._id %>', '<%= item._id %>', `<%= item.productName %>`, `<%= item.variantName %>`, `<%= imageUrl %>`, <%= item.quantity %>)"
-                                                                            class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-slate-600 text-xs font-bold hover:bg-gray-50 hover:text-slate-800 hover:border-gray-300 transition shadow-sm">
-                                                                            <i class="fa-solid fa-rotate-left mr-1"></i>
-                                                                            Return Item
-                                                                        </button>
-                                                                        <button
-                                                                            class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold hover:bg-emerald-100 transition shadow-sm">
-                                                                            <i class="fa-regular fa-star mr-1"></i>
-                                                                            Review
-                                                                        </button>
-                                                                        <% } else { %>
-                                                                            <span
-                                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-xs font-bold">
-                                                                                <i
-                                                                                    class="fa-solid fa-clock-rotate-left"></i>
-                                                                                Return <%= item.returnRequest.status %>
-                                                                            </span>
-                                                                            <% if (item.returnRequest.status==='Pending'
-                                                                                ) { %>
+                                                                <% let canReturn=false; if (order.deliveredAt) { const
+                                                                    deliveryDate=new Date(order.deliveredAt); const
+                                                                    currentDate=new Date(); const
+                                                                    daysSinceDelivery=(currentDate - deliveryDate) /
+                                                                    (1000 * 60 * 60 * 24); canReturn=daysSinceDelivery
+                                                                    <=10; } %>
+                                                                    <% if (['Delivered'].includes(order.orderStatus) &&
+                                                                        !['Cancelled', 'Returned'
+                                                                        ].includes(item.itemStatus)) { %>
+                                                                        <% if (!item.returnRequest ||
+                                                                            !item.returnRequest.isRequested) { %>
+                                                                            <% if (canReturn) { %>
                                                                                 <button
-                                                                                    onclick="cancelReturnItem('<%= order._id %>', '<%= item._id %>')"
-                                                                                    class="text-xs font-semibold text-gray-400 hover:text-rose-500 hover:underline transition ml-2">
-                                                                                    Cancel Request
+                                                                                    onclick="openReturnModal('<%= order._id %>', '<%= item._id %>', `<%= item.productName %>`, `<%= item.variantName %>`, `<%= imageUrl %>`, <%= item.quantity %>)"
+                                                                                    class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-slate-600 text-xs font-bold hover:bg-gray-50 hover:text-slate-800 hover:border-gray-300 transition shadow-sm">
+                                                                                    <i
+                                                                                        class="fa-solid fa-rotate-left mr-1"></i>
+                                                                                    Return Item
                                                                                 </button>
-                                                                                <% } %>
+                                                                                <% } else { %>
+                                                                                    <span
+                                                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 text-xs font-bold shadow-sm">
+                                                                                        <i class="fa-solid fa-ban"></i>
+                                                                                        Return Closed
+                                                                                    </span>
                                                                                     <% } %>
-                                                                                        <% } else if
-                                                                                            (['Pending', 'Processing'
-                                                                                            , 'Placed'
-                                                                                            , 'Partially Cancelled'
-                                                                                            ].includes(order.orderStatus)
-                                                                                            && !['Cancelled', 'Returned'
-                                                                                            , 'Failed'
-                                                                                            ].includes(item.itemStatus))
-                                                                                            { %>
-                                                                                            <button
-                                                                                                onclick="openCancelModal('<%= order._id %>', '<%= item._id %>', `<%= item.productName %>`, `<%= item.variantName %>`, `<%= imageUrl %>`, <%= item.quantity %>)"
-                                                                                                class="px-3 py-1.5 rounded-lg bg-white border border-rose-100 text-rose-600 text-xs font-bold hover:bg-rose-50 hover:border-rose-200 transition shadow-sm">
-                                                                                                Cancel Item
-                                                                                            </button>
-                                                                                            <% } else if
-                                                                                                (item.itemStatus==='Returned'
+                                                                                        <button
+                                                                                            class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold hover:bg-emerald-100 transition shadow-sm">
+                                                                                            <i
+                                                                                                class="fa-regular fa-star mr-1"></i>
+                                                                                            Review
+                                                                                        </button>
+                                                                                        <% } else { %>
+                                                                                            <span
+                                                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-xs font-bold">
+                                                                                                <i
+                                                                                                    class="fa-solid fa-clock-rotate-left"></i>
+                                                                                                Return <%=
+                                                                                                    item.returnRequest.status
+                                                                                                    %>
+                                                                                            </span>
+                                                                                            <% if
+                                                                                                (item.returnRequest.status==='Pending'
                                                                                                 ) { %>
-                                                                                                <span
-                                                                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold">
-                                                                                                    <i
-                                                                                                        class="fa-solid fa-check-double"></i>
-                                                                                                    Refunded: ₹<%=
-                                                                                                        (finalPrice *
-                                                                                                        item.quantity).toFixed(2)
-                                                                                                        %>
-                                                                                                </span>
+                                                                                                <button
+                                                                                                    onclick="cancelReturnItem('<%= order._id %>', '<%= item._id %>')"
+                                                                                                    class="text-xs font-semibold text-gray-400 hover:text-rose-500 hover:underline transition ml-2">
+                                                                                                    Cancel Request
+                                                                                                </button>
                                                                                                 <% } %>
+                                                                                                    <% } %>
+                                                                                                        <% } else if
+                                                                                                            (['Pending', 'Processing'
+                                                                                                            , 'Placed'
+                                                                                                            , 'Partially Cancelled'
+                                                                                                            ].includes(order.orderStatus)
+                                                                                                            &&
+                                                                                                            !['Cancelled', 'Returned'
+                                                                                                            , 'Failed'
+                                                                                                            ].includes(item.itemStatus))
+                                                                                                            { %>
+                                                                                                            <button
+                                                                                                                onclick="openCancelModal('<%= order._id %>', '<%= item._id %>', `<%= item.productName %>`, `<%= item.variantName %>`, `<%= imageUrl %>`, <%= item.quantity %>)"
+                                                                                                                class="px-3 py-1.5 rounded-lg bg-white border border-rose-100 text-rose-600 text-xs font-bold hover:bg-rose-50 hover:border-rose-200 transition shadow-sm">
+                                                                                                                Cancel
+                                                                                                                Item
+                                                                                                            </button>
+                                                                                                            <% } else if
+                                                                                                                (item.itemStatus==='Returned'
+                                                                                                                ) { %>
+                                                                                                                <span
+                                                                                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold">
+                                                                                                                    <i
+                                                                                                                        class="fa-solid fa-check-double"></i>
+                                                                                                                    Refunded:
+                                                                                                                    ₹<%= (finalPrice
+                                                                                                                        *
+                                                                                                                        item.quantity).toFixed(2)
+                                                                                                                        %>
+                                                                                                                </span>
+                                                                                                                <% } %>
                                                             </div>
                                                         </div>
                                                     </div>

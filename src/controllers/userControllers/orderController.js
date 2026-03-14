@@ -126,6 +126,18 @@ const requestReturnItem = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid return quantity" });
         }
 
+        // 10-day return policy check
+        const deliveryDate = order.deliveredAt ? new Date(order.deliveredAt) : null;
+        if (!deliveryDate) {
+            return res.status(400).json({ success: false, message: "Delivery date not found, cannot process return" });
+        }
+
+        const currentDate = new Date();
+        const daysSinceDelivery = (currentDate - deliveryDate) / (1000 * 60 * 60 * 24);
+        if (daysSinceDelivery > 10) {
+            return res.status(400).json({ success: false, message: "Return policy period of 10 days has expired" });
+        }
+
         // If partial return, split the item
         if (returnQty < item.quantity) {
             const originalQty = item.quantity;
