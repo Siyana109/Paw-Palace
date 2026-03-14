@@ -401,7 +401,7 @@ const placeOrder = async (req, res) => {
       const { offerApplied, finalPrice } = applyOfferToPrice({
         price: item.variant.price,
         productId: item.product._id,
-        categoryId: item.product.categoryId,
+        categoryId: item.product.categoryId._id,
         activeOffers,
       });
 
@@ -714,6 +714,19 @@ const verifyPayment = async (req, res) => {
 
     // Update payment status
     order.payment.status = "Paid";
+
+    if (order.couponId) {
+      await Coupon.findByIdAndUpdate(order.couponId, {
+        $inc: { usageCount: 1 },
+        $push: {
+          usedBy: {
+            userId: order.userId,
+            orderId: order._id,
+            usedAt: new Date()
+          }
+        }
+      });
+    }
 
     await deductStock(order.items);
 

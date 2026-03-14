@@ -847,7 +847,8 @@
 
                 // Update Total Logic
                 currentDiscount = data.discount;
-                const newTotal = originalTotal - currentDiscount;
+                const shipping = 50;
+                const newTotal = data.subtotal + shipping - data.discount;
                 document.getElementById('totalAmountDisplay').innerText = `₹${newTotal.toFixed(2)}`;
 
                 // Set Hidden Input
