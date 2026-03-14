@@ -278,7 +278,7 @@ TODO :
         ✔ wallet failed payment @done (3/14/2026, 11:23:17 AM)
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
         ☐ breadcrumbs in single order page is not correct
-        ☐ profile photo not showing in order related pages
+        ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
         ☐ 
 
     Admin:

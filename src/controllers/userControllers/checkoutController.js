@@ -141,7 +141,7 @@ const getOrderConfirmationPage = async (req, res) => {
       order: order,
       subtotal: subtotal,
       shipping: shipping,
-      user: req.session.user
+      user: req.currentUser
     });
 
   } catch (error) {
