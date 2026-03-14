@@ -87,10 +87,25 @@
             }
 
             function validateFullName(show = true) {
-                if (fullNameInput.value.trim().length < 3) {
-                    if (show) showError(errors.fullName, 'Name must be at least 3 characters');
+
+                let name = fullNameInput.value.trim();
+
+                // Normalize multiple spaces
+                name = name.replace(/\s+/g, " ");
+                fullNameInput.value = name;
+
+                const regex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+
+                if (name.length < 3) {
+                    if (show) showError(errors.fullName, "Name must be at least 3 characters");
                     return false;
                 }
+
+                if (!regex.test(name)) {
+                    if (show) showError(errors.fullName, "Name should contain only letters and spaces");
+                    return false;
+                }
+
                 hideError(errors.fullName);
                 return true;
             }

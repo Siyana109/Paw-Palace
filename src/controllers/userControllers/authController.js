@@ -57,12 +57,22 @@ const postSignup = async (req, res) => {
       });
     }
 
+    const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 
-    if (!fullName || fullName.trim().length < 3) {
+    if (!fullName || !nameRegex.test(fullName.trim())) {
       return res.render("user/signup", {
-        errors: [{ msg: 'Name must be at least 3 characters' }]
+        errors: [{ msg: "Name should contain only letters and spaces" }],
+        formData
       });
     }
+
+    if (fullName.trim().length < 3) {
+      return res.render("user/signup", {
+        errors: [{ msg: "Name must be at least 3 characters" }],
+        formData
+      });
+    }
+    
     if (!email) {
       return res.render("user/signup", {
         errors: [{ msg: 'Email is required' }]
