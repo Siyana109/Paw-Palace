@@ -135,30 +135,43 @@
                                     <% const effectivePrice=(item.variant.offerPrice && item.variant.offerPrice <
                                         item.variant.price) ? item.variant.offerPrice : item.variant.price; const
                                         itemTotal=effectivePrice * item.quantity; %>
-                                        <span class="text-sm font-semibold text-gray-500">₹<%= effectivePrice %> /-
-                                        </span>
 
-                                        <div class="flex items-end gap-2 mt-1">
-                                            <span class="text-sm font-bold text-gray-400">Total:</span>
-                                            <span id="item-total-<%= item.variant._id %>"
-                                                class="text-brand-500 text-xl font-black">₹<%= itemTotal.toFixed(2) %>
-                                            </span>
-                                        </div>
-
-                                        <% if (item.variant && item.variant.isActive && item.product &&
-                                            item.product.isActive && item.product.categoryId &&
-                                            item.product.categoryId.isActive && item.variant.stock> 0) { %>
-                                            <button type="button"
-                                                onclick="buyNowFromCart('<%= item.product._id %>', '<%= item.variant._id %>')"
-                                                class="mt-3 px-6 py-2 bg-brand-500 text-white text-sm font-bold rounded-xl hover:bg-brand-600 transition shadow-lg shadow-brand-500/30 whitespace-nowrap w-full sm:w-auto">
-                                                Buy Now
-                                            </button>
+                                        <% if (item.variant.offerPrice && item.variant.offerPrice < item.variant.price)
+                                            { %>
+                                            <div class="flex items-center gap-2 mb-1 mt-1 justify-end">
+                                                <span class="text-[13px] font-medium text-gray-400 line-through">₹<%=
+                                                        item.variant.price %></span>
+                                                <span class="text-sm font-bold text-brand-500">₹<%= effectivePrice %>
+                                                </span>
+                                            </div>
                                             <% } else { %>
-                                                <button disabled
-                                                    class="mt-3 px-6 py-2 bg-gray-200 text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed whitespace-nowrap w-full sm:w-auto">
-                                                    Unavailable
-                                                </button>
+                                                <span class="text-sm font-semibold text-gray-500 mt-1">₹<%=
+                                                        effectivePrice %>
+                                                        /-</span>
                                                 <% } %>
+
+                                                    <div class="flex items-end gap-2 mt-1">
+                                                        <span class="text-sm font-bold text-gray-400">Total:</span>
+                                                        <span id="item-total-<%= item.variant._id %>"
+                                                            class="text-brand-500 text-xl font-black">₹<%=
+                                                                itemTotal.toFixed(2) %>
+                                                        </span>
+                                                    </div>
+
+                                                    <% if (item.variant && item.variant.isActive && item.product &&
+                                                        item.product.isActive && item.product.categoryId &&
+                                                        item.product.categoryId.isActive && item.variant.stock> 0) { %>
+                                                        <button type="button"
+                                                            onclick="buyNowFromCart('<%= item.product._id %>', '<%= item.variant._id %>')"
+                                                            class="mt-3 px-6 py-2 bg-brand-500 text-white text-sm font-bold rounded-xl hover:bg-brand-600 transition shadow-lg shadow-brand-500/30 whitespace-nowrap w-full sm:w-auto">
+                                                            Buy Now
+                                                        </button>
+                                                        <% } else { %>
+                                                            <button disabled
+                                                                class="mt-3 px-6 py-2 bg-gray-200 text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed whitespace-nowrap w-full sm:w-auto">
+                                                                Unavailable
+                                                            </button>
+                                                            <% } %>
                                 </div>
                             </div>
                             <% }) %>
