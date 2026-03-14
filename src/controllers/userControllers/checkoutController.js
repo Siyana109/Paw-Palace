@@ -290,9 +290,14 @@ const applyCoupon = async (req, res) => {
 const deductStock = async (items) => {
   for (const item of items) {
     const variantId = item.variant?._id || item.variantId;
-    await Variant.findByIdAndUpdate(variantId,
-      { $inc: { stock: -item.quantity } }
-    );
+    const result = await Variant.findOneAndUpdate({
+      _id: variantId,
+      stock: { $gte: item.quantity }
+    },
+      { $inc: { stock: -item.quantity } });
+    if (!result) {
+      throw new Error("Stock changed during checkout. Please try again.");
+    }
   }
 };
 
@@ -730,7 +735,11 @@ const verifyPayment = async (req, res) => {
 
     await deductStock(order.items);
 
-    await Cart.deleteOne({ user: order.userId });
+    if (req.session.buyNowItem) {
+      req.session.buyNowItem = null;
+    } else {
+      await Cart.deleteOne({ user: order.userId });
+    }
 
     await Transaction.create({
       userId: order.userId,
