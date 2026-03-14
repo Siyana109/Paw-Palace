@@ -276,7 +276,18 @@ const getCartPage = async (req, res) => {
       return res.render('user/cart', { cart: null, hasOutOfStock: false });
     }
 
+    let stockAdjusted = false;
 
+    for (let item of cart.items) {
+      if (item.variant.stock < item.quantity) {
+        item.quantity = item.variant.stock;
+        stockAdjusted = true;
+      }
+    }
+
+    if (stockAdjusted) {
+      await cart.save();
+    }
 
     // Fetch active offers ONCE
     const activeOffers = await Offer.find({
@@ -309,6 +320,7 @@ const getCartPage = async (req, res) => {
       cart,
       hasStockIssues: stockIssues.length > 0,
       stockIssues,
+      stockAdjusted
     });
 
   } catch (error) {

@@ -340,7 +340,7 @@ const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { addressId, paymentDetails, couponCode, isBuyNow } = req.body;
-    const isBuyNowFlow = isBuyNow === 'true';
+    const isBuyNowFlow = isBuyNow === true || isBuyNow === 'true';
 
     const allowedMethods = ["COD", "ONLINE", "WALLET"];
     if (!allowedMethods.includes(paymentDetails)) {
@@ -487,6 +487,7 @@ const placeOrder = async (req, res) => {
     // Construct Order Data (Common for all methods)
     const orderPayload = {
       userId,
+      isBuyNowFlow,
       orderId: `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       items: orderItems,
       subtotal,
@@ -569,6 +570,9 @@ const placeOrder = async (req, res) => {
     // ONLINE (RAZORPAY)
     if (paymentMethod === "RAZORPAY") {
       // Create Order in DB with Pending status
+
+      await deductStock(cart.items)
+
       const order = await Order.create({
         ...orderPayload,
         payment: {
@@ -592,7 +596,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // COD OR WALLET → CREATE ORDER
+    // COD → CREATE ORDER
 
     const order = await Order.create(orderPayload);
 
@@ -657,7 +661,7 @@ const restoreCart = async (order) => {
     );
 
     if (existingItem) {
-      existingItem.quantity += item.quantity;
+      existingItem.quantity = item.quantity;
     } else {
       cart.items.push({
         product: item.productId,
@@ -733,9 +737,7 @@ const verifyPayment = async (req, res) => {
       });
     }
 
-    await deductStock(order.items);
-
-    if (req.session.buyNowItem) {
+    if (order.isBuyNowFlow) {
       req.session.buyNowItem = null;
     } else {
       await Cart.deleteOne({ user: order.userId });
@@ -776,13 +778,14 @@ const getPaymentFailedPage = async (req, res) => {
 
       const order = await Order.findById(orderId);
 
-      if (order && order.payment.status !== "Paid" && order.orderStatus !== "Payment Failed") {
+      if (order && order.payment.status !== "Paid") {
 
         // restore stock
         await restoreStock(order);
 
-        // restore cart
-        await restoreCart(order);
+        if (!order.isBuyNowFlow) {
+          await restoreCart(order);
+        }
 
         order.orderStatus = "Payment Failed";
         order.payment.status = "Failed";

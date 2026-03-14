@@ -239,23 +239,32 @@
                                     </span>
                                 </div>
 
-                                <% if (hasStockIssues) { %>
+                                <% if (stockAdjusted) { %>
                                     <div
-                                        class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold mb-4">
-                                        <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-                                        Some items are out of stock or exceed available quantity.
-                                        Please update your cart to continue.
+                                        class="bg-yellow-50 border border-red-200 text-yellow-700 p-4 rounded-xl text-sm font-bold mb-4">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                        Some items were adjusted due to stock changes.
                                     </div>
                                     <% } %>
 
-                                        <button <% if (hasStockIssues) { %> disabled <% } %>
-                                                onclick="<%= hasStockIssues ? '' : `window.location.href='/checkout' `
-                                                    %>"
-                                                    class="w-full py-4 rounded-xl font-bold
-                                                    <%= hasStockIssues ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                        : 'bg-brand-500 text-white hover:bg-brand-600' %>">
-                                                        Proceed to Checkout
-                                        </button>
+                                        <% if (hasStockIssues) { %>
+                                            <div
+                                                class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold mb-4">
+                                                <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                                                Some items are out of stock or exceed available quantity.
+                                                Please update your cart to continue.
+                                            </div>
+                                            <% } %>
+
+                                                <button <% if (hasStockIssues) { %> disabled <% } %>
+                                                        onclick="<%= hasStockIssues ? '' :
+                                                            `window.location.href='/checkout' ` %>"
+                                                            class="w-full py-4 rounded-xl font-bold
+                                                            <%= hasStockIssues
+                                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                                : 'bg-brand-500 text-white hover:bg-brand-600' %>">
+                                                                Proceed to Checkout
+                                                </button>
 
                         </div>
                     </div>
