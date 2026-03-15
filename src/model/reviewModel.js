@@ -40,6 +40,11 @@ const reviewSchema = new mongoose.Schema({
         type: String,
         enum: ["Pending", "Approved", "Rejected"],
         default: "Approved"
+    },
+    rejectionReason: {
+        type: String,
+        trim: true,
+        maxLength: 200
     }
 }, { timestamps: true });
 

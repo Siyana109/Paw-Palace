@@ -369,7 +369,7 @@
                                                                                     <% } %>
                                                                                         <% if (item.userReview) { %>
                                                                                             <button
-                                                                                                onclick="viewYourReview(`<%= item.userReview.comment %>`, <%= item.userReview.rating %>, '<%= item.userReview._id %>')"
+                                                                                                onclick='viewYourReview(<%- JSON.stringify(item.userReview.comment) %>, <%= item.userReview.rating %>, "<%= item.userReview._id %>", "<%= item.userReview.status %>", <%- JSON.stringify(item.userReview.rejectionReason || "") %>)'
                                                                                                 class="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold hover:bg-blue-100 transition shadow-sm">
                                                                                                 <i
                                                                                                     class="fa-solid fa-comment-dots mr-1"></i>
@@ -1229,18 +1229,37 @@
                     }
                 }
 
-                function viewYourReview(comment, rating, reviewId) {
+                function viewYourReview(comment, rating, reviewId, status, rejectionReason) {
                     let stars = '';
                     for (let i = 1; i <= 5; i++) {
                         stars += `<i class="fa-${i <= rating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm"></i>`;
                     }
 
+                    let statusBadge = '';
+                    let rejectionBanner = '';
+                    
+                    if (status === 'Rejected') {
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 border border-rose-100 text-[10px] font-bold">Restricted</span>';
+                        rejectionBanner = `
+                            <div class="mt-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-left">
+                                <p class="text-[10px] font-bold text-rose-600 uppercase tracking-wider mb-1">Admin Feedback</p>
+                                <p class="text-xs text-rose-700 italic">"${rejectionReason || 'Your review has been restricted for violating our community guidelines.'}"</p>
+                            </div>
+                        `;
+                    } else if (status === 'Approved') {
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 text-[10px] font-bold">Approved</span>';
+                    }
+
                     Swal.fire({
                         title: 'Your Review',
                         html: `
-                            <div class="mb-4">${stars}</div>
-                            <div class="text-gray-600 italic mb-6">"${comment || 'No comment provided.'}"</div>
-                            <div class="pt-4 border-t border-gray-100 flex justify-center">
+                            <div class="flex flex-col items-center gap-2 mb-4">
+                                ${statusBadge}
+                                <div>${stars}</div>
+                            </div>
+                            <div class="text-gray-600 italic mb-2">"${comment || 'No comment provided.'}"</div>
+                            ${rejectionBanner}
+                            <div class="mt-6 pt-4 border-t border-gray-100 flex justify-center">
                                 <button onclick="deleteReviewFromOrder('${reviewId}')" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition flex items-center gap-1">
                                     <i class="fa-solid fa-trash-can"></i> Delete This Review
                                 </button>

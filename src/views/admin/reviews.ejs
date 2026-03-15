@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Management | PawPalace Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48' },
+                        accent: { navy: '#0f172a', teal: '#2dd4bf' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-accent-navy overflow-hidden">
+
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+
+        <main class="flex-1 p-8 h-full overflow-y-auto">
+            <!-- HEADER -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-accent-navy">Review Management</h1>
+                    <p class="text-gray-400 font-medium text-sm mt-1">Moderate customer product reviews</p>
+                </div>
+            </header>
+
+            <!-- REVIEWS LIST -->
+            <div class="space-y-6">
+                <% if (reviews.length > 0) { %>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-100">
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Product</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">User</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Rating</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Comment</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center">Status</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% reviews.forEach(review => { %>
+                                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 bg-gray-50 rounded-lg p-1 border border-gray-100 flex-shrink-0">
+                                                    <img src="<%= review.variantId?.coverImage || '/assets/images/default-product.png' %>" 
+                                                         alt="Product" class="w-full h-full object-contain mix-blend-multiply">
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-bold text-accent-navy line-clamp-1"><%= review.productId?.name %></p>
+                                                    <p class="text-[10px] text-gray-400 font-medium"><%= review.variantId?.variantName %></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-6 h-6 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center font-bold text-[10px]">
+                                                    <%= review.userId?.fullName?.charAt(0).toUpperCase() || 'U' %>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-bold text-gray-700 capitalize"><%= review.userId?.fullName || 'Deleted User' %></p>
+                                                    <p class="text-[10px] text-gray-400"><%= review.userId?.email %></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-0.5 text-yellow-400">
+                                                <% for(let i=1; i<=5; i++) { %>
+                                                    <i class="fa-star <%= i <= review.rating ? 'fa-solid' : 'fa-regular' %> text-[10px]"></i>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-xs text-gray-600 leading-relaxed max-w-xs break-words italic">"<%= review.comment %>"</p>
+                                            <p class="text-[10px] text-gray-300 mt-1"><%= new Date(review.createdAt).toLocaleDateString() %></p>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <% let statusClass = '';
+                                               if (review.status === 'Approved') statusClass = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                                               else if (review.status === 'Rejected') statusClass = 'bg-rose-50 text-rose-600 border-rose-100';
+                                               else statusClass = 'bg-amber-50 text-amber-600 border-amber-100';
+                                            %>
+                                            <span class="px-2 py-0.5 rounded-full border text-[10px] font-bold <%= statusClass %>">
+                                                <%= review.status %>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <% if (review.status !== 'Approved') { %>
+                                                    <button onclick="updateStatus('<%= review._id %>', 'Approved')" 
+                                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition shadow-sm border border-emerald-100" 
+                                                            title="Approve">
+                                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                                    </button>
+                                                <% } %>
+                                                <% if (review.status !== 'Rejected') { %>
+                                                    <button onclick="updateStatus('<%= review._id %>', 'Rejected')" 
+                                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white transition shadow-sm border border-orange-100" 
+                                                            title="Reject">
+                                                        <i class="fa-solid fa-ban text-[10px]"></i>
+                                                    </button>
+                                                <% } %>
+                                                <button onclick="deleteReview('<%= review._id %>')" 
+                                                        class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition shadow-sm border border-rose-100" 
+                                                        title="Delete Permanently">
+                                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (totalPages > 1) { %>
+                        <div class="flex justify-center mt-8 gap-2 pb-10">
+                            <% if (currentPage > 1) { %>
+                                <a href="?page=<%= currentPage - 1 %>" class="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-brand-500 hover:text-white transition shadow-sm">
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                </a>
+                            <% } %>
+                            
+                            <div class="flex gap-1">
+                                <% for(let i=1; i<=totalPages; i++) { %>
+                                    <a href="?page=<%= i %>" 
+                                       class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold transition shadow-sm <%= i === currentPage ? 'bg-brand-500 text-white' : 'bg-white border border-gray-100 text-gray-500 hover:bg-brand-50' %>">
+                                        <%= i %>
+                                    </a>
+                                <% } %>
+                            </div>
+
+                            <% if (currentPage < totalPages) { %>
+                                <a href="?page=<%= currentPage + 1 %>" class="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-brand-500 hover:text-white transition shadow-sm">
+                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                            <i class="fa-solid fa-comment-slash text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-accent-navy">No reviews found</h3>
+                        <p class="text-gray-400 text-sm">Customer reviews will appear here once submitted.</p>
+                    </div>
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function updateStatus(reviewId, status) {
+            let rejectionReason = "";
+            if (status === 'Rejected') {
+                const { value: reason, isConfirmed } = await Swal.fire({
+                    title: 'Reject Review',
+                    input: 'text',
+                    inputLabel: 'Reason for restriction',
+                    inputPlaceholder: 'e.g. Inappropriate language, Spam...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'Confirm Reject',
+                    inputValidator: (value) => {
+                        if (!value) return 'Please provide a reason for the user'
+                    }
+                });
+                if (!isConfirmed) return;
+                rejectionReason = reason;
+            } else {
+                const confirm = await Swal.fire({
+                    title: 'Approve Review?',
+                    text: 'This will make the review visible and update product ratings.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Yes, Approve'
+                });
+                if (!confirm.isConfirmed) return;
+            }
+
+            try {
+                const response = await fetch(`/admin/reviews/${reviewId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, rejectionReason })
+                });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Success', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to update review status', 'error');
+                }
+            }
+
+        async function deleteReview(reviewId) {
+            const confirm = await Swal.fire({
+                title: 'Delete Permanently?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Yes, delete it'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/reviews/${reviewId}`, { method: 'DELETE' });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Deleted!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to delete review', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

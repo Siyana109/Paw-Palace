@@ -17,6 +17,7 @@ import requestController from "../controllers/adminControllers/requestController
 import salesController from "../controllers/adminControllers/salesController.js"
 import dashboardController from "../controllers/adminControllers/dashboardController.js"
 import transactionController from "../controllers/adminControllers/transactionController.js"
+import adminReviewController from "../controllers/adminControllers/reviewController.js"
 
 import { variantUpload, upload } from "../middlewares/upload.js"
 
@@ -81,5 +82,9 @@ router.post('/orders/:orderId/items/:itemId/return-action', adminMiddleware.admi
 
 router.get('/sales-report', adminMiddleware.adminSession, salesController.getSalesReport);
 router.get('/sales-report/download', adminMiddleware.adminSession, salesController.downloadReport);
+
+router.get('/reviews', adminMiddleware.adminSession, adminReviewController.getReviews);
+router.patch('/reviews/:reviewId/status', adminMiddleware.adminSession, adminReviewController.updateReviewStatus);
+router.delete('/reviews/:reviewId', adminMiddleware.adminSession, adminReviewController.deleteReview);
 
 export default router

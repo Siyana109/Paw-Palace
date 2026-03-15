@@ -47,19 +47,18 @@ const addReview = async (req, res) => {
             orderId,
             rating: Number(rating),
             comment,
-            status: "Approved" // Default to approved for now
+            status: "Approved"
         });
 
         await review.save();
 
-        // Update Product average rating and review count
+        // Update Product average rating and review count immediately
         const product = await Product.findById(productId);
         if (product) {
             const oldCount = product.reviewCount || 0;
             const oldAvg = product.averageRating || 0;
 
             const newCount = oldCount + 1;
-            // Correct calculation for new average
             const newAvg = ((oldAvg * oldCount) + Number(rating)) / newCount;
 
             product.reviewCount = newCount;
