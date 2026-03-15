@@ -1,6 +1,7 @@
 import Review from "../../model/reviewModel.js";
 import Product from "../../model/productModel.js";
 import Order from "../../model/orderModel.js";
+import reviewHelper from "../../helpers/reviewHelper.js";
 
 const addReview = async (req, res) => {
     try {
@@ -33,6 +34,12 @@ const addReview = async (req, res) => {
             return res.status(400).json({ success: false, message: "You have already reviewed this item for this order" });
         }
 
+        const daysSinceDelivery = (Date.now() - order.deliveredAt) / (1000 * 60 * 60 * 24);
+
+        if (daysSinceDelivery > 30) {
+            return res.status(400).json({ message: "Review period expired" });
+        }
+
         const review = new Review({
             productId,
             variantId,
@@ -50,7 +57,7 @@ const addReview = async (req, res) => {
         if (product) {
             const oldCount = product.reviewCount || 0;
             const oldAvg = product.averageRating || 0;
-            
+
             const newCount = oldCount + 1;
             // Correct calculation for new average
             const newAvg = ((oldAvg * oldCount) + Number(rating)) / newCount;
@@ -94,8 +101,8 @@ const getProductReviews = async (req, res) => {
             .limit(limit)
             .lean();
 
-        res.status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             reviews,
             pagination: {
                 totalReviews,
@@ -125,30 +132,13 @@ const deleteReview = async (req, res) => {
             return res.status(403).json({ success: false, message: "Unauthorized" });
         }
 
-        const rating = review.rating;
-        const productId = review.productId;
-
-        await Review.findByIdAndDelete(reviewId);
-
-        // Update Product stats
-        const product = await Product.findById(productId);
-        if (product && product.reviewCount > 0) {
-            const oldCount = product.reviewCount;
-            const oldAvg = product.averageRating;
-
-            if (oldCount === 1) {
-                product.reviewCount = 0;
-                product.averageRating = 0;
-            } else {
-                const newCount = oldCount - 1;
-                const newAvg = ((oldAvg * oldCount) - rating) / newCount;
-                product.reviewCount = newCount;
-                product.averageRating = Number(newAvg.toFixed(1));
-            }
-            await product.save();
+        const result = await reviewHelper.deleteReviewInternal(reviewId);
+        
+        if (!result.success) {
+            return res.status(404).json(result);
         }
 
-        res.status(200).json({ success: true, message: "Review deleted" });
+        res.status(200).json(result);
     } catch (error) {
         console.error("Delete Review Error:", error);
         res.status(500).json({ success: false, message: "Failed to delete review" });

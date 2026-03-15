@@ -152,7 +152,7 @@ const getSalesReport = async (req, res) => {
 
     } catch (error) {
         console.error("Sales Report Error:", error);
-        res.status(500).render('error', { message: "Failed to load sales report" });
+        res.status(500).render('error/500', { message: "Failed to load sales report" });
     }
 };
 

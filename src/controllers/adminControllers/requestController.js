@@ -1,5 +1,7 @@
 import Order from "../../model/orderModel.js";
 import Variant from "../../model/variantModel.js";
+import Review from "../../model/reviewModel.js";
+import reviewHelper from "../../helpers/reviewHelper.js";
 import walletController from "../userControllers/walletController.js";
 
 
@@ -32,7 +34,7 @@ const getReturnRequests = async (req, res) => {
 
     } catch (error) {
         console.error("Get Return Requests Error:", error);
-        res.status(500).render('error', { message: 'Failed to fetch return requests' });
+        res.status(500).render('error/500', { message: 'Failed to fetch return requests' });
     }
 };
 
@@ -209,6 +211,23 @@ const handleReturnAction = async (req, res) => {
 
 
         await order.save();
+
+        // AUTOMATED REVIEW DELETION: If item is fully returned, delete associated review
+        try {
+            const review = await Review.findOne({
+                userId: order.userId,
+                orderId: order._id,
+                variantId: item.variantId
+            });
+
+            if (review) {
+                console.log(`Auto-deleting review ${review._id} as item was returned`);
+                await reviewHelper.deleteReviewInternal(review._id);
+            }
+        } catch (reviewError) {
+            console.error("Auto Review Deletion Error:", reviewError);
+            // Don't fail the whole return if review deletion fails
+        }
 
         res.json({ success: true, message: "Return approved & refunded" });
 
