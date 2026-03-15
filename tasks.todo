@@ -277,6 +277,7 @@ TODO :
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
+        ☐ checkout coupon applied amount
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
@@ -288,7 +289,6 @@ TODO :
         ☐ dashboard total orders ??
         ☐ top brand in admin brands
         ☐ stock limit error in Cart
-        ☐ offer amount in cart and checkout order summary
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
 
 

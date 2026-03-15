@@ -107,26 +107,22 @@
                                         </div>
 
                                         <!-- Stock Limit Message -->
-                                        <% if (!item.variant || !item.variant.isActive || !item.product ||
-                                            !item.product.isActive || !item.product.categoryId ||
-                                            !item.product.categoryId.isActive) { %>
-                                            <p class="text-xs font-bold text-red-500 mt-1">
-                                                <i class="fa-solid fa-circle-exclamation"></i> Product is no longer
-                                                available
-                                            </p>
-                                            <% } else if (item.variant.stock===0) { %>
-                                                <p class="text-[10px] font-bold text-red-500 mt-1">
-                                                    Out of stock
+                                        <div id="stock-msg-<%= item.variant._id %>">
+                                            <% if (!item.variant || !item.variant.isActive || !item.product ||
+                                                !item.product.isActive || !item.product.categoryId ||
+                                                !item.product.categoryId.isActive) { %>
+                                                <p class="text-xs font-bold text-red-500 mt-1">
+                                                    <i class="fa-solid fa-circle-exclamation"></i> Product is no longer
+                                                    available
                                                 </p>
-                                                <% } else if (item.quantity>= 10 && item.variant.stock >= 10) { %>
-                                                    <p class="text-[10px] font-bold text-red-400 mt-1">
-                                                        Max limit reached (10)
-                                                    </p>
-                                                    <% } else if (item.quantity>= item.variant.stock) { %>
-                                                        <p class="text-[10px] font-bold text-red-400 mt-1">
-                                                            Stock limit reached
-                                                        </p>
-                                                        <% } %>
+                                            <% } else if (item.variant.stock === 0) { %>
+                                                <p class="text-[10px] font-bold text-red-500 mt-1">Out of stock</p>
+                                            <% } else if (item.quantity >= 10 && item.variant.stock >= 10) { %>
+                                                <p class="text-[10px] font-bold text-red-400 mt-1">Max limit reached (10)</p>
+                                            <% } else if (item.quantity >= item.variant.stock) { %>
+                                                <p class="text-[10px] font-bold text-red-400 mt-1">Stock limit reached</p>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -393,6 +389,18 @@
                         }
 
                         recalculateCartTotals();
+
+                        // Dynamic Stock Message update
+                        const msgContainer = document.getElementById(`stock-msg-${variantId}`);
+                        if (msgContainer) {
+                            if (newQty >= 10 && maxStock >= 10) {
+                                msgContainer.innerHTML = `<p class="text-[10px] font-bold text-red-400 mt-1">Max limit reached (10)</p>`;
+                            } else if (newQty >= maxStock) {
+                                msgContainer.innerHTML = `<p class="text-[10px] font-bold text-red-400 mt-1">Stock limit reached</p>`;
+                            } else {
+                                msgContainer.innerHTML = '';
+                            }
+                        }
 
                     } catch (err) {
                         console.error(err);
