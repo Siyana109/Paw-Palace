@@ -1,5 +1,6 @@
 import Order from "../../model/orderModel.js";
 import Variant from "../../model/variantModel.js";
+import Review from "../../model/reviewModel.js";
 import walletController from "../userControllers/walletController.js";
 import PDFDocument from 'pdfkit';
 
@@ -91,6 +92,18 @@ const getOrderDetails = async (req, res) => {
         if (!order) {
             return res.status(404).render('error', { message: 'Order not found' });
         }
+
+        // Fetch user's reviews for this order
+        const reviews = await Review.find({ orderId, userId }).lean();
+        
+        // Attach review info to items
+        order.items = order.items.map(item => {
+            const review = reviews.find(r => r.variantId.toString() === item.variantId._id.toString());
+            return {
+                ...item,
+                userReview: review || null
+            };
+        });
 
         res.render('user/singleOrder', {
             title: `Order #${order.orderId} | PawPalace`,

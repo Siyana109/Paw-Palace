@@ -287,11 +287,15 @@
                                     <!-- CONTENT -->
                                     <div class="px-2 pb-2 flex flex-col flex-grow justify-between">
                                         <div>
-                                            <div
-                                                class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold mb-2">
-                                                <i class="fa-solid fa-star text-yellow-400"></i>
-                                                4.6
-                                            </div>
+                                            <% if (product.reviewCount > 0) { %>
+                                                <div
+                                                    class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold mb-2">
+                                                    <i class="fa-solid fa-star text-yellow-400"></i>
+                                                    <%= product.averageRating %>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="h-6 mb-2"></div> <!-- Spacer -->
+                                            <% } %>
 
                                             <a href="/product/<%= product._id %>">
                                                 <h3

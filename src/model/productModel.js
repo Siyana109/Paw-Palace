@@ -31,6 +31,14 @@ const productSchema = new mongoose.Schema({
         enum: ['Dogs', 'Cats', 'Puppies', 'Kittens'], 
         required: true
     },
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+    reviewCount: {
+        type: Number,
+        default: 0
+    },
 }, { timestamps: true });
 
 export default mongoose.model("Product", productSchema);

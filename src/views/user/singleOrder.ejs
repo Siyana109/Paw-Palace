@@ -367,12 +367,22 @@
                                                                                         Return Closed
                                                                                     </span>
                                                                                     <% } %>
-                                                                                        <button
-                                                                                            class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold hover:bg-emerald-100 transition shadow-sm">
-                                                                                            <i
-                                                                                                class="fa-regular fa-star mr-1"></i>
-                                                                                            Review
-                                                                                        </button>
+                                                                                        <% if (item.userReview) { %>
+                                                                                            <button
+                                                                                                onclick="viewYourReview(`<%= item.userReview.comment %>`, <%= item.userReview.rating %>, '<%= item.userReview._id %>')"
+                                                                                                class="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold hover:bg-blue-100 transition shadow-sm">
+                                                                                                <i class="fa-solid fa-comment-dots mr-1"></i>
+                                                                                                View Review
+                                                                                            </button>
+                                                                                        <% } else { %>
+                                                                                            <button
+                                                                                                onclick="openReviewModal('<%= order._id %>', '<%= item.variantId._id %>', `<%= item.productName %>`, `<%= item.variantName %>`, `<%= imageUrl %>`, '<%= item.productId._id %>')"
+                                                                                                class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold hover:bg-emerald-100 transition shadow-sm">
+                                                                                                <i
+                                                                                                    class="fa-regular fa-star mr-1"></i>
+                                                                                                Review
+                                                                                            </button>
+                                                                                        <% } %>
                                                                                         <% } else { %>
                                                                                             <span
                                                                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-xs font-bold">
@@ -739,6 +749,67 @@
             </div>
         </div>
 
+        <!-- REVIEW MODAL -->
+        <div id="reviewModal" class="fixed inset-0 z-50 hidden">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+                onclick="closeReviewModal()">
+            </div>
+
+            <!-- Modal Content -->
+            <div
+                class="relative bg-white rounded-3xl w-full max-w-md mx-auto mt-20 p-6 shadow-2xl transform transition-all scale-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-accent-navy">Rate & Review</h3>
+                    <button onclick="closeReviewModal()"
+                        class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="reviewItemDetails" class="mb-6 p-4 bg-gray-50 rounded-xl flex gap-4 items-center">
+                    <img id="reviewItemImage" src="" alt="Product" class="w-16 h-16 object-contain mix-blend-multiply">
+                    <div>
+                        <p id="reviewItemName" class="font-bold text-accent-navy line-clamp-1"></p>
+                        <p id="reviewItemVariant" class="text-xs text-gray-500"></p>
+                    </div>
+                </div>
+
+                <form id="reviewForm" onsubmit="submitReview(event)" novalidate>
+                    <input type="hidden" id="reviewOrderId" name="orderId">
+                    <input type="hidden" id="reviewVariantId" name="variantId">
+                    <input type="hidden" id="reviewProductId" name="productId">
+
+                    <!-- Star Rating -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 text-center">Your Rating</label>
+                        <div class="flex justify-center gap-2">
+                            <% [1, 2, 3, 4, 5].forEach(i => { %>
+                                <button type="button" onclick="setRating(<%= i %>)" 
+                                    class="star-btn w-10 h-10 rounded-lg border border-gray-100 flex items-center justify-center transition-all hover:scale-110 active:scale-95 text-gray-200"
+                                    data-index="<%= i %>">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                            <% }) %>
+                        </div>
+                        <input type="hidden" name="rating" id="selectedRating" required>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Share your thoughts</label>
+                        <textarea name="comment" id="reviewComment" rows="4" maxlength="500" required
+                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition resize-none"
+                            placeholder="What did you like or dislike?"></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <%- include('../partials/footer') %>
 
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1043,6 +1114,169 @@
                             text: 'An unexpected error occurred',
                             confirmButtonColor: '#f43f5e'
                         });
+                    }
+                }
+
+                // REVIEW MODAL FUNCTIONS
+                function openReviewModal(orderId, variantId, productName, variantName, imageUrl, productId) {
+                    document.getElementById('reviewOrderId').value = orderId;
+                    document.getElementById('reviewVariantId').value = variantId;
+                    document.getElementById('reviewProductId').value = productId;
+                    
+                    document.getElementById('reviewItemName').textContent = productName;
+                    document.getElementById('reviewItemVariant').textContent = variantName || '';
+                    document.getElementById('reviewItemImage').src = imageUrl || '/assets/images/default-product.png';
+
+                    // Reset star buttons
+                    setRating(0);
+                    document.getElementById('reviewForm').reset();
+                    
+                    document.getElementById('reviewModal').classList.remove('hidden');
+                }
+
+                function closeReviewModal() {
+                    document.getElementById('reviewModal').classList.add('hidden');
+                }
+
+                function setRating(val) {
+                    document.getElementById('selectedRating').value = val > 0 ? val : '';
+                    document.querySelectorAll('.star-btn').forEach(btn => {
+                        const index = parseInt(btn.dataset.index);
+                        if (index <= val) {
+                            btn.classList.add('bg-yellow-50', 'border-yellow-200', 'text-yellow-400');
+                            btn.classList.remove('text-gray-200', 'border-gray-100');
+                        } else {
+                            btn.classList.remove('bg-yellow-50', 'border-yellow-200', 'text-yellow-400');
+                            btn.classList.add('text-gray-200', 'border-gray-100');
+                        }
+                    });
+                }
+
+                async function submitReview(event) {
+                    event.preventDefault();
+                    const form = event.target;
+                    const rating = form.rating.value;
+                    const comment = form.comment.value.trim();
+
+                    if (!rating) {
+                        return Swal.fire({
+                            icon: 'warning',
+                            title: 'Rating Required',
+                            text: 'Please select a star rating before submitting.',
+                            confirmButtonColor: '#ff4d6d'
+                        });
+                    }
+
+                    if (comment.length < 5) {
+                        return Swal.fire({
+                            icon: 'warning',
+                            title: 'Comment Too Short',
+                            text: 'Please write a brief comment (at least 5 characters).',
+                            confirmButtonColor: '#ff4d6d'
+                        });
+                    }
+
+                    try {
+                        const response = await fetch('/reviews/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                orderId: form.orderId.value,
+                                productId: form.productId.value,
+                                variantId: form.variantId.value,
+                                rating,
+                                comment
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            closeReviewModal();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Review Submitted!',
+                                text: 'Your feedback helps other pet parents.',
+                                confirmButtonColor: '#10b981',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Submission Error',
+                                text: data.message || 'We could not process your review at this time.',
+                                confirmButtonColor: '#ff4d6d'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Review submission error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Connectivity Issue',
+                            text: 'Please check your connection and try again.',
+                            confirmButtonColor: '#ff4d6d'
+                        });
+                    }
+                }
+
+                function viewYourReview(comment, rating, reviewId) {
+                    let stars = '';
+                    for (let i = 1; i <= 5; i++) {
+                        stars += `<i class="fa-${i <= rating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm"></i>`;
+                    }
+
+                    Swal.fire({
+                        title: 'Your Review',
+                        html: `
+                            <div class="mb-4">${stars}</div>
+                            <div class="text-gray-600 italic mb-6">"${comment || 'No comment provided.'}"</div>
+                            <div class="pt-4 border-t border-gray-100 flex justify-center">
+                                <button onclick="deleteReviewFromOrder('${reviewId}')" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition flex items-center gap-1">
+                                    <i class="fa-solid fa-trash-can"></i> Delete This Review
+                                </button>
+                            </div>
+                        `,
+                        showConfirmButton: false,
+                        showCloseButton: true
+                    });
+                }
+
+                async function deleteReviewFromOrder(reviewId) {
+                    const result = await Swal.fire({
+                        title: 'Delete Review?',
+                        text: "Are you sure you want to delete your review? This action cannot be undone.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f43f5e',
+                        cancelButtonColor: '#9ca3af',
+                        confirmButtonText: 'Yes, delete it!'
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch(`/reviews/${reviewId}`, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: 'Your review has been removed.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => window.location.reload());
+                            } else {
+                                throw new Error(data.message);
+                            }
+                        } catch (error) {
+                            console.error('Delete review error:', error);
+                            Swal.fire('Error', error.message || 'Failed to delete review', 'error');
+                        }
                     }
                 }
             </script>

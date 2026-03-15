@@ -9,6 +9,7 @@ import checkoutController from "../controllers/userControllers/checkoutControlle
 import { upload } from "../middlewares/upload.js";
 import orderController from "../controllers/userControllers/orderController.js";
 import walletController from "../controllers/userControllers/walletController.js";
+import reviewController from "../controllers/userControllers/reviewController.js";
 
 router.get('/', authController.landingPage)
 
@@ -91,6 +92,11 @@ router.get('/orders/:orderId/invoice', userMiddleware.checkSession, orderControl
 router.post('/wishlist/add', userMiddleware.checkSession, productController.addToWishlist);
 router.get('/wishlist', userMiddleware.checkSession, productController.getWishlist);
 router.delete('/wishlist/remove', userMiddleware.checkSession, productController.removeFromWishlist);
+
+// Reviews
+router.post('/reviews/add', userMiddleware.checkSession, reviewController.addReview);
+router.get('/reviews/:productId', reviewController.getProductReviews);
+router.delete('/reviews/:reviewId', userMiddleware.checkSession, reviewController.deleteReview);
 
 router.post('/logout', userMiddleware.checkSession, authController.logout)
 

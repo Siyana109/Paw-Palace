@@ -119,6 +119,8 @@ const homePage = async (req, res) => {
           variantId: { $first: "$variants._id" },
           createdAt: { $first: "$createdAt" },
           petType: { $first: "$petType" },
+          averageRating: { $first: "$averageRating" },
+          reviewCount: { $first: "$reviewCount" },
 
           totalStock: { $sum: "$variants.stock" }
         }
