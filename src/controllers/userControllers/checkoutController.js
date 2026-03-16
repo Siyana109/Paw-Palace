@@ -741,7 +741,7 @@ const verifyPayment = async (req, res) => {
         await restoreCart(order);
 
         order.payment.status = "Failed";
-        order.orderStatus = "Payment Failed";
+        order.orderStatus = "Failed";
         await order.save();
       }
 
@@ -826,7 +826,7 @@ const getPaymentFailedPage = async (req, res) => {
           await restoreCart(order);
         }
 
-        order.orderStatus = "Payment Failed";
+        order.orderStatus = "Failed";
         order.payment.status = "Failed";
 
         await order.save();

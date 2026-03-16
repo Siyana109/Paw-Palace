@@ -89,7 +89,7 @@
 
 
                             <!-- <% if (order.orderStatus==='Delivered' || ['Returned', 'Partially Returned' , 'Cancelled'
-                                , 'Failed' , 'Payment Failed' ].includes(order.orderStatus)) { %>
+                                , 'Failed' ].includes(order.orderStatus)) { %>
                                 <button onclick="reorderItems('<%= order._id %>')"
                                     class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm hover:bg-rose-600 transition flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-95 transform duration-200">
                                     <i class="fa-solid fa-cart-plus"></i> Buy Again
@@ -101,7 +101,7 @@
                                     <i class="fa-regular fa-circle-xmark"></i> Cancel Order
                                 </button>
                                 <% } %>
-                                    <% if (['Failed', 'Payment Failed' ].includes(order.orderStatus) || (order.payment
+                                    <% if (order.orderStatus === 'Failed' || (order.payment
                                         && order.payment.status==='Failed' )) { %>
                                         <button onclick="retryPayment('<%= order._id %>')"
                                             class="flex-1 lg:flex-none px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-bold text-sm hover:bg-indigo-600 transition flex items-center justify-center gap-2 shadow-sm shadow-indigo-500/20 active:scale-95 transform duration-200">
@@ -113,7 +113,7 @@
 
 
             <!-- TRACKING BAR -->
-            <% if (!['Cancelled', 'Returned' , 'Failed' , 'Payment Failed' ].includes(order.orderStatus)) { %>
+            <% if (!['Cancelled', 'Returned' , 'Failed' ].includes(order.orderStatus)) { %>
                 <div
                     class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8 relative overflow-hidden animate-fade-in-up delay-100">
                     <div

@@ -105,8 +105,8 @@
                                 statusColor='bg-rose-50 text-rose-600' ; statusIcon='fa-xmark' ; } else if
                                 (['Processing', 'Shipped' , 'Partially Shipped' , 'Out for Delivery'
                                 ].includes(order.orderStatus)) { borderColor='border-l-blue-500' ;
-                                statusColor='bg-blue-50 text-blue-600' ; statusIcon='fa-truck-fast' ; } if
-                                (order.payment.status==='Failed' || order.orderStatus==='Failed' ) {
+                                statusColor='bg-blue-50 text-blue-600' ; statusIcon='fa-truck-fast' ; } 
+                                if (order.orderStatus==='Failed' ) {
                                 borderColor='border-l-rose-500' ; statusColor='bg-rose-50 text-rose-600' ;
                                 statusIcon='fa-triangle-exclamation' ; } %>
 
@@ -167,7 +167,7 @@
                                                             <% } else if (order.orderStatus==='Cancelled' ) { %>
                                                                 Order Cancelled
                                                                 <% } else if (order.orderStatus==='Failed' ) { %>
-                                                                    Payment Failed
+                                                                    Failed
                                                                     <% } else if (order.orderStatus==='Out for Delivery'
                                                                         ) { %>
                                                                         Out for Delivery
@@ -185,8 +185,8 @@
                                                             You cancelled this order.
                                                             <% } else if (order.orderStatus==='Out for Delivery' ) { %>
                                                                 Your package is out for delivery today.
-                                                                <% } else if (order.payment.status==='Failed' ) {
-                                                                    %> Your order attempt was failed.
+                                                                <% } else if (order.orderStatus==='Failed' ) {
+                                                                    %> Your order attempt failed.
                                                                     <% } else { 
                                                                         %> Package is on the way.
                                                                         <% } %>
