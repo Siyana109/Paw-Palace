@@ -136,7 +136,8 @@
                     <!-- Price & Rating -->
                     <div class="flex items-center gap-6 mb-8 border-b border-gray-100 pb-8">
                         <div class="flex items-baseline gap-3">
-                            <span id="priceDisplay" class="text-4xl font-black text-accent-navy">
+                            <span id="priceDisplay"
+                                class="text-4xl font-black <%= defaultVariant.offerApplied ? 'text-brand-500' : 'text-accent-navy' %>">
                                 ₹<%= defaultVariant.offerApplied ? defaultVariant.offerPrice : defaultVariant.price %>
                             </span>
                             <span id="originalPriceDisplay"
@@ -146,35 +147,38 @@
                         </div>
 
                         <!-- Rating -->
-                        <% if (product.reviewCount > 0) { %>
-                            <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
+                        <% if (product.reviewCount> 0) { %>
+                            <div
+                                class="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
                                 <div class="flex text-yellow-400 text-xs">
                                     <% for(let i=1; i<=5; i++) { %>
-                                        <% if (i <= Math.floor(product.averageRating)) { %>
+                                        <% if (i <=Math.floor(product.averageRating)) { %>
                                             <i class="fa-solid fa-star"></i>
-                                        <% } else if (i - 0.5 <= product.averageRating) { %>
-                                            <i class="fa-solid fa-star-half-stroke"></i>
-                                        <% } else { %>
-                                            <i class="fa-regular fa-star text-gray-300"></i>
-                                        <% } %>
-                                    <% } %>
+                                            <% } else if (i - 0.5 <=product.averageRating) { %>
+                                                <i class="fa-solid fa-star-half-stroke"></i>
+                                                <% } else { %>
+                                                    <i class="fa-regular fa-star text-gray-300"></i>
+                                                    <% } %>
+                                                        <% } %>
                                 </div>
                                 <span class="text-xs font-bold text-yellow-700">
                                     <%= product.averageRating %> (<%= product.reviewCount %> reviews)
                                 </span>
                             </div>
-                        <% } else { %>
-                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50/50">
-                                <div class="flex text-gray-300 text-xs">
-                                    <i class="fa-regular fa-star"></i>
-                                    <i class="fa-regular fa-star"></i>
-                                    <i class="fa-regular fa-star"></i>
-                                    <i class="fa-regular fa-star"></i>
-                                    <i class="fa-regular fa-star"></i>
+                            <% } else { %>
+                                <div
+                                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50/50">
+                                    <div class="flex text-gray-300 text-xs">
+                                        <i class="fa-regular fa-star"></i>
+                                        <i class="fa-regular fa-star"></i>
+                                        <i class="fa-regular fa-star"></i>
+                                        <i class="fa-regular fa-star"></i>
+                                        <i class="fa-regular fa-star"></i>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">No
+                                        reviews yet</span>
                                 </div>
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">No reviews yet</span>
-                            </div>
-                        <% } %>
+                                <% } %>
                     </div>
 
                     <!-- STOCK MESSAGE -->
@@ -340,7 +344,8 @@
             <!-- Reviews Content (Hidden) -->
             <div id="content-reviews" class="hidden max-w-3xl mx-auto py-10">
                 <div id="reviews-loader" class="flex justify-center py-10">
-                    <div class="w-8 h-8 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+                    <div class="w-8 h-8 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin">
+                    </div>
                 </div>
                 <div id="reviews-list" class="space-y-8">
                     <!-- Reviews will be loaded here -->
@@ -528,10 +533,16 @@
 
                     if (variant.offerApplied) {
                         priceEl.innerText = '₹' + variant.offerPrice;
+                        priceEl.classList.remove('text-accent-navy');
+                        priceEl.classList.add('text-brand-500');
+
                         origPriceEl.innerText = '₹' + variant.price;
                         origPriceEl.classList.remove('hidden');
                     } else {
                         priceEl.innerText = '₹' + variant.price;
+                        priceEl.classList.remove('text-brand-500');
+                        priceEl.classList.add('text-accent-navy');
+
                         origPriceEl.classList.add('hidden');
                     }
                 }
