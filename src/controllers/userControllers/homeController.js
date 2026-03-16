@@ -92,16 +92,16 @@ const homePage = async (req, res) => {
       { $unwind: "$variants" },
 
       {
-        $addFields: {
-          "variants.hasStock": {
-            $cond: [{ $gt: ["$variants.stock", 0] }, 1, 0]
-          }
+        $match: {
+          "variants.isActive": true
         }
       },
 
       {
-        $match: {
-          "variants.isActive": true
+        $addFields: {
+          "variants.hasStock": {
+            $cond: [{ $gt: ["$variants.stock", 0] }, 1, 0]
+          }
         }
       },
 
@@ -122,7 +122,7 @@ const homePage = async (req, res) => {
           "variants.price": 1
         }
       },
-      
+
       {
         $group: {
           _id: "$_id",
