@@ -1837,6 +1837,17 @@
     const description = form.description.value.trim();
     const petTypes = form.querySelectorAll('input[name="petType"]:checked');
 
+    const nameRegex = /^[A-Za-z0-9][A-Za-z0-9\s\-(),'".]{2,119}$/;
+
+    if (!nameRegex.test(productName)) {
+      Swal.fire(
+        "Validation Error",
+        "Product name must be 3-120 characters and contain only letters, numbers, spaces and - , . ' ( )",
+        "error"
+      );
+      return false;
+    }
+
     if (productName.length < 3) {
       Swal.fire("Validation Error", "Product name must be at least 3 characters", "error");
       return false;

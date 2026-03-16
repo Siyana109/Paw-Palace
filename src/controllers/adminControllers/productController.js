@@ -119,8 +119,11 @@ const validateProductInput = ({
   description,
   petType
 }) => {
-  if (!productName || productName.trim().length < 3) {
-    return "Product name must be at least 3 characters";
+
+  const nameRegex = /^[A-Za-z0-9][A-Za-z0-9\s\-(),'".]{2,119}$/;
+
+  if (!productName || !nameRegex.test(productName.trim())) {
+    return "Product name must be 3-120 characters and contain only letters, numbers, spaces, and - , . ' ( )";
   }
 
   if (!brandId) {
@@ -163,7 +166,7 @@ const postAddProduct = async (req, res) => {
     }
 
     await Product.create({
-      productName: req.body.productName.trim(),
+      productName: req.body.productName.trim().replace(/\s+/g," "),
       brandId: req.body.brandId,
       categoryId: req.body.categoryId,
       description: req.body.description.trim(),
@@ -200,7 +203,7 @@ const updateProduct = async (req, res) => {
     }
 
     await Product.findByIdAndUpdate(req.params.id, {
-      productName: req.body.productName.trim(),
+      productName: req.body.productName.trim().replace(/\s+/g," "),
       brandId: req.body.brandId,
       categoryId: req.body.categoryId,
       description: req.body.description.trim(),
