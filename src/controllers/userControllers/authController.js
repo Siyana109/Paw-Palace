@@ -45,10 +45,11 @@ const getSignup = (req, res) => {
 const postSignup = async (req, res) => {
   try {
     console.log("POST /signup HIT");
-    const { fullName, email, password, confirmPassword, referralCode } = req.body;
+    const { fullName, password, confirmPassword, referralCode } = req.body;
+    const email = req.body.email.trim().toLowerCase();
     const formData = { fullName, email, referralCode };
 
-    const emailRegex = /^[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
       return res.render("user/signup", {
@@ -72,7 +73,7 @@ const postSignup = async (req, res) => {
         formData
       });
     }
-    
+
     if (!email) {
       return res.render("user/signup", {
         errors: [{ msg: 'Email is required' }]
@@ -88,6 +89,15 @@ const postSignup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.render("user/signup", {
         errors: [{ msg: "Passwords do not match" }]
+      });
+    }
+
+    const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+
+    if (!strongPassword.test(password)) {
+      return res.render("user/signup", {
+        errors: [{ msg: "Password must contain uppercase, lowercase, number and be 8+ characters" }],
+        formData
       });
     }
 
@@ -136,7 +146,7 @@ const postSignup = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.render("user/signup");
+    return res.render("user/signup");
   }
 };
 
@@ -187,7 +197,13 @@ const verifyOtp = async (req, res) => {
     }
 
     // Generate unique referral code
-    const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    let referralCode;
+    let exists;
+
+    do {
+      referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      exists = await User.findOne({ referralCode });
+    } while (exists);
 
     const user = await User.create({
       fullName: signupData.fullName,
@@ -296,21 +312,28 @@ const googleSignup = (req, res) => {
 }
 
 
-const googleCallback = (req, res) => {
-  passport.authenticate("google", {
-    failureRedirect: "/login"
-  })(req, res, () => {
 
+const googleCallback = (req, res) => {
+  passport.authenticate("google", { failureRedirect: "/login" })(req, res, async () => {
+
+    if (!req.user) {
+      return res.redirect("/login");
+    }
 
     req.session.user = { id: req.user._id };
+
+    await Wallet.findOneAndUpdate(
+      { user: req.user._id },
+      { $setOnInsert: { balance: 0, transactions: [] } },
+      { upsert: true }
+    );
 
     req.session.save(() => {
       res.redirect("/home");
     });
+
   });
 };
-
-
 
 
 

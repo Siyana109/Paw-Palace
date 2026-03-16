@@ -88,15 +88,15 @@
 
             function validateFullName(show = true) {
 
-                let name = fullNameInput.value.trim();
+                let name = fullNameInput.value;
 
                 // Normalize multiple spaces
-                name = name.replace(/\s+/g, " ");
+                name = name.replace(/\s+/g, " ").trim();
                 fullNameInput.value = name;
 
-                const regex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+                const regex = /^[A-Za-z\s]+$/;
 
-                if (name.length < 3) {
+                if (name.trim().length < 3) {
                     if (show) showError(errors.fullName, "Name must be at least 3 characters");
                     return false;
                 }
@@ -111,11 +111,12 @@
             }
 
             function validateEmail(show = true) {
-                const email = emailInput.value.trim();
+                const email = emailInput.value.toLowerCase();
+                emailInput.value = email;
 
                 // Strong but realistic email regex
                 // const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
-                const regex = /^[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}$/;
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 // Extra logical checks
                 if (!regex.test(email)) {
                     if (show) {
@@ -167,7 +168,7 @@
             }
 
             // 🔹 Field-level validation (only after touch)
-            fullNameInput.addEventListener('input', () => {
+            fullNameInput.addEventListener('blur', () => {
                 touched.fullName = true;
                 validateFullName(true);
                 validateForm();
@@ -182,6 +183,11 @@
             passwordInput.addEventListener('input', () => {
                 touched.password = true;
                 validatePassword(true);
+
+                if (confirmPasswordInput.value) {
+                    validateConfirmPassword(true);
+                }
+
                 validateForm();
             });
 
