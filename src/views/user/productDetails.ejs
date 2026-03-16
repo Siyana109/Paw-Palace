@@ -229,54 +229,38 @@
                                     class="text-gray-400 hover:text-accent-navy transition font-black text-lg p-2">+</button>
                             </div>
 
-                            <!-- ADD TO CART -->
-                            <!-- <% if (isInCart) { %>
-                                <a href="/cart"
-                                    class="flex-1 h-14 bg-accent-navy text-white rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center hover:bg-black transition shadow-lg shadow-accent-navy/20 gap-2">
-                                    <i class="fa-solid fa-cart-shopping"></i> Go to Cart
-                                </a>
-                                <% } else { %>
-                                    <button id="addToCartBtn"
-                                        class="flex-1 h-14 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center transition shadow-lg gap-2
-                                    <%= !hasStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'bg-brand-500 text-white hover:bg-brand-600 shadow-brand-500/30' %>"
-                                        <%=!hasStock ? 'disabled' : '' %>>
-                                        <i class="fa-solid fa-bag-shopping"></i>
-                                        <%= !hasStock ? 'Out of Stock' : 'Add to Cart' %>
-                                    </button>
-                                    <% } %> -->
-
                             <% if (!hasStock) { %>
+
                                 <button disabled
                                     class="w-full h-12 bg-gray-300 text-gray-500 rounded-xl font-bold cursor-not-allowed">
                                     Out of Stock
                                 </button>
-                                <% } else if (isInCart) { %>
-                                    <a href="/cart"
-                                        class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center">
-                                        Go to Cart
-                                    </a>
-                                    <% } else { %>
-                                        <div class="flex-1 flex gap-3">
-                                            <button type="submit" id="addToCartBtn"
-                                                class="flex-1 h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
-                                                Add to Cart
-                                            </button>
-                                            <button type="button" onclick="buyNow()"
-                                                class="flex-1 h-12 bg-accent-navy text-white rounded-xl font-bold hover:bg-black transition shadow-lg shadow-accent-navy/30">
-                                                Buy Now
-                                            </button>
-                                        </div>
-                                        <% } %>
 
+                                <% } else { %>
 
-                                            <!-- WISHLIST -->
-                                            <button type="button" id="wishlistBtn"
-                                                data-variant="<%= defaultVariant._id %>"
-                                                class="h-14 w-14 rounded-xl border-2 flex items-center justify-center transition
+                                    <div class="flex-1 flex gap-3">
+
+                                        <button type="submit" id="addToCartBtn"
+                                            class="flex-1 h-12 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/30">
+                                            Add to Cart
+                                        </button>
+
+                                        <button type="button" onclick="buyNow()"
+                                            class="flex-1 h-12 bg-accent-navy text-white rounded-xl font-bold hover:bg-black transition shadow-lg shadow-accent-navy/30">
+                                            Buy Now
+                                        </button>
+
+                                    </div>
+
+                                    <% } %>
+
+                                        <!-- WISHLIST -->
+                                        <button type="button" id="wishlistBtn" data-variant="<%= defaultVariant._id %>"
+                                            class="h-14 w-14 rounded-xl border-2 flex items-center justify-center transition
                                 <%= inWishlist ? 'border-red-100 bg-red-50 text-brand-500' : 'border-gray-100 hover:border-gray-200 text-gray-400 hover:text-gray-600' %>">
-                                                <i id="wishlistIcon"
-                                                    class="<%= inWishlist ? 'fa-solid' : 'fa-regular' %> fa-heart text-xl"></i>
-                                            </button>
+                                            <i id="wishlistIcon"
+                                                class="<%= inWishlist ? 'fa-solid' : 'fa-regular' %> fa-heart text-xl"></i>
+                                        </button>
 
                         </form>
                     </div>
@@ -426,6 +410,8 @@
                     'Navy': '#1e3a8a'
                 };
 
+                const cartVariantIds = <%- JSON.stringify(cartVariantIds || []) %>;
+
                 function getHexColor(colorName) {
                     return colorMap[colorName] || colorName; // Fallback to name if hex not found or is already hex
                 }
@@ -493,6 +479,40 @@
                     }
                 }
 
+                function updateCartButton(variantId) {
+                    const btn = document.getElementById("addToCartBtn");
+                    if (!btn || !activeVariant) return;
+
+                    // 🚨 If out of stock, do not allow cart state change
+                    if (activeVariant.stock === 0) {
+                        btn.innerText = "Out of Stock";
+                        btn.disabled = true;
+
+                        btn.classList.remove('bg-brand-500', 'hover:bg-brand-600', 'bg-gray-900', 'hover:bg-black');
+                        btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+
+                        btn.dataset.state = "oos";
+                        return;
+                    }
+
+                    // Normal cart logic
+                    if (cartVariantIds.includes(variantId)) {
+                        btn.innerText = "Go to Cart";
+
+                        btn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
+                        btn.classList.add('bg-gray-900', 'hover:bg-black', 'text-white');
+
+                        btn.dataset.state = "go";
+                    } else {
+                        btn.innerText = "Add to Cart";
+
+                        btn.classList.remove('bg-gray-900', 'hover:bg-black');
+                        btn.classList.add('bg-brand-500', 'hover:bg-brand-600', 'text-white');
+
+                        btn.dataset.state = "add";
+                    }
+                }
+
                 function selectVariant(id) {
                     activeVariant = variants.find(v => v._id === id);
                     if (!activeVariant) return;
@@ -503,6 +523,7 @@
                     // THEN UI updates
                     updatePrice(activeVariant);
                     updateImages(activeVariant);
+                    updateCartButton(activeVariant._id);
                     updateStock(activeVariant);
 
                     // Reset Quantity
@@ -524,8 +545,11 @@
                     const activeColorIcon = document.getElementById(`color-icon-${activeVariant.color}`);
                     if (activeColorIcon) {
                         activeColorIcon.classList.remove('hidden');
+
                     }
                 }
+
+
 
                 function updatePrice(variant) {
                     const priceEl = document.getElementById('priceDisplay');
@@ -591,29 +615,51 @@
                     const stockCount = document.getElementById('stockCount');
 
                     if (variant.stock > 0) {
-                        // In stock
+
                         qtyWrapper.classList.remove('opacity-50', 'pointer-events-none');
+
                         if (btn) {
                             btn.disabled = false;
-                            btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Add to Cart';
-                            btn.classList.remove('bg-gray-200', 'bg-gray-300', 'text-gray-400', 'text-gray-500', 'cursor-not-allowed', 'shadow-none');
-                            btn.classList.add('bg-brand-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+
+                            // ✅ Check if variant already in cart
+                            if (cartVariantIds.includes(variant._id)) {
+
+                                btn.innerText = "Go to Cart";
+                                btn.dataset.state = "go";
+
+                                btn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
+                                btn.classList.add('bg-gray-900', 'hover:bg-black', 'text-white');
+
+                            } else {
+
+                                btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Add to Cart';
+                                btn.dataset.state = "add";
+
+                                btn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                                btn.classList.add('bg-brand-500', 'text-white', 'hover:bg-brand-600');
+
+                            }
                         }
+
                         stockMsg.classList.add('hidden');
-                    }
-                    else {
-                        // Out of stock
+
+                    } else {
+
                         qtyWrapper.classList.add('opacity-50', 'pointer-events-none');
+
                         if (btn) {
                             btn.disabled = true;
                             btn.innerHTML = 'Out of Stock';
-                            btn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed', 'shadow-none');
-                            btn.classList.remove('bg-brand-500', 'bg-gray-300', 'text-gray-500', 'text-white', 'hover:bg-brand-600', 'shadow-brand-500/30');
+                            btn.dataset.state = "oos";
+
+                            btn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                            btn.classList.remove('bg-brand-500', 'text-white', 'hover:bg-brand-600');
                         }
-                        stockMsg.classList.add('hidden'); // Or show "Out of Stock" text
+
+                        stockMsg.classList.add('hidden');
                     }
 
-                    // Low Stock Warning
+                    // Low stock warning
                     if (variant.stock > 0 && variant.stock < 5) {
                         stockMsg.classList.remove('hidden');
                         stockCount.innerText = variant.stock;
@@ -1000,8 +1046,10 @@
                                 showConfirmButton: false
                             });
 
-                            // Change button to "Go to Cart"
+                            cartVariantIds.push(payload.variantId);
+
                             btn.innerText = 'Go to Cart';
+                            btn.dataset.state = 'go';
 
                             btn.classList.remove(
                                 'bg-brand-500',

@@ -38,7 +38,18 @@ const getProductDetails = async (req, res) => {
 
     // Wishlist & Cart Status
     let inWishlist = false;
-    let isInCart = false;
+    
+    let cartVariantIds = [];
+
+      if (req.session.user) {
+        const userId = req.session.user.id;
+
+        const cart = await Cart.findOne({ user: userId });
+
+        if (cart) {
+          cartVariantIds = cart.items.map(i => i.variant.toString());
+        }
+      }
 
     if (req.session.user && defaultVariant) {
       const userId = req.session.user.id;
@@ -46,11 +57,6 @@ const getProductDetails = async (req, res) => {
       inWishlist = !!await Wishlist.findOne({
         user: userId,
         variant: defaultVariant._id
-      });
-
-      isInCart = !!await Cart.findOne({
-        user: userId,
-        "items.variant": defaultVariant._id
       });
     }
 
@@ -122,7 +128,7 @@ const getProductDetails = async (req, res) => {
       defaultVariant,
       hasStock,
       inWishlist,
-      isInCart,
+      cartVariantIds,
       relatedProducts,
       activeOffers
     });
@@ -276,21 +282,21 @@ const getCartPage = async (req, res) => {
       return res.render('user/cart', { cart: null, hasOutOfStock: false });
     }
 
-let stockAdjusted = false;
+    let stockAdjusted = false;
 
-cart.items = cart.items.filter(item => {
-  if (!item.variant || item.variant.stock === 0) {
-    stockAdjusted = true;
-    return false; // remove item
-  }
+    cart.items = cart.items.filter(item => {
+      if (!item.variant || item.variant.stock === 0) {
+        stockAdjusted = true;
+        return false; // remove item
+      }
 
-  if (item.variant.stock < item.quantity) {
-    item.quantity = item.variant.stock;
-    stockAdjusted = true;
-  }
+      if (item.variant.stock < item.quantity) {
+        item.quantity = item.variant.stock;
+        stockAdjusted = true;
+      }
 
-  return true;
-});
+      return true;
+    });
 
     if (stockAdjusted) {
       await cart.save();
@@ -322,7 +328,7 @@ cart.items = cart.items.filter(item => {
       !item.product.categoryId || !item.product.categoryId.isActive ||
       item.variant.stock === 0 || item.quantity > item.variant.stock
     );
-    
+
     res.render('user/cart', {
       cart,
       hasStockIssues: stockIssues.length > 0,
