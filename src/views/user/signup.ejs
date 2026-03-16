@@ -111,7 +111,7 @@
             }
 
             function validateEmail(show = true) {
-                const email = emailInput.value.toLowerCase();
+                const email = emailInput.value.trim().toLowerCase();
                 emailInput.value = email;
 
                 // Strong but realistic email regex
@@ -169,19 +169,19 @@
 
             // 🔹 Field-level validation (only after touch)
             fullNameInput.addEventListener('blur', () => {
-                touched.fullName = true;
+                clearServerError();
                 validateFullName(true);
                 validateForm();
             });
 
             emailInput.addEventListener('input', () => {
-                touched.email = true;
+                clearServerError();
                 validateEmail(true);
                 validateForm();
             });
 
             passwordInput.addEventListener('input', () => {
-                touched.password = true;
+                clearServerError();
                 validatePassword(true);
 
                 if (confirmPasswordInput.value) {
@@ -192,7 +192,7 @@
             });
 
             confirmPasswordInput.addEventListener('input', () => {
-                touched.confirmPassword = true;
+                clearServerError();
                 validateConfirmPassword(true);
                 validateForm();
             });
@@ -204,6 +204,15 @@
                 }
             });
         });
+
+        const serverErrorBox = document.getElementById('serverErrorBox');
+
+        function clearServerError() {
+            if (serverErrorBox) {
+                serverErrorBox.style.display = "none";
+            }
+        }
+
     </script>
 
 
@@ -247,7 +256,7 @@
                 </div>
 
                 <% if (typeof errors !=='undefined' && errors.length> 0) { %>
-                    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                    <div id="serverErrorBox" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
                         <ul class="list-disc ml-5">
                             <% errors.forEach(function(error) { %>
                                 <li>
