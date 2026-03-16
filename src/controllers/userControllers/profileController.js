@@ -72,12 +72,32 @@ const updateProfile = async (req, res) => {
         const user = await User.findById(userId).lean();
         const addresses = await Address.find({ userId }).lean(); // IMPORTANT
 
+        const nameRegex = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+
         if (!name || name.trim().length < 3) {
             return res.render('user/profile', {
                 user,
                 addresses,
                 isEditing: true,
                 error: 'Name must be at least 3 characters'
+            });
+        }
+
+        if (name.length > 50) {
+            return res.render('user/profile', {
+                user,
+                addresses,
+                isEditing: true,
+                error: 'Name cannot exceed 50 characters'
+            });
+        }
+
+        if (!nameRegex.test(name.trim())) {
+            return res.render('user/profile', {
+                user,
+                addresses,
+                isEditing: true,
+                error: 'Name can only contain letters and spaces'
             });
         }
 
@@ -91,7 +111,7 @@ const updateProfile = async (req, res) => {
         }
 
         await User.findByIdAndUpdate(userId, {
-            fullName: name.trim(),
+            fullName: name.trim().replace(/\s+/g, ' '),
             phone: phone || null
         });
 

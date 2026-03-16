@@ -531,10 +531,24 @@
 
     function validateName() {
         const value = nameInput.value.trim();
+
+        const nameRegex = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+
         if (value.length < 3) {
             showError(nameInput, 'Name must be at least 3 characters');
             return false;
         }
+
+        if (value.length > 50) {
+            showError(nameInput, 'Name cannot exceed 50 characters');
+            return false;
+        }
+
+        if (!nameRegex.test(value)) {
+            showError(nameInput, 'Name can contain only letters, spaces, hyphens, or apostrophes');
+            return false;
+        }
+
         clearError(nameInput);
         return true;
     }
