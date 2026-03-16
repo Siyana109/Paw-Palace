@@ -92,6 +92,14 @@ const homePage = async (req, res) => {
       { $unwind: "$variants" },
 
       {
+        $addFields: {
+          "variants.hasStock": {
+            $cond: [{ $gt: ["$variants.stock", 0] }, 1, 0]
+          }
+        }
+      },
+
+      {
         $match: {
           "variants.isActive": true
         }
@@ -108,7 +116,13 @@ const homePage = async (req, res) => {
         }]
         : []),
 
-      { $sort: { "variants.price": 1 } },
+      {
+        $sort: {
+          "variants.hasStock": -1,
+          "variants.price": 1
+        }
+      },
+      
       {
         $group: {
           _id: "$_id",
