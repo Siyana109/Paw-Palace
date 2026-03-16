@@ -338,18 +338,25 @@
             </div>
         </div>
 
-        <div id="cropModal" class="fixed inset-0 z-50 bg-black/60 items-center justify-center hidden">
+        <div id="cropModal" class="fixed inset-0 z-50 bg-black/60 items-center justify-center hidden px-4">
+            <div class="bg-white rounded-[2rem] p-8 w-full max-w-lg h-[70vh] flex flex-col shadow-2xl transition-all scale-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-500">
+                        <i class="fa-solid fa-crop"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-accent-navy tracking-tight">Crop Profile Picture</h3>
+                </div>
+                
+                <div class="flex-1 overflow-hidden relative bg-gray-50 rounded-3xl flex items-center justify-center border-2 border-dashed border-gray-200">
+                    <img id="cropImage" class="max-w-full max-h-full block">
+                </div>
 
-            <div class="bg-white rounded-2xl p-6 w-[320px]">
-                <img id="cropImage" class="max-w-full">
-
-                <div class="flex gap-3 mt-4">
-                    <button onclick="applyCrop()" class="flex-1 bg-brand-500 text-white py-2 rounded-xl font-bold">
-                        Crop & Upload
-                    </button>
-
-                    <button onclick="closeCrop()" class="flex-1 bg-gray-100 py-2 rounded-xl font-bold">
+                <div class="flex gap-4 mt-8 shrink-0">
+                    <button onclick="closeCrop()" class="flex-1 bg-gray-100 text-gray-500 py-4 rounded-2xl font-bold hover:bg-gray-200 transition">
                         Cancel
+                    </button>
+                    <button onclick="applyCrop()" class="flex-1 bg-brand-500 text-white py-4 rounded-2xl font-bold hover:bg-rose-600 shadow-lg shadow-brand-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> Crop & Upload
                     </button>
                 </div>
             </div>
