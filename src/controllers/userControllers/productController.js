@@ -276,14 +276,21 @@ const getCartPage = async (req, res) => {
       return res.render('user/cart', { cart: null, hasOutOfStock: false });
     }
 
-    let stockAdjusted = false;
+let stockAdjusted = false;
 
-    for (let item of cart.items) {
-      if (item.variant.stock < item.quantity) {
-        item.quantity = item.variant.stock;
-        stockAdjusted = true;
-      }
-    }
+cart.items = cart.items.filter(item => {
+  if (!item.variant || item.variant.stock === 0) {
+    stockAdjusted = true;
+    return false; // remove item
+  }
+
+  if (item.variant.stock < item.quantity) {
+    item.quantity = item.variant.stock;
+    stockAdjusted = true;
+  }
+
+  return true;
+});
 
     if (stockAdjusted) {
       await cart.save();
@@ -315,7 +322,7 @@ const getCartPage = async (req, res) => {
       !item.product.categoryId || !item.product.categoryId.isActive ||
       item.variant.stock === 0 || item.quantity > item.variant.stock
     );
-
+    
     res.render('user/cart', {
       cart,
       hasStockIssues: stockIssues.length > 0,
