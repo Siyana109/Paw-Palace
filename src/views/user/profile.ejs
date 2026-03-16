@@ -896,8 +896,16 @@
             isDefault: document.getElementById("addrIsDefault").checked
         };
 
+        const nameRegex = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+
         if (data.fullName.length < 3)
             return showMsg("error", "Name must be at least 3 characters");
+
+        if (data.fullName.length > 50)
+            return showMsg("error", "Name cannot exceed 50 characters");
+
+        if (!nameRegex.test(data.fullName))
+            return showMsg("error", "Name can contain only letters, spaces, hyphens, or apostrophes");
 
         if (!/^\d{10}$/.test(data.phone))
             return showMsg("error", "Enter a valid 10-digit phone number");
