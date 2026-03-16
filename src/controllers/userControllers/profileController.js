@@ -392,7 +392,7 @@ const postChangeEmail = async (req, res) => {
 
         req.session.emailChange = {
             newEmail,
-            expiresAt: new Date(Date.now() + 60 * 1000)
+            otpSentAt: Date.now()
         };
 
 
@@ -419,9 +419,14 @@ const getVerifyEmailOtp = (req, res) => {
     const emailChange = req.session.emailChange;
     if (!emailChange) return res.redirect('/profile');
 
+    const otpSentAt = emailChange.otpSentAt || Date.now();
+    const elapsed = Math.floor((Date.now() - otpSentAt) / 1000);
+    const remaining = Math.max(60 - elapsed, 0);
+
     res.render('user/otpEmail', {
         title: 'Verify Email | PawPalace',
-        email: emailChange.newEmail
+        email: emailChange.newEmail,
+        remaining
     });
 };
 
@@ -443,24 +448,30 @@ const verifyEmailOtp = async (req, res) => {
             email: sessionData.newEmail
         });
 
+        const elapsed = Math.floor((Date.now() - sessionData.otpSentAt) / 1000);
+        const remaining = Math.max(60 - elapsed, 0);
+
         if (!otpDoc) {
             return res.render('user/otpEmail', {
                 email: sessionData.newEmail,
-                error: 'OTP not found or expired'
+                error: 'OTP not found or expired',
+                remaining
             });
         }
 
         if (otpDoc.expiresAt < new Date()) {
             return res.render('user/otpEmail', {
                 email: sessionData.newEmail,
-                error: 'OTP expired'
+                error: 'OTP expired',
+                remaining
             });
         }
 
         if (otpDoc.otp !== String(otp).trim()) {
             return res.render('user/otpEmail', {
                 email: sessionData.newEmail,
-                error: 'Invalid OTP'
+                error: 'Invalid OTP',
+                remaining
             });
         }
 
@@ -505,9 +516,12 @@ const resendEmailOtp = async (req, res) => {
 
         await sendOTPEmail(sessionData.newEmail, otp);
 
+        req.session.emailChange.otpSentAt = Date.now();
+
         return res.render('user/otpEmail', {
             email: sessionData.newEmail,
-            success: 'A new OTP has been sent'
+            success: 'A new OTP has been sent',
+            remaining: 60
         });
 
     } catch (error) {

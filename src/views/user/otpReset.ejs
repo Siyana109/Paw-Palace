@@ -131,7 +131,7 @@
             Didn't receive the code?
             <form action="/reset-password/resend-otp" method="POST" class="inline">
                 <button type="submit" id="resend-btn" class="text-gray-300 font-bold cursor-not-allowed ml-1" disabled>
-                    Resend in <span id="timer">00:30</span>
+                    Resend in <span id="timer">01:00</span>
                 </button>
             </form>
         </div>
@@ -211,9 +211,11 @@
 
 
         // Timer Logic
-        let timeLeft = 60;
+        let timeLeft = <%= typeof remaining !== 'undefined' ? remaining : 60 %>;
         const timerEl = document.getElementById('timer');
         const resendBtn = document.getElementById('resend-btn');
+
+        timerEl.textContent = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
 
         const countdown = setInterval(() => {
             timeLeft--;

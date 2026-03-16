@@ -142,6 +142,8 @@ const postSignup = async (req, res) => {
       referrerId
     };
 
+    req.session.otpSentAt = Date.now();
+
     res.redirect("/verify-otp");
 
   } catch (error) {
@@ -158,8 +160,13 @@ const getVerifyOtp = (req, res) => {
     return res.redirect("/signup");
   }
 
+  const otpSentAt = req.session.otpSentAt || Date.now();
+  const elapsed = Math.floor((Date.now() - otpSentAt) / 1000);
+  const remaining = Math.max(60 - elapsed, 0);
+
   res.render("user/otpSignup", {
-    email: req.session.signupData.email
+    email: req.session.signupData.email,
+    remaining
   });
 };
 
@@ -175,24 +182,30 @@ const verifyOtp = async (req, res) => {
 
     const otpData = await OTP.findOne({ email: signupData.email });
 
+    const elapsed = Math.floor((Date.now() - req.session.otpSentAt) / 1000);
+    const remaining = Math.max(60 - elapsed, 0);
+
     if (!otpData) {
       return res.render("user/otpSignup", {
         error: "OTP not found. Please resend OTP.",
-        email: signupData.email
+        email: signupData.email,
+        remaining
       });
     }
 
     if (otpData.expiresAt < new Date()) {
       return res.render("user/otpSignup", {
         error: "OTP expired. Please resend OTP.",
-        email: signupData.email
+        email: signupData.email,
+        remaining
       });
     }
 
     if (otpData.otp !== String(otp).trim()) {
       return res.render("user/otpSignup", {
         error: "Invalid OTP",
-        email: signupData.email
+        email: signupData.email,
+        remaining
       });
     }
 
@@ -291,6 +304,8 @@ const resendOtp = async (req, res) => {
     );
 
     await sendOTPEmail(email, otp);
+
+    req.session.otpSentAt = Date.now();
 
     res.render("user/otpSignup", {
       success: "OTP resent successfully",
@@ -451,7 +466,7 @@ const verifyEmailSendOtp = async (req, res) => {
 
     await sendOTPEmail(email, otp);
 
-    req.session.resetPassword = { email };
+    req.session.resetPassword = { email, otpSentAt: Date.now() };
 
     res.redirect("/reset-password/verify-otp");
   }
@@ -470,8 +485,13 @@ const getResetOtp = (req, res) => {
     return res.redirect("/forgot-password");
   }
 
+  const otpSentAt = req.session.resetPassword.otpSentAt || Date.now();
+  const elapsed = Math.floor((Date.now() - otpSentAt) / 1000);
+  const remaining = Math.max(60 - elapsed, 0);
+
   res.render("user/otpReset", {
-    email: req.session.resetPassword.email
+    email: req.session.resetPassword.email,
+    remaining
   });
 };
 
@@ -493,9 +513,12 @@ const resendResetOtp = async (req, res) => {
 
     await sendOTPEmail(email, otp);
 
+    req.session.resetPassword.otpSentAt = Date.now();
+
     res.render("user/otpReset", {
       email,
-      success: "OTP resent successfully"
+      success: "OTP resent successfully",
+      remaining: 60
     });
   } catch (error) {
     console.error(error);
@@ -531,10 +554,16 @@ const verifyResetOtp = async (req, res) => {
       email
     });
 
+    const sessionData = req.session.resetPassword;
+
+const elapsed = Math.floor((Date.now() - sessionData.otpSentAt) / 1000);
+const remaining = Math.max(60 - elapsed, 0);
+
     if (!otpData) {
       return res.render("user/otpReset", {
         error: "OTP not found or expired",
-        email
+        email,
+        remaining
       });
     }
 
@@ -542,7 +571,8 @@ const verifyResetOtp = async (req, res) => {
     if (otpData.otp !== String(otp).trim()) {
       return res.render("user/otpReset", {
         error: "Invalid OTP",
-        email
+        email,
+        remaining
       });
     }
 
@@ -550,7 +580,8 @@ const verifyResetOtp = async (req, res) => {
     if (otpData.expiresAt < new Date()) {
       return res.render("user/otpReset", {
         error: "OTP expired",
-        email
+        email,
+        remaining
       });
     }
 
