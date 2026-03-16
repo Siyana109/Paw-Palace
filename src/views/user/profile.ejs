@@ -35,73 +35,83 @@
         <main class="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
             <div class="lg:col-span-3 space-y-6">
-                <div class="bg-white rounded-[2rem] p-8 text-center shadow-sm">
-                    <div class="relative inline-block mb-4">
-                        <img id="profilePreview" src="<%= user.profilePic || 'https://via.placeholder.com/150' %>"
-                            class="w-24 h-24 rounded-full object-cover border-4 border-brand-50" alt="Profile">
+                <div class="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-brand-50 to-transparent opacity-50 left-0"></div>
+                    <div class="relative z-10">
+                        <div class="relative inline-block mb-4">
+                            <img id="profilePreview" src="<%= user.profilePic || 'https://via.placeholder.com/150' %>"
+                                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md" alt="Profile">
 
-                        <!-- ALWAYS visible camera -->
-                        <form action="/profile/image/update" method="POST" enctype="multipart/form-data"
-                            class="absolute bottom-0 right-0">
-                            <!-- <label class="bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center
-             text-xs text-brand-500 border border-gray-100 cursor-pointer
-             hover:bg-brand-50 transition">
-                                <i class="fa-solid fa-camera"></i>
-                                <input type="file" name="profilePic" accept="image/*" hidden
-                                    onchange="this.form.submit()">
-                            </label> -->
+                            <!-- ALWAYS visible camera -->
                             <label class="absolute bottom-0 right-0 bg-white shadow-md rounded-full w-8 h-8
-         flex items-center justify-center text-xs text-brand-500 border border-gray-100
-         cursor-pointer hover:bg-brand-50 transition">
+                                flex items-center justify-center text-xs text-brand-500 border border-gray-100
+                                cursor-pointer hover:bg-brand-50 transition shadow-sm">
                                 <i class="fa-solid fa-camera"></i>
                                 <input type="file" id="profilePicInput" accept="image/*" hidden>
                             </label>
-                        </form>
 
-                        <!-- REMOVE BUTTON -->
-                        <% if (user.profilePic) { %>
-                            <form action="/profile/image/remove" method="POST"
-                                class="absolute -bottom-3 left-1/2 -translate-x-1/2">
-                                <button type="submit" class="text-[10px] text-red-400 hover:text-red-500 font-bold">
-                                    Remove
-                                </button>
-                            </form>
+                            <!-- REMOVE BUTTON -->
+                            <% if (user.profilePic) { %>
+                                <form action="/profile/image/remove" method="POST"
+                                    class="absolute -bottom-6 left-1/2 -translate-x-1/2">
+                                    <button type="submit" class="text-[10px] text-red-400 hover:text-red-500 font-bold whitespace-nowrap">
+                                        Remove Photo
+                                    </button>
+                                </form>
                             <% } %>
-                    </div>
+                        </div>
 
-
-                    <h2 class="text-xl font-bold">
-                        <%= user.fullName %>
-                    </h2>
-                    <!-- <p class="text-gray-400 text-sm font-medium">PawParent since 2023</p> -->
-                    <div class="mt-4 p-2 bg-brand-50 rounded-xl">
-                        <p class="text-[10px] font-bold text-brand-500 uppercase">Referral Code</p>
-                        <p class="font-bold text-xs">
-                            <%= user.referralCode %>
+                        <h2 class="text-xl font-black text-accent-navy tracking-tight mt-2">
+                            <%= user.fullName %>
+                        </h2>
+                        <p class="text-xs text-brand-500 font-bold uppercase tracking-wider mt-1">
+                            <%= user.role || 'Member' %>
                         </p>
+
+                        <div class="mt-8 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Referral Code</p>
+                            <div class="flex items-center justify-center gap-2 cursor-pointer group/ref"
+                                onclick="navigator.clipboard.writeText('<%= user.referralCode %>'); Swal.fire({title: 'Copied!', text: 'Referral code copied to clipboard', icon: 'success', timer: 1500, showConfirmButton: false})">
+                                <span class="font-mono font-bold text-accent-navy text-sm group-hover/ref:text-brand-500 transition-colors">
+                                    <%= user.referralCode %>
+                                </span>
+                                <i class="fa-regular fa-copy text-xs text-gray-300 group-hover/ref:text-brand-500 transition-colors"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[2rem] p-4 shadow-sm space-y-2">
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-1">
                     <a href="/profile"
-                        class="flex items-center gap-4 p-4 rounded-2xl bg-brand-50 text-brand-600 font-bold transition">
-                        <i class="fa-regular fa-user"></i> Profile Details
+                        class="flex items-center gap-4 p-4 rounded-2xl bg-brand-50 text-brand-600 font-bold transition shadow-sm border border-brand-100">
+                        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-500 shadow-sm">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                        Profile Details
                     </a>
                     <a href="/wallet"
-                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-600 font-bold transition">
-                        <i class="fa-solid fa-wallet"></i> Wallet
+                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-600 font-bold transition group">
+                        <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-brand-500 group-hover:shadow-sm transition">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <span class="group-hover:text-accent-navy transition">Wallet</span>
                     </a>
                     <a href="/orders"
-                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-600 font-bold transition">
-                        <i class="fa-solid fa-box"></i> Orders
+                        class="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-600 font-bold transition group">
+                        <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-brand-500 group-hover:shadow-sm transition">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                        <span class="group-hover:text-accent-navy transition">My Orders</span>
                     </a>
                     <button type="button" onclick="openLogoutModal()"
-                        class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-600 font-bold transition text-left">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                        class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-red-500 font-bold transition text-left group">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-white group-hover:shadow-sm transition">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </div>
+                        <span class="group-hover:text-red-600 transition">Log Out</span>
                     </button>
 
-                    <form id="logoutForm" action="/logout" method="POST"></form>
-
+                    <form id="logoutForm" action="/logout" method="POST" class="hidden"></form>
                 </div>
             </div>
 
@@ -123,12 +133,11 @@
                                 </div>
                                 <% } %>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
                         <!-- FULL NAME -->
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+                            <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2 ml-1">
                                 Full Name
                             </label>
 
@@ -140,14 +149,14 @@
                                     : '' %>
                                 class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
                                 focus:border-brand-500 focus:bg-white transition outline-none font-medium
-                                disabled:opacity-60"
+                                disabled:opacity-80"
                                 >
                             </div>
                         </div>
 
                         <!-- PHONE NUMBER -->
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">
+                            <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2 ml-1">
                                 Phone Number
                             </label>
 
@@ -159,7 +168,7 @@
                                 placeholder="Optional"
                                 class="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-50 rounded-xl
                                 focus:border-brand-500 focus:bg-white transition outline-none font-medium
-                                disabled:opacity-60"
+                                disabled:opacity-80"
                                 >
                             </div>
                         </div>
@@ -169,7 +178,7 @@
 
                     <div class="border-t border-gray-50 pt-8">
                         <div class="flex justify-between items-center mb-6">
-                            <h4 class="font-bold text-gray-400 uppercase text-[10px]">Shipping Address</h4>
+                            <h4 class="font-bold text-gray-600 uppercase text-[10px]">Shipping Address</h4>
                             <a href="javascript:void(0)" onclick="openAddAddressModal()"
                                 class="text-brand-500 font-bold text-xs">
                                 + Add New
@@ -200,19 +209,19 @@
                                             <div class="flex gap-3 items-center whitespace-nowrap">
                                                 <a href="javascript:void(0)"
                                                     onclick="event.stopPropagation(); openEditAddressModal('<%= encodeURIComponent(JSON.stringify(addr)) %>')"
-                                                    class="text-xs text-gray-400 hover:text-brand-500">
+                                                    class="text-xs text-gray-600 hover:text-brand-700">
                                                     Edit
                                                 </a>
 
                                                 <button type="button"
                                                     onclick="event.stopPropagation(); openDeleteModal('<%= addr._id %>', '<%= addr.fullName %>', '<%= addr.address %>')"
-                                                    class="text-xs text-red-400 hover:text-red-500">
+                                                    class="text-xs text-red-600 hover:text-red-700">
                                                     Delete
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <p class="text-xs text-gray-500 leading-relaxed">
+                                        <p class="text-sm text-gray-800 leading-relaxed">
                                             <%= addr.address %><br>
                                                 <%= addr.city %>, <%= addr.state %>
                                                         <%= addr.zipCode %><br>
