@@ -108,9 +108,48 @@ const updateOrderStatus = async (req, res) => {
         const order = await Order.findById(orderId);
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
+        const STATUS_FLOW = {
+            Pending: ["Processing"],
+            Placed: ["Processing"],
+            Processing: ["Shipped"],
+            Shipped: ["Out for Delivery"],
+            "Out for Delivery": ["Delivered"],
+
+            "Partially Cancelled": ["Processing", "Shipped", "Out for Delivery", "Delivered"],
+            "Partially Returned": ["Delivered"],
+
+            Delivered: [],
+            Cancelled: [],
+            Returned: []
+        };
+
         // Logic check: Can't change from Cancelled/Delivered usually
         if (['Returned', 'Cancelled'].includes(order.orderStatus)) {
             return res.status(400).json({ success: false, message: `Cannot change status of ${order.orderStatus} order` });
+        }
+
+        const currentStatus = order.orderStatus;
+
+        if (status === "Cancelled") {
+            return res.status(400).json({
+                success: false,
+                message: "Admin cannot cancel orders"
+            });
+        }
+
+        // Validate status progression
+        if (!STATUS_FLOW[currentStatus]?.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid status transition from ${currentStatus} to ${status}`
+            });
+        }
+
+        if (status === currentStatus) {
+            return res.status(400).json({
+                success: false,
+                message: "Order is already in this status"
+            });
         }
 
         order.orderStatus = status;
@@ -126,7 +165,7 @@ const updateOrderStatus = async (req, res) => {
         }
 
         // Sync item statuses with order status
-        if (['Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'].includes(status)) {
+        if (['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(status)) {
             order.items.forEach(item => {
                 if (!['Cancelled', 'Returned'].includes(item.itemStatus)) {
                     item.itemStatus = status;

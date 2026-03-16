@@ -242,7 +242,7 @@
                                         'bg-orange-50 text-orange-600';
                                         else if (order.orderStatus === 'Processing')
                                         statusColor = 'bg-blue-50 text-blue-600';
-                                        else if (['Cancelled', 'Failed', 'Returned'].includes(order.orderStatus))
+                                        else if (['Cancelled', 'Failed', 'Returned','Partially Cancelled','Partially Returned'].includes(order.orderStatus))
                                         statusColor = 'bg-red-50 text-red-600';
 
                                         const itemsCount = order.items.reduce((acc, item) => acc + item.quantity, 0);
@@ -512,16 +512,17 @@
             const currentStatus = order.orderStatus;
             let nextSteps = [];
 
-            if (['Pending', 'Placed', 'Partially Cancelled'].includes(currentStatus)) {
-                nextSteps = ['Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
-            } else if (currentStatus === 'Processing') {
-                nextSteps = ['Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
-            } else if (currentStatus === 'Shipped') {
-                nextSteps = ['Out for Delivery', 'Delivered'];
-            } else if (currentStatus === 'Out for Delivery') {
+            if (['Pending', 'Placed'].includes(currentStatus)) {
+                nextSteps = ['Processing'];
+            }
+            else if (['Processing', 'Partially Cancelled'].includes(currentStatus)) {
+                nextSteps = ['Shipped'];
+            }
+            else if (currentStatus === 'Shipped') {
+                nextSteps = ['Out for Delivery'];
+            }
+            else if (currentStatus === 'Out for Delivery') {
                 nextSteps = ['Delivered'];
-            } else if (currentStatus === 'Partially Returned') {
-                nextSteps = ['Returned'];
             }
 
             // Combine Current Status + Next Valid Steps
