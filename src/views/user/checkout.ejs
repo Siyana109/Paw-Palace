@@ -157,39 +157,79 @@
 
                     <!-- STEP 3: COUPON -->
                     <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-center mb-4">
+                        <div class="flex justify-between items-center mb-6">
                             <div class="flex items-center gap-3">
                                 <span
-                                    class="w-8 h-8 rounded-full bg-accent-navy text-white flex items-center justify-center font-bold text-sm">3</span>
-                                <h2 class="font-bold text-lg">Apply coupon</h2>
+                                    class="w-10 h-10 rounded-full bg-accent-navy text-white flex items-center justify-center font-bold text-lg">3</span>
+                                <h2 class="text-xl font-bold">Apply Coupon</h2>
                             </div>
-                            <!-- <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">remove coupon</span> -->
                         </div>
 
-                        <!-- SELECT DROPDOWN FOR COUPONS -->
-                        <div class="flex gap-3">
+                        <!-- INPUT BLOCK -->
+                        <div class="flex gap-3 mb-6">
                             <div class="relative flex-1">
-                                <select id="couponSelect"
-                                    class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 pl-4 pr-10 rounded-xl appearance-none focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer">
-                                    <option value="">Select a coupon</option>
-                                    <% if (coupons && coupons.length> 0) { %>
-                                        <% coupons.forEach(coupon=> { %>
-                                            <option value="<%= coupon.code %>">
-                                                <%= coupon.code %> - <%= coupon.discountValue %>
-                                                        <%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
-                                            </option>
-                                            <% }) %>
-                                                <% } %>
-                                </select>
-                                <div
-                                    class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                <input type="text" id="couponInput" placeholder="Enter code"
+                                    class="w-full bg-gray-50 border border-gray-100 text-accent-navy font-bold py-3.5 px-5 rounded-2xl focus:outline-none focus:border-brand-500 focus:bg-white transition-all uppercase tracking-wider">
+                                <div class="absolute inset-y-0 right-4 flex items-center text-gray-400">
+                                    <i class="fa-solid fa-ticket-simple"></i>
                                 </div>
                             </div>
                             <button type="button" onclick="applyCoupon()"
-                                class="bg-brand-500 text-white px-6 rounded-xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">
+                                class="bg-brand-500 text-white px-8 rounded-2xl font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20 active:scale-95">
                                 Apply
                             </button>
+                        </div>
+
+                        <!-- AVAILABLE COUPONS LIST -->
+                        <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Available Coupons
+                            </h4>
+
+                            <% if (coupons && coupons.length> 0) { %>
+                                <% coupons.forEach(coupon=> { %>
+                                    <div id="coupon-card-<%= coupon.code %>"
+                                        onclick="if(<%= coupon.isApplicable %>) selectCoupon('<%= coupon.code %>')"
+                                        class="coupon-card p-4 rounded-2xl border-2 transition-all relative overflow-hidden group 
+                                        <%= coupon.isApplicable 
+                                            ? 'border-emerald-100 bg-emerald-50 cursor-pointer hover:border-emerald-300 hover:shadow-md' 
+                                            : 'border-gray-100 bg-gray-50 opacity-40 cursor-not-allowed' %>">
+                                        
+                                        <!-- Decorative Circle notches for coupon look -->
+                                        <div class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-r-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>"></div>
+                                        <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-l-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>"></div>
+
+                                        <div class="flex justify-between items-start pl-2">
+                                            <div>
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <span class="font-black text-accent-navy tracking-tight"><%= coupon.code %></span>
+                                                    <span class="applied-badge hidden bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
+                                                        <i class="fa-solid fa-check"></i> Applied
+                                                    </span>
+                                                </div>
+                                                <p class="text-xs font-bold <%= coupon.isApplicable ? 'text-emerald-600' : 'text-gray-400' %>">
+                                                    Save <%= coupon.discountValue %><%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[10px] font-black uppercase tracking-tighter <%= coupon.isApplicable ? 'text-emerald-500' : 'text-gray-400' %>">
+                                                    <%= coupon.isApplicable ? 'TAP TO USE' : 'RESTRICTED' %>
+                                                </span>
+                                                <% if (!coupon.isApplicable && coupon.reasons.minPurchase) { %>
+                                                    <p class="text-[8px] font-bold text-rose-500 leading-none mt-1">
+                                                        Min ₹<%= coupon.reasons.minPurchaseAmount %> required
+                                                    </p>
+                                                <% } else if (!coupon.isApplicable && coupon.reasons.usageLimit) { %>
+                                                    <p class="text-[8px] font-bold text-rose-500 leading-none mt-1">Limit reached</p>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                    <p class="text-xs font-bold text-gray-400 italic">No coupons available right now.</p>
+                                </div>
+                            <% } %>
                         </div>
                     </div>
 
@@ -271,21 +311,13 @@
                                     </div>
 
                                     <!-- Totals -->
-                                    <% const subtotal=cart.items.reduce((acc, item)=>
-                                        acc + item.variant.price * item.quantity, 0);
-
-                                        const offerDiscount = cart.items.reduce((acc, item) => {
-                                        if (!item.variant.offerApplied) return acc;
-                                        return acc + (item.variant.price - item.variant.offerPrice) * item.quantity;
-                                        }, 0);
-
-                                        const postOfferTotal = subtotal - offerDiscount;
-
+                                    <% 
+                                        const subtotal = cart.items.reduce((acc, item) => acc + item.variant.price * item.quantity, 0);
+                                        const offerDiscount = subtotal - postOfferTotal;
                                         const shipping = 0;
-
                                         const couponDiscount = 0;
                                         const total = postOfferTotal + shipping - couponDiscount;
-                                        %>
+                                    %>
 
                                         <div class="space-y-3 mb-6">
                                             <div
@@ -833,14 +865,30 @@
         });
     });
 
+    function selectCoupon(code) {
+        document.getElementById("couponInput").value = code;
+        applyCoupon();
+    }
+
     async function applyCoupon() {
-        const couponCode = document.getElementById("couponSelect").value;
+        const couponCode = document.getElementById("couponInput").value.trim();
         if (!couponCode) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Oops...',
                 text: 'Please select a coupon first!',
                 confirmButtonColor: '#f43f5e'
+            });
+            return;
+        }
+
+        const currentApplied = document.getElementById('appliedCouponCode').value;
+        if (currentApplied === couponCode) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Already Applied',
+                text: 'This coupon is already applied to your order!',
+                confirmButtonColor: '#3b82f6'
             });
             return;
         }
@@ -872,6 +920,19 @@
 
                 // Set Hidden Input
                 document.getElementById('appliedCouponCode').value = data.couponCode;
+
+                // Visual Highlight for Card
+                document.querySelectorAll('.coupon-card').forEach(card => {
+                    card.classList.remove('border-emerald-500', 'bg-emerald-100/50', 'ring-2', 'ring-emerald-500');
+                    card.querySelector('.applied-badge')?.classList.add('hidden');
+                });
+                const activeCard = document.getElementById(`coupon-card-${data.couponCode}`);
+                if (activeCard) {
+                    activeCard.classList.add('border-emerald-500', 'bg-emerald-100/50', 'ring-2', 'ring-emerald-500');
+                    activeCard.querySelector('.applied-badge')?.classList.remove('hidden');
+                    // Scroll to card if needed
+                    activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
 
                 Swal.fire({
                     icon: 'success',
@@ -917,7 +978,13 @@
         document.getElementById('appliedCouponCode').value = "";
 
         // Reset dropdown
-        document.getElementById("couponSelect").value = "";
+        document.getElementById("couponInput").value = "";
+
+        // Reset Card Visuals
+        document.querySelectorAll('.coupon-card').forEach(card => {
+            card.classList.remove('border-emerald-500', 'bg-emerald-100/50', 'ring-2', 'ring-emerald-500');
+            card.querySelector('.applied-badge')?.classList.add('hidden');
+        });
 
         Swal.fire({
             icon: 'info',

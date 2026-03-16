@@ -36,11 +36,11 @@ const getCheckoutPage = async (req, res) => {
 
     const today = new Date();
 
-    const coupons = await Coupon.find({
+    const rawCoupons = await Coupon.find({
       isActive: true,
       startDate: { $lte: today },
       expiryDate: { $gte: today }
-    });
+    }).lean();
 
     // Optional: Filter coupons user has already exhausted?
     // Let's mark them or filter them. For now, pass all and let applyCoupon handle validation.
@@ -56,7 +56,7 @@ const getCheckoutPage = async (req, res) => {
       endDate: { $gte: new Date() }
     });
 
-    // Recalculate offers for each cart item
+    let postOfferTotal = 0;
     cart.items.forEach(item => {
       const { offerApplied, finalPrice } = applyOfferToPrice({
         price: item.variant.price,
@@ -68,7 +68,29 @@ const getCheckoutPage = async (req, res) => {
       item.variant.offerApplied = offerApplied;
       if (offerApplied) {
         item.variant.offerPrice = finalPrice;
+        postOfferTotal += finalPrice * item.quantity;
+      } else {
+        postOfferTotal += item.variant.price * item.quantity;
       }
+    });
+
+    // Map coupons with applicability status
+    const coupons = rawCoupons.map(coupon => {
+      const userUsageCount = coupon.usedBy
+        .filter(u => u.userId.toString() === userId).length;
+      
+      const isUsageLimitReached = coupon.usageLimit && userUsageCount >= coupon.usageLimit;
+      const isMinPurchaseSatisfied = postOfferTotal >= coupon.minimumPurchase;
+
+      return {
+        ...coupon,
+        isApplicable: !isUsageLimitReached && isMinPurchaseSatisfied,
+        reasons: {
+          usageLimit: isUsageLimitReached,
+          minPurchase: !isMinPurchaseSatisfied,
+          minPurchaseAmount: coupon.minimumPurchase
+        }
+      };
     });
 
     let stockIssues = [];
@@ -100,6 +122,7 @@ const getCheckoutPage = async (req, res) => {
       addresses,
       cart,
       coupons,
+      postOfferTotal,
       walletBalance: wallet ? wallet.balance : 0,
       stockIssues,
       isBuyNow
