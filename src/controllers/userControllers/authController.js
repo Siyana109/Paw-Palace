@@ -556,8 +556,8 @@ const verifyResetOtp = async (req, res) => {
 
     const sessionData = req.session.resetPassword;
 
-const elapsed = Math.floor((Date.now() - sessionData.otpSentAt) / 1000);
-const remaining = Math.max(60 - elapsed, 0);
+    const elapsed = Math.floor((Date.now() - sessionData.otpSentAt) / 1000);
+    const remaining = Math.max(60 - elapsed, 0);
 
     if (!otpData) {
       return res.render("user/otpReset", {
