@@ -262,7 +262,7 @@ TODO :
         ✔ after returing order summary not proper @done (2/25/2026, 4:55:34 PM)
         ✔ payment status when order is placing @done (2/20/2026, 3:19:18 PM)
         ✔ order tracking statuses @done (2/20/2026, 3:17:19 PM)
-        ☐ reviews
+        ✔ reviews @done (3/17/2026, 2:29:34 PM)
         ✔ order detailing page calculations @done (2/23/2026, 11:51:04 PM)
         ✔ coupon controller @done (2/26/2026, 11:39:30 AM
         ✔ min & max price validation in home page @done (3/2/2026, 6:15:46 PM)
@@ -277,7 +277,6 @@ TODO :
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
-        ☐ checkout coupon applied amount
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
@@ -288,7 +287,7 @@ TODO :
         ✔ online filtering in admin order @done (2/11/2026, 3:51:50 AM)
         ☐ dashboard total orders ??
         ☐ top brand in admin brands
-        ☐ stock limit error in Cart
+        ✔ stock limit error in Cart @done (3/17/2026, 2:30:29 PM)
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
 
 

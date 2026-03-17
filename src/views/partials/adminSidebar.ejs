@@ -4,97 +4,199 @@
     : 'text-gray-700 hover:bg-gray-50';
     %>
 
-    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
-        <div class="p-6 border-b border-gray-50">
-            <div class="flex items-center gap-3">
-                <div
-                    class="bg-brand-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-brand-200">
-                    <i class="fa-solid fa-paw text-lg"></i>
-                </div>
-                <div>
-                    <span
-                        class="font-extrabold text-lg tracking-tight text-accent-navy block leading-none">PawPalace</span>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admin Panel</span>
-                </div>
+    <aside id="adminSidebar"
+        class="sidebar-expanded bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden shrink-0">
+
+        <style>
+            #adminSidebar {
+                width: 16rem; /* 256px = w-64 */
+            }
+            #adminSidebar.sidebar-collapsed {
+                width: 4.5rem; /* icon-only strip */
+            }
+            /* Label / text spans fade out when collapsed */
+            #adminSidebar .nav-label {
+                transition: opacity 0.2s ease, width 0.2s ease;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            #adminSidebar.sidebar-collapsed .nav-label {
+                opacity: 0;
+                width: 0;
+            }
+            /* Brand text */
+            #adminSidebar .brand-text {
+                transition: opacity 0.2s ease, max-width 0.3s ease;
+                overflow: hidden;
+                max-width: 200px;
+            }
+            #adminSidebar.sidebar-collapsed .brand-text {
+                opacity: 0;
+                max-width: 0;
+            }
+            /* Collapse button icon flips */
+            #collapseBtn .collapse-icon {
+                transition: transform 0.3s ease;
+            }
+            #adminSidebar.sidebar-collapsed #collapseBtn .collapse-icon {
+                transform: rotate(180deg);
+            }
+            /* Tooltip for collapsed nav items */
+            #adminSidebar.sidebar-collapsed nav a,
+            #adminSidebar.sidebar-collapsed nav button,
+            #adminSidebar.sidebar-collapsed nav form button {
+                position: relative;
+                justify-content: center;
+            }
+            #adminSidebar.sidebar-collapsed nav a[data-tip]:hover::after,
+            #adminSidebar.sidebar-collapsed nav form button[data-tip]:hover::after {
+                content: attr(data-tip);
+                position: absolute;
+                left: calc(100% + 12px);
+                top: 50%;
+                transform: translateY(-50%);
+                background: #0f172a;
+                color: #fff;
+                padding: 4px 10px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                white-space: nowrap;
+                z-index: 999;
+                pointer-events: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            }
+        </style>
+
+        <!-- Logo -->
+        <div class="p-4 border-b border-gray-50 flex items-center gap-3">
+            <div class="bg-brand-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-brand-200 shrink-0">
+                <i class="fa-solid fa-paw text-lg"></i>
+            </div>
+            <div class="brand-text">
+                <span class="font-extrabold text-lg tracking-tight text-accent-navy block leading-none">PawPalace</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admin Panel</span>
             </div>
         </div>
 
-        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto overflow-x-hidden">
 
-            <a href="/admin/dashboard"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/dashboard') %>">
-                <i class="fa-solid fa-gauge w-5"></i> Dashboard
+            <a href="/admin/dashboard" data-tip="Dashboard"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/dashboard') %>">
+                <i class="fa-solid fa-gauge w-5 shrink-0"></i>
+                <span class="nav-label">Dashboard</span>
             </a>
 
-            <a href="/admin/users"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/users') %>">
-                <i class="fa-solid fa-users w-5"></i> Users
+            <a href="/admin/users" data-tip="Users"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/users') %>">
+                <i class="fa-solid fa-users w-5 shrink-0"></i>
+                <span class="nav-label">Users</span>
             </a>
 
-            <a href="/admin/brands"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/brands') %>">
-                <i class="fa-solid fa-tags w-5"></i> Brands
+            <a href="/admin/brands" data-tip="Brands"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/brands') %>">
+                <i class="fa-solid fa-tags w-5 shrink-0"></i>
+                <span class="nav-label">Brands</span>
             </a>
 
-            <a href="/admin/categories"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/categories') %>">
-                <i class="fa-solid fa-layer-group w-5"></i> Categories
+            <a href="/admin/categories" data-tip="Categories"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/categories') %>">
+                <i class="fa-solid fa-layer-group w-5 shrink-0"></i>
+                <span class="nav-label">Categories</span>
             </a>
 
-            <a href="/admin/products"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/products') %>">
-                <i class="fa-solid fa-box w-5"></i> Products
+            <a href="/admin/products" data-tip="Products"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/products') %>">
+                <i class="fa-solid fa-box w-5 shrink-0"></i>
+                <span class="nav-label">Products</span>
             </a>
 
-            <a href="/admin/offers"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/offers') %>">
-                <i class="fa-solid fa-percent w-5"></i> Offers
+            <a href="/admin/offers" data-tip="Offers"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/offers') %>">
+                <i class="fa-solid fa-percent w-5 shrink-0"></i>
+                <span class="nav-label">Offers</span>
             </a>
 
-            <a href="/admin/coupons"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/coupons') %>">
-                <i class="fa-solid fa-ticket w-5"></i> Coupons
+            <a href="/admin/coupons" data-tip="Coupons"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/coupons') %>">
+                <i class="fa-solid fa-ticket w-5 shrink-0"></i>
+                <span class="nav-label">Coupons</span>
             </a>
 
-            <a href="/admin/orders"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/orders') %>">
-                <i class="fa-solid fa-clock-rotate-left w-5"></i> Order History
+            <a href="/admin/orders" data-tip="Order History"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/orders') %>">
+                <i class="fa-solid fa-clock-rotate-left w-5 shrink-0"></i>
+                <span class="nav-label">Order History</span>
             </a>
 
-            <a href="/admin/returns"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/returns') %>">
-                <i class="fa-solid fa-rotate-left w-5"></i> Return Requests
+            <a href="/admin/returns" data-tip="Return Requests"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/returns') %>">
+                <i class="fa-solid fa-rotate-left w-5 shrink-0"></i>
+                <span class="nav-label">Return Requests</span>
             </a>
 
-            <a href="/admin/reviews"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/reviews') %>">
-                <i class="fa-solid fa-star w-5"></i> Reviews
+            <a href="/admin/reviews" data-tip="Reviews"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/reviews') %>">
+                <i class="fa-solid fa-star w-5 shrink-0"></i>
+                <span class="nav-label">Reviews</span>
             </a>
 
-            <a href="/admin/transactions"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/transactions') %>">
-                <i class="fa-solid fa-wallet w-5"></i> Transactions
+            <a href="/admin/transactions" data-tip="Transactions"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/transactions') %>">
+                <i class="fa-solid fa-wallet w-5 shrink-0"></i>
+                <span class="nav-label">Transactions</span>
             </a>
 
-            <a href="/admin/sales-report"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/sales-report') %>">
-                <i class="fa-solid fa-chart-line w-5"></i> Sales report
+            <a href="/admin/sales-report" data-tip="Sales Report"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm <%= isActive('/admin/sales-report') %>">
+                <i class="fa-solid fa-chart-line w-5 shrink-0"></i>
+                <span class="nav-label">Sales Report</span>
             </a>
 
-            <hr class="border-gray-50 my-4 mx-4">
+            <hr class="border-gray-50 my-3 mx-2">
 
             <form action="/admin/logout" method="GET">
-                <button
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-red-600 hover:bg-red-50 hover:text-red-500 transition">
-                    <i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Logout
+                <button type="submit" data-tip="Logout"
+                    class="w-full flex items-center gap-3 px-3 py-3 rounded-2xl font-bold text-sm text-red-600 hover:bg-red-50 hover:text-red-500 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5 shrink-0"></i>
+                    <span class="nav-label">Logout</span>
                 </button>
             </form>
         </nav>
 
-        <div class="p-4 border-t border-gray-50">
-            <button
+        <!-- Collapse toggle -->
+        <div class="p-3 border-t border-gray-50">
+            <button id="collapseBtn" onclick="toggleSidebar()"
                 class="w-full flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-400 rounded-2xl font-bold text-xs hover:bg-gray-100 transition">
-                <i class="fa-solid fa-chevron-left"></i> Collapse
+                <i class="fa-solid fa-chevron-left collapse-icon"></i>
+                <span class="nav-label">Collapse</span>
             </button>
         </div>
     </aside>
+
+    <script>
+        (function () {
+            const sidebar = document.getElementById('adminSidebar');
+            const STORAGE_KEY = 'pawpalace_sidebar_collapsed';
+
+            // Restore state immediately (before paint) to avoid flicker
+            if (localStorage.getItem(STORAGE_KEY) === 'true') {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+            }
+
+            window.toggleSidebar = function () {
+                const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                if (isCollapsed) {
+                    sidebar.classList.remove('sidebar-collapsed');
+                    sidebar.classList.add('sidebar-expanded');
+                    localStorage.setItem(STORAGE_KEY, 'false');
+                } else {
+                    sidebar.classList.remove('sidebar-expanded');
+                    sidebar.classList.add('sidebar-collapsed');
+                    localStorage.setItem(STORAGE_KEY, 'true');
+                }
+            };
+        })();
+    </script>
