@@ -1,6 +1,7 @@
 import Brand from '../../model/brandModel.js'
 import Category from '../../model/categoryModel.js';
 import Product from '../../model/productModel.js'
+import Order from '../../model/orderModel.js'
 
 const getBrandsPage = async (req, res) => {
   try {
@@ -33,6 +34,49 @@ const getBrandsPage = async (req, res) => {
       .limit(limit)
       .lean();
 
+    const topBrandData = await Order.aggregate([
+      { $unwind: "$items" },
+
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+
+      {
+        $group: {
+          _id: "$product.brandId",
+          totalSold: { $sum: "$items.quantity" }
+        }
+      },
+
+      { $sort: { totalSold: -1 } },
+      { $limit: 1 },
+
+      {
+        $lookup: {
+          from: "brands",
+          localField: "_id",
+          foreignField: "_id",
+          as: "brand"
+        }
+      },
+      { $unwind: "$brand" },
+
+      {
+        $project: {
+          brandName: "$brand.brandName",
+          totalSold: 1
+        }
+      }
+    ]);
+
+    const topBrand = topBrandData.length ? topBrandData[0].brandName : "No Sales";
+
     // PRODUCT COUNT
     const brandsWithCount = await Promise.all(
       brands.map(async (brand) => {
@@ -50,7 +94,7 @@ const getBrandsPage = async (req, res) => {
     const totalPages = Math.ceil(totalBrands / limit);
 
     //  AJAX RESPONSE 
-     if (req.headers["x-requested-with"] === "XMLHttpRequest") {
+    if (req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({
         success: true,
         brands: brandsWithCount,
@@ -71,7 +115,8 @@ const getBrandsPage = async (req, res) => {
       totalBrands,
       totalProducts,
       currentPage: page,
-      totalPages
+      totalPages,
+      topBrand
     });
 
   } catch (error) {
