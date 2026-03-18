@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Our Collection | PawPalace</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -468,6 +469,57 @@
                     return true;
                 }
             </script>
+
+        <script>
+            // Show feedback toast when redirected due to unavailable product/variant
+            (function () {
+                const params = new URLSearchParams(window.location.search);
+                const unavailable = params.get('unavailable');
+
+                if (!unavailable) return;
+
+                // Clean the URL without reloading
+                const cleanUrl = window.location.pathname +
+                    window.location.search.replace(/[?&]unavailable=[^&]*/g, '').replace(/^&/, '?') || window.location.pathname;
+                history.replaceState(null, '', cleanUrl);
+
+                const messages = {
+                    product: {
+                        icon: '🚫',
+                        title: 'Product Unavailable',
+                        text: 'This product has been removed or is no longer available in our store.'
+                    },
+                    variant: {
+                        icon: '📦',
+                        title: 'Variant Unavailable',
+                        text: 'The selected variant is currently unavailable. Browse similar products below.'
+                    }
+                };
+
+                const msg = messages[unavailable] || {
+                    icon: '⚠️',
+                    title: 'Product Unavailable',
+                    text: 'This product is no longer available.'
+                };
+
+                Swal.fire({
+                    iconHtml: `<span style="font-size:2rem">${msg.icon}</span>`,
+                    title: msg.title,
+                    text: msg.text,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-2xl font-sans shadow-xl',
+                        title: 'font-bold text-gray-800 text-sm',
+                        htmlContainer: 'text-gray-500 text-xs'
+                    }
+                });
+            })();
+        </script>
+
 </body>
 
 </html>

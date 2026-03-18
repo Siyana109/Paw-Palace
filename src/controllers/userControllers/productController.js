@@ -18,15 +18,15 @@ const getProductDetails = async (req, res) => {
       .populate("categoryId");
 
     if (!product || !product.isActive || (product.categoryId && !product.categoryId.isActive)) {
-      return res.redirect("/home");
+      return res.redirect("/home?unavailable=product");
     }
 
     // Fetch ALL Variants
     const variants = await Variant.find({ product: productId, isActive: true });
 
     if (!variants.length) {
-      // product exists but no variants → admin issue
-      return res.redirect("/home");
+      // product exists but no active variants
+      return res.redirect("/home?unavailable=variant");
     }
 
     // Stock Computation
@@ -36,28 +36,25 @@ const getProductDetails = async (req, res) => {
     // Default Variant (SAFE)
     const defaultVariant = hasStock ? sellableVariants[0] : variants[0];
 
-    // Wishlist & Cart Status
     let inWishlist = false;
-    
     let cartVariantIds = [];
+    let wishlistVariantIds = [];
 
-      if (req.session.user) {
-        const userId = req.session.user.id;
-
-        const cart = await Cart.findOne({ user: userId });
-
-        if (cart) {
-          cartVariantIds = cart.items.map(i => i.variant.toString());
-        }
-      }
-
-    if (req.session.user && defaultVariant) {
+    if (req.session.user) {
       const userId = req.session.user.id;
 
-      inWishlist = !!await Wishlist.findOne({
-        user: userId,
-        variant: defaultVariant._id
-      });
+      const cart = await Cart.findOne({ user: userId });
+      if (cart) {
+        cartVariantIds = cart.items.map(i => i.variant.toString());
+      }
+
+      const wishlist = await Wishlist.findOne({ user: userId });
+      if (wishlist) {
+        wishlistVariantIds = wishlist.items.map(i => i.variant.toString());
+        if (defaultVariant) {
+          inWishlist = wishlistVariantIds.includes(defaultVariant._id.toString());
+        }
+      }
     }
 
     // Normalize petType
@@ -129,6 +126,7 @@ const getProductDetails = async (req, res) => {
       hasStock,
       inWishlist,
       cartVariantIds,
+      wishlistVariantIds,
       relatedProducts,
       activeOffers
     });
@@ -186,10 +184,13 @@ const addToCart = async (req, res) => {
     }
 
     if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive)) {
+      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive);
+      const reason = isProductError ? "product" : "variant";
       return res.status(400).json({
         success: false,
-        message: "This product is currently unavailable",
-        redirect: "/home"
+        message: isProductError ? "This product is no longer available" : "This variant is no longer available",
+        reason: reason,
+        redirect: `/home?unavailable=${reason}`
       });
     }
 
@@ -461,11 +462,16 @@ const getWishlist = async (req, res) => {
       })
       .populate("items.variant");
 
-    const wishlistItems = wishlistDoc ? wishlistDoc.items.filter(item =>
+    const allItems = wishlistDoc ? wishlistDoc.items : [];
+
+    const wishlistItems = allItems.filter(item =>
       item.variant && item.variant.isActive &&
       item.product && item.product.isActive &&
       item.product.categoryId && item.product.categoryId.isActive
-    ) : [];
+    );
+
+    // How many items were silently removed
+    const removedCount = allItems.length - wishlistItems.length;
 
     // Active offers
     const activeOffers = await Offer.find({
@@ -488,7 +494,8 @@ const getWishlist = async (req, res) => {
     });
 
     res.render("user/wishlist", {
-      wishlist: wishlistItems
+      wishlist: wishlistItems,
+      removedCount
     });
 
   } catch (error) {
@@ -510,6 +517,30 @@ const addToWishlist = async (req, res) => {
 
     const userId = req.session.user.id;
     const { productId, variantId } = req.body;
+
+    // Check product and variant are active before adding to wishlist
+    const variant = await Variant.findById(variantId)
+      .populate({
+        path: "product",
+        populate: { path: "categoryId" }
+      });
+
+    if (
+      !variant ||
+      !variant.isActive ||
+      !variant.product ||
+      !variant.product.isActive ||
+      (variant.product.categoryId && !variant.product.categoryId.isActive)
+    ) {
+      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive);
+      const reason = isProductError ? "product" : "variant";
+      return res.status(400).json({
+        success: false,
+        message: isProductError ? "This product is no longer available" : "This variant is no longer available",
+        reason: reason,
+        redirect: `/home?unavailable=${reason}`
+      });
+    }
 
     let wishlist = await Wishlist.findOne({ user: userId });
 

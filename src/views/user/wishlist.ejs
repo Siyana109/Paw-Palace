@@ -39,7 +39,29 @@
                 <p class="text-gray-500 font-medium">Save them now, spoil them later.</p>
             </div>
 
+            <% if (removedCount > 0) { %>
+                <div id="unavailable-banner"
+                    class="flex items-start gap-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl px-5 py-4 mb-8 shadow-sm">
+                    <div class="flex-shrink-0 w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-exclamation text-amber-500"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-sm text-amber-900">
+                            <%= removedCount === 1 ? '1 item was removed' : `${removedCount} items were removed` %> from your wishlist
+                        </p>
+                        <p class="text-xs text-amber-700 mt-0.5">
+                            <%= removedCount === 1 ? 'This product' : 'These products' %> <%= removedCount === 1 ? 'is' : 'are' %> no longer available — they may have been deactivated or discontinued by the store.
+                        </p>
+                    </div>
+                    <button onclick="document.getElementById('unavailable-banner').remove()"
+                        class="flex-shrink-0 text-amber-400 hover:text-amber-600 transition mt-0.5">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            <% } %>
+
             <% if (wishlist && wishlist.length> 0) { %>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
                     <% wishlist.forEach(item=> { %>
@@ -181,61 +203,73 @@
                         const res = await fetch('/cart/add', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                productId,
-                                variantId,
-                                quantity: 1
-                            })
+                            body: JSON.stringify({ productId, variantId, quantity: 1 })
                         });
-
-                        if (res.redirected) {
-                            window.location.href = res.url;
-                            return;
-                        }
 
                         const data = await res.json();
 
+                        if (res.status === 401) {
+                            window.location.href = '/login';
+                            return;
+                        }
+
                         if (data.success) {
-                            // Update header badge
                             if (typeof window.updateCartCount === 'function' && data.cartCount !== undefined) {
                                 window.updateCartCount(data.cartCount);
                             }
 
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Added to Cart',
-                                text: 'Item moved to your cart!',
-                                timer: 1500,
-                                showConfirmButton: false
+                                title: 'Added to Cart!',
+                                text: 'Item successfully added to your cart.',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                customClass: { popup: 'rounded-2xl font-sans shadow-xl' }
                             });
 
-                            setTimeout(() => {
-                                location.reload(); // wishlist refresh
-                            }, 1500);
-                        }
-                        // Optional: Remove from wishlist automatically after adding to cart?
-                        // For now keep it as per standard e-com behavior (keep in wishlist or let user remove)
-                        // But typically "Move to cart" implies removing from wishlist. 
-                        // The button says "Add to Cart", implying copy. I'll leave it as copy.
-                        else if (data.redirect) {
-                            window.location.href = data.redirect;
+                            // Reload wishlist after short delay so cart badge updates
+                            setTimeout(() => location.reload(), 2000);
+
                         } else {
-                            Swal.fire({
+                            // Show error — then remove the unavailable item from wishlist and reload
+                            await Swal.fire({
                                 icon: 'error',
-                                title: 'Oops',
-                                text: data.message || 'Could not add to cart'
+                                title: 'Cannot Add to Cart',
+                                text: data.message || 'This product is no longer available.',
+                                confirmButtonColor: '#f43f5e',
+                                customClass: {
+                                    popup: 'rounded-2xl font-sans',
+                                    confirmButton: 'rounded-xl font-bold px-6'
+                                }
                             });
+
+                            // Remove the item from wishlist silently
+                            try {
+                                await fetch('/wishlist/remove', {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ variantId })
+                                });
+                            } catch (_) {}
+
+                            location.reload();
                         }
+
                     } catch (err) {
-                        console.error(err);
+                        console.error('Add to cart error:', err);
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error',
-                            text: 'Something went wrong'
+                            title: 'Something went wrong',
+                            text: 'Could not add item to cart. Please try again.',
+                            confirmButtonColor: '#f43f5e'
                         });
                     }
                 }
             </script>
+
 
 </body>
 

@@ -411,6 +411,7 @@
                 };
 
                 const cartVariantIds = <%- JSON.stringify(cartVariantIds || []) %>;
+                let wishlistVariantIds = <%- JSON.stringify(wishlistVariantIds || []) %>;
 
                 function getHexColor(colorName) {
                     return colorMap[colorName] || colorName; // Fallback to name if hex not found or is already hex
@@ -546,6 +547,21 @@
                     if (activeColorIcon) {
                         activeColorIcon.classList.remove('hidden');
 
+                    }
+                    
+                    // Update Wishlist Icon State
+                    const icon = document.getElementById("wishlistIcon");
+                    const wishlistBtn = document.getElementById("wishlistBtn");
+                    if (icon && wishlistBtn) {
+                        if (wishlistVariantIds.includes(activeVariant._id)) {
+                            icon.classList.remove("fa-regular", "text-gray-400");
+                            icon.classList.add("fa-solid", "text-brand-500");
+                            wishlistBtn.classList.add("border-brand-500");
+                        } else {
+                            icon.classList.remove("fa-solid", "text-brand-500");
+                            icon.classList.add("fa-regular", "text-gray-400");
+                            wishlistBtn.classList.remove("border-brand-500");
+                        }
                     }
                 }
 
@@ -921,14 +937,36 @@
 
                         const data = await res.json();
 
-                        // Not logged in
-                        if (!data.success && data.redirect) {
-                            window.location.href = data.redirect;
+                        // Not logged in → redirect to login
+                        if (res.status === 401) {
+                            window.location.href = '/login';
+                            return;
+                        }
+
+                        // Product/variant inactive → show error, do not add
+                        if (!data.success) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Cannot Add to Wishlist',
+                                text: data.message || 'This product is no longer available.',
+                                confirmButtonColor: '#ff4d6d',
+                                customClass: {
+                                    popup: 'rounded-2xl font-sans',
+                                    confirmButton: 'rounded-xl font-bold'
+                                }
+                            }).then(() => {
+                                if (data.reason === 'product') {
+                                    window.location.href = data.redirect || '/home';
+                                } else if (data.reason === 'variant') {
+                                    location.reload();
+                                }
+                            });
                             return;
                         }
 
                         // 🤍 → ❤️ Added
                         if (data.added) {
+                            if (!wishlistVariantIds.includes(variantId)) wishlistVariantIds.push(variantId);
                             icon.classList.remove("fa-regular", "text-gray-400");
                             icon.classList.add("fa-solid", "text-brand-500");
                             btn.classList.add("border-brand-500");
@@ -936,6 +974,7 @@
 
                         // ❤️ → 🤍 Removed
                         if (data.removed) {
+                            wishlistVariantIds = wishlistVariantIds.filter(id => id !== variantId);
                             icon.classList.remove("fa-solid", "text-brand-500");
                             icon.classList.add("fa-regular", "text-gray-400");
                             btn.classList.remove("border-brand-500");
@@ -1024,10 +1063,16 @@
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Product Unavailable',
-                                text: 'This product is no longer available',
+                                text: data.message || 'This product is no longer available',
                                 confirmButtonColor: '#ff4d6d'
                             }).then(() => {
-                                window.location.href = data.redirect;
+                                if (data.reason === 'product') {
+                                    window.location.href = data.redirect;
+                                } else if (data.reason === 'variant') {
+                                    location.reload();
+                                } else {
+                                    window.location.href = data.redirect;
+                                }
                             });
                             return;
                         }
