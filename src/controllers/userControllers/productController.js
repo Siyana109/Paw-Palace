@@ -571,5 +571,106 @@ const removeFromWishlist = async (req, res) => {
 
 
 
+// Validate cart items before proceeding to checkout (called via AJAX)
+const validateCart = async (req, res) => {
+  try {
 
-export default { getProductDetails, getCartPage, addToCart, updateCartQuantity, removeCartItem, addToWishlist, getWishlist, removeFromWishlist };
+    const userId = req.session.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: "items.product",
+        populate: { path: "categoryId" }
+      })
+      .populate("items.variant");
+
+    if (!cart || cart.items.length === 0) {
+      return res.json({
+        success: false,
+        isEmpty: true,
+        message: "Your cart is empty"
+      });
+    }
+
+    const issues = [];
+
+    for (const item of cart.items) {
+
+      const product = item.product;
+      const category = product?.categoryId;
+      const variant = item.variant;
+
+      if (!product || !product.isActive) {
+        issues.push({
+          type: "PRODUCT_INACTIVE",
+          productName: product?.productName || "Product"
+        });
+        continue;
+      }
+
+      if (!category || !category.isActive) {
+        issues.push({
+          type: "CATEGORY_INACTIVE",
+          productName: product.productName
+        });
+        continue;
+      }
+
+      if (!variant || !variant.isActive) {
+        issues.push({
+          type: "VARIANT_INACTIVE",
+          productName: product.productName
+        });
+        continue;
+      }
+
+      if (variant.stock === 0) {
+        issues.push({
+          type: "OUT_OF_STOCK",
+          productName: product.productName
+        });
+        continue;
+      }
+
+      if (item.quantity > variant.stock) {
+        issues.push({
+          type: "EXCEEDS_STOCK",
+          productName: product.productName,
+          available: variant.stock
+        });
+      }
+    }
+
+    if (issues.length > 0) {
+      return res.json({
+        success: true,
+        hasIssues: true,
+        issues
+      });
+    }
+
+    return res.json({
+      success: true,
+      hasIssues: false
+    });
+
+  } catch (error) {
+    console.error("Cart validation error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong"
+    });
+  }
+};
+
+
+export default { getProductDetails, getCartPage, addToCart, updateCartQuantity, removeCartItem, addToWishlist, getWishlist, removeFromWishlist, validateCart };
+

@@ -65,6 +65,8 @@ router.get('/cart', userMiddleware.checkSession, productController.getCartPage);
 router.post('/cart/add', userMiddleware.checkSession, productController.addToCart);
 router.patch('/cart/update', userMiddleware.checkSession, productController.updateCartQuantity);
 router.delete('/cart/remove', userMiddleware.checkSession, productController.removeCartItem);
+router.post('/cart/validate', userMiddleware.checkSession, productController.validateCart);
+
 
 router.get('/checkout', userMiddleware.checkSession, checkoutController.getCheckoutPage);
 router.post('/checkout/apply-coupon', userMiddleware.checkSession, checkoutController.applyCoupon);
