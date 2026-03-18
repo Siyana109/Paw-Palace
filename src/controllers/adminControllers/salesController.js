@@ -35,8 +35,12 @@ const getDateRange = (filter) => {
 
 const getSalesReport = async (req, res) => {
     try {
-        const { filter, startDate, endDate, page = 1 } = req.query;
+        const { filter = "daily", startDate, endDate, page = 1 } = req.query;
         let dateQuery = {};
+
+        if (!req.query.filter) {
+            return res.redirect("/admin/sales-report?filter=daily");
+        }
 
         // 1. Date Filtering Logic
         if (filter === 'custom' && startDate && endDate) {
@@ -46,7 +50,7 @@ const getSalesReport = async (req, res) => {
                     $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
                 }
             };
-        } else if (filter && filter !== 'all') {
+        } else {
             const range = getDateRange(filter);
             dateQuery = {
                 createdAt: { $gte: range.startDate, $lte: range.endDate }

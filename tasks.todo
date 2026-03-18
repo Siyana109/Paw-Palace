@@ -241,7 +241,7 @@ WEEK-11 PENDINGS:
     ☐ Product quantity and availability should be validated at every stage of the order management process.
     ☐ Blocked item should display a proper message indicating that the item is unavailable in both detail pages and wishlist page
     ☐ Coupon implementation logic needs improvement and proper handling across different scenarios.
-    ☐ Initial load data of sales report should be specific to default filter which was selected in dropdown
+    ✔ Initial load data of sales report should be specific to default filter which was selected in dropdown @done (3/18/2026, 4:33:42 PM)
 
 
 
