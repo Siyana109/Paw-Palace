@@ -636,11 +636,12 @@ const resetPassword = async (req, res) => {
 
 
 const logout = (req, res) => {
-  req.session.destroy(err => {
+  delete req.session.user;
+
+  req.session.save((err) => {
     if (err) {
       return res.redirect("/home");
     }
-    res.clearCookie("pawpalace.sid");
     res.redirect("/login");
   });
 };

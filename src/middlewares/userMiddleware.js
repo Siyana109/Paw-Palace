@@ -22,7 +22,7 @@ const checkSession = async (req, res, next) => {
 
     // User not found
      if (!user) {
-      req.session.destroy();
+      delete req.session.user;
 
       if (req.xhr || req.headers.accept?.includes('application/json')) {
         return res.status(401).json({
@@ -38,7 +38,7 @@ const checkSession = async (req, res, next) => {
 
     // Blocked user
      if (user.isBlocked) {
-      req.session.destroy();
+      delete req.session.user;
 
       if (req.xhr || req.headers.accept?.includes('application/json')) {
         return res.status(403).json({

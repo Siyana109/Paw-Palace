@@ -58,17 +58,14 @@ const postAdmin = async (req, res) => {
 
 const adminLogout = (req, res) => {
   try {
+    delete req.session.isAdmin;
 
-    req.session.destroy((err) => {
-
+    req.session.save((err) => {
       if (err) {
         console.error("Admin logout error:", err);
         return res.redirect("/admin/dashboard");
       }
-
-      res.clearCookie("pawpalace.sid");
       return res.redirect("/admin/login");
-
     });
 
   } catch (error) {
