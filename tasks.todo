@@ -66,7 +66,7 @@ WEEK-8 PENDINGS:
     ✔ Email Template of User Signup & Password Reset should be different @done (1/3/2026, 4:37:55 PM)
     ✔ Change Email otp is not working @done (1/13/2026, 9:52:43 AM)
     ✔ Profile Picture is pending @done (1/28/2026, 7:35:30 PM)
-    ☐ Don't pass the err msgs in url (Block user)
+    ✔ Don't pass the err msgs in url (Block user) @done (3/19/2026, 11:11:21 AM)
 
     Admin:
     ✔ Skip the object id from user table and add serial number @done (1/4/2026, 7:07:54 PM)
@@ -289,6 +289,7 @@ TODO :
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
+        ☐ buy now inactive items handling
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

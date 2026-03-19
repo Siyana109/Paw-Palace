@@ -890,13 +890,21 @@ const initBuyNow = async (req, res) => {
     const userId = req.session.user.id;
 
     const product = await Product.findById(productId).populate('categoryId');
-    if (!product || !product.isActive) {
-      return res.json({ success: false, message: "Product not available" });
+    const variant = await Variant.findById(variantId);
+
+    if (!variant || !variant.isActive || !product || !product.isActive || (product.categoryId && !product.categoryId.isActive)) {
+      const isProductError = !product || !product.isActive || (product.categoryId && !product.categoryId.isActive);
+      const reason = isProductError ? "product" : "variant";
+      return res.json({
+        success: false,
+        message: isProductError ? "This product is no longer available" : "This variant is no longer available",
+        reason: reason,
+        redirect: `/home?unavailable=${reason}`
+      });
     }
 
-    const variant = await Variant.findById(variantId);
-    if (!variant || variant.stock < quantity || !variant.isActive) {
-      return res.json({ success: false, message: "Requested quantity not available in stock" });
+    if (variant.stock < quantity) {
+      return res.json({ success: false, message: `Only ${variant.stock} items available` });
     }
 
     // Store item specifically formatted exactly like a populated Cart Item in the session

@@ -1175,6 +1175,12 @@
                                 title: 'Product Unavailable',
                                 text: data.message,
                                 confirmButtonColor: '#ff4d6d'
+                            }).then(() => {
+                                if (data.reason === 'product') {
+                                    window.location.href = data.redirect || '/home';
+                                } else if (data.reason === 'variant') {
+                                    location.reload();
+                                }
                             });
                             return;
                         }
