@@ -289,7 +289,7 @@ TODO :
         ✔ in buynow cannot apply coupon ? @done (3/14/2026, 11:23:21 AM)
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
-        ☐ buy now inactive items handling
+        ✔ buy now inactive items handling @done (3/19/2026, 11:49:53 AM)
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
@@ -308,6 +308,16 @@ TODO :
 
 
 
+WEEK-12:
+    ☐ Complete all the testing and bug fixing activities of your first project.
+    ☐ Reformat your project source code into the official coding standard of your domain.
+    ☐ Complete the basic tutorial of GIT.
+    ☐ Publish your first project on GIT.
+    ☐ Finish nginx tutorial and host your first project
+        On AWS, Azure, GCP cloud platform or any other linux server instance (Load balancing, caching, Reverse proxy).
+    ☐ Learn about Alternatives of nginx.
+    ☐ HTTP protocols
+    ☐ Learn the difference between HTTP and HTTPs.
 
 
 
