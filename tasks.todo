@@ -290,6 +290,12 @@ TODO :
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
         ✔ buy now inactive items handling @done (3/19/2026, 11:49:53 AM)
+        ☐ brand active or inactive check
+        ☐ wishlist error message is showing every time
+        ☐ cart and wishlist count not showing in profile
+        ☐ order item card - refunded - COD - UI
+        ☐ after order success checkout page is showing for a sec.
+        ☐ cancelling order in last process
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)
@@ -302,7 +308,9 @@ TODO :
         ✔ top brand in admin brands @done (3/18/2026, 1:24:18 PM)
         ✔ stock limit error in Cart @done (3/17/2026, 2:30:29 PM)
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
-
+        ✔ when blocking or unblocking user, the page reloads and rerendenring @done (3/25/2026, 12:23:12 AM)
+        ☐ edit offer
+        ☐ transaction- date filtering validation
 
 
 

@@ -3,14 +3,14 @@ import User from "../../model/userModel.js";
 
 const getUsers = async (req, res) => {
     try {
-        
+
         const users = await User.find({})
             // .select("fullName email isBlocked createdAt")
             .sort({ createdAt: -1 });
-console.log(users)
+        console.log(users)
 
-        const formattedUsers = users.map((user,i) => ({
-            count: i+1,
+        const formattedUsers = users.map((user, i) => ({
+            count: i + 1,
             name: user.fullName,
             email: user.email,
             status: user.isBlocked ? "Blocked" : "Active",
@@ -35,14 +35,12 @@ const blockUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        await User.findByIdAndUpdate(userId, {
-            isBlocked: true
-        });
+        await User.findByIdAndUpdate(userId, { isBlocked: true });
 
-        res.redirect("/admin/users");
+        res.json({ success: true });
     } catch (error) {
         console.error("Error blocking user:", error);
-        res.status(500).redirect("/admin/users");
+        res.status(500).json({ success: false });
     }
 };
 
@@ -51,14 +49,12 @@ const unblockUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        await User.findByIdAndUpdate(userId, {
-            isBlocked: false
-        });
+        await User.findByIdAndUpdate(userId, { isBlocked: false });
 
-        res.redirect("/admin/users");
+        res.json({ success: true });
     } catch (error) {
         console.error("Error unblocking user:", error);
-        res.status(500).redirect("/admin/users");
+        res.status(500).json({ success: false });
     }
 };
 
@@ -121,4 +117,4 @@ const listUsers = async (req, res) => {
 
 
 
-export default {getUsers, blockUser, unblockUser, listUsers}
+export default { getUsers, blockUser, unblockUser, listUsers }

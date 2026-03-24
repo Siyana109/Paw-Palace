@@ -403,6 +403,27 @@ document.addEventListener("click", (e) => {
   );
 });
 
+confirmForm.addEventListener("submit", async (e) => {
+  e.preventDefault(); // ❌ stop page reload
+
+  const actionUrl = confirmForm.action;
+
+  try {
+    const res = await fetch(actionUrl, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      closeModal();
+
+      // refresh table dynamically
+      fetchUsers(searchInput.value.trim(), currentPage);
+    }
+  } catch (err) {
+    console.error("Action failed", err);
+  }
+});
+
 
     </script>
 
