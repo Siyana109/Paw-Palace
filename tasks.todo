@@ -309,8 +309,8 @@ TODO :
         ✔ stock limit error in Cart @done (3/17/2026, 2:30:29 PM)
         ✔ offer expiring @done (2/11/2026, 8:51:44 AM)
         ✔ when blocking or unblocking user, the page reloads and rerendenring @done (3/25/2026, 12:23:12 AM)
-        ☐ edit offer
-        ☐ transaction- date filtering validation
+        ✔ edit offer @done (3/25/2026, 12:34:04 AM)
+        ✔ transaction- date filtering validation @done (3/25/2026, 12:49:00 AM)
 
 
 

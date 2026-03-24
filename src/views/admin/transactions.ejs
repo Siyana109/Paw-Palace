@@ -113,7 +113,7 @@
                     <!-- Date From -->
                     <div class="flex flex-col gap-1.5">
                         <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">From</label>
-                        <input type="date" name="dateFrom" value="<%= filters.dateFrom || '' %>"
+                        <input type="date" name="dateFrom" value="<%= filters.dateFrom || '' %>" max="<%= new Date().toISOString().split('T')[0] %>"
                             onchange="document.getElementById('filterForm').submit()"
                             class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold text-accent-navy bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 transition cursor-pointer">
                     </div>
@@ -121,16 +121,16 @@
                     <!-- Date To -->
                     <div class="flex flex-col gap-1.5">
                         <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">To</label>
-                        <input type="date" name="dateTo" value="<%= filters.dateTo || '' %>"
+                        <input type="date" name="dateTo" value="<%= filters.dateTo || '' %>" max="<%= new Date().toISOString().split('T')[0] %>"
                             onchange="document.getElementById('filterForm').submit()"
                             class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold text-accent-navy bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 transition cursor-pointer">
                     </div>
 
                     <!-- Search button -->
-                    <button type="submit"
+                    <!-- <button type="submit"
                         class="px-5 py-2 bg-accent-navy text-white rounded-xl text-sm font-black shadow hover:bg-brand-600 transition-all flex items-center gap-2">
                         <i class="fa-solid fa-filter text-xs"></i> Apply
-                    </button>
+                    </button> -->
 
                     <!-- Clear filters (only show when filters are active) -->
                     <% const hasFilter = (filters.search||filters.type&&filters.type!=='all'||filters.status&&filters.status!=='all'||filters.method&&filters.method!=='all'||filters.dateFrom||filters.dateTo); %>
