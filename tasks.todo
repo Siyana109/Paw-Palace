@@ -292,7 +292,7 @@ TODO :
         ✔ buy now inactive items handling @done (3/19/2026, 11:49:53 AM)
         ☐ brand active or inactive check
         ☐ wishlist error message is showing every time
-        ☐ cart and wishlist count not showing in profile
+        ✔ cart and wishlist count not showing in profile @done (3/25/2026, 1:12:10 AM)
         ☐ order item card - refunded - COD - UI
         ☐ after order success checkout page is showing for a sec.
         ☐ cancelling order in last process

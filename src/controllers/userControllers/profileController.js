@@ -38,8 +38,6 @@ const getProfile = async (req, res) => {
             isEditing,
 
             //  IMPORTANT: defaults for shared partials
-            wishlistCount: 0,
-            cartCount: 0,
             currentPath: req.path
         });
 
@@ -51,8 +49,6 @@ const getProfile = async (req, res) => {
             user: null,
             addresses: [],
             isEditing: false,
-            wishlistCount: 0,
-            cartCount: 0,
             currentPath: req.path,
             error: 'Failed to load profile'
         });
