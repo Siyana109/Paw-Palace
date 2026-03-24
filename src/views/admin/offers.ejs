@@ -687,6 +687,8 @@
         async function handleOfferSubmit(e) {
             e.preventDefault();
 
+            const submitBtn = document.getElementById("submitBtn");
+
             const id = document.getElementById('offerId').value;
 
             const data = {
@@ -752,6 +754,9 @@
                 window.location.reload();
 
             } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Update Offer";
+
                 Swal.fire({
                     icon: "error",
                     title: "Error",
