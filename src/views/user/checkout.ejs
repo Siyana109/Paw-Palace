@@ -182,7 +182,8 @@
 
                         <!-- AVAILABLE COUPONS LIST -->
                         <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Available Coupons
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Available
+                                Coupons
                             </h4>
 
                             <% if (coupons && coupons.length> 0) { %>
@@ -193,43 +194,57 @@
                                         <%= coupon.isApplicable 
                                             ? 'border-emerald-100 bg-emerald-50 cursor-pointer hover:border-emerald-300 hover:shadow-md' 
                                             : 'border-gray-100 bg-gray-50 opacity-40 cursor-not-allowed' %>">
-                                        
+
                                         <!-- Decorative Circle notches for coupon look -->
-                                        <div class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-r-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>"></div>
-                                        <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-l-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>"></div>
+                                        <div
+                                            class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-r-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>">
+                                        </div>
+                                        <div
+                                            class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-l-2 <%= coupon.isApplicable ? 'border-emerald-100' : 'border-gray-100' %>">
+                                        </div>
 
                                         <div class="flex justify-between items-start pl-2">
                                             <div>
                                                 <div class="flex items-center gap-2 mb-1">
-                                                    <span class="font-black text-accent-navy tracking-tight"><%= coupon.code %></span>
-                                                    <span class="applied-badge hidden bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
+                                                    <span class="font-black text-accent-navy tracking-tight">
+                                                        <%= coupon.code %>
+                                                    </span>
+                                                    <span
+                                                        class="applied-badge hidden bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
                                                         <i class="fa-solid fa-check"></i> Applied
                                                     </span>
                                                 </div>
-                                                <p class="text-xs font-bold <%= coupon.isApplicable ? 'text-emerald-600' : 'text-gray-400' %>">
-                                                    Save <%= coupon.discountValue %><%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
+                                                <p
+                                                    class="text-xs font-bold <%= coupon.isApplicable ? 'text-emerald-600' : 'text-gray-400' %>">
+                                                    Save <%= coupon.discountValue %>
+                                                        <%= coupon.discountType==='percentage' ? '%' : ' OFF' %>
                                                 </p>
                                             </div>
                                             <div class="text-right">
-                                                <span class="text-[10px] font-black uppercase tracking-tighter <%= coupon.isApplicable ? 'text-emerald-500' : 'text-gray-400' %>">
+                                                <span
+                                                    class="text-[10px] font-black uppercase tracking-tighter <%= coupon.isApplicable ? 'text-emerald-500' : 'text-gray-400' %>">
                                                     <%= coupon.isApplicable ? 'TAP TO USE' : 'RESTRICTED' %>
                                                 </span>
                                                 <% if (!coupon.isApplicable && coupon.reasons.minPurchase) { %>
                                                     <p class="text-[8px] font-bold text-rose-500 leading-none mt-1">
                                                         Min ₹<%= coupon.reasons.minPurchaseAmount %> required
                                                     </p>
-                                                <% } else if (!coupon.isApplicable && coupon.reasons.usageLimit) { %>
-                                                    <p class="text-[8px] font-bold text-rose-500 leading-none mt-1">Limit reached</p>
-                                                <% } %>
+                                                    <% } else if (!coupon.isApplicable && coupon.reasons.usageLimit) {
+                                                        %>
+                                                        <p class="text-[8px] font-bold text-rose-500 leading-none mt-1">
+                                                            Limit reached</p>
+                                                        <% } %>
                                             </div>
                                         </div>
                                     </div>
-                                <% }) %>
-                            <% } else { %>
-                                <div class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <p class="text-xs font-bold text-gray-400 italic">No coupons available right now.</p>
-                                </div>
-                            <% } %>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div
+                                                class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                                <p class="text-xs font-bold text-gray-400 italic">No coupons available
+                                                    right now.</p>
+                                            </div>
+                                            <% } %>
                         </div>
                     </div>
 
@@ -311,13 +326,13 @@
                                     </div>
 
                                     <!-- Totals -->
-                                    <% 
-                                        const subtotal = cart.items.reduce((acc, item) => acc + item.variant.price * item.quantity, 0);
+                                    <% const subtotal=cart.items.reduce((acc, item)=> acc + item.variant.price *
+                                        item.quantity, 0);
                                         const offerDiscount = subtotal - postOfferTotal;
                                         const shipping = 0;
                                         const couponDiscount = 0;
                                         const total = postOfferTotal + shipping - couponDiscount;
-                                    %>
+                                        %>
 
                                         <div class="space-y-3 mb-6">
                                             <div
@@ -470,12 +485,15 @@
                 class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-accent-navy/50 backdrop-blur-sm p-0 sm:px-4">
 
                 <!-- Panel -->
-                <div class="bg-white w-full sm:max-w-lg sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
+                <div
+                    class="bg-white w-full sm:max-w-lg sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
 
                     <!-- Sticky Header -->
-                    <div class="flex items-center justify-between px-7 pt-7 pb-5 border-b border-gray-100 flex-shrink-0">
+                    <div
+                        class="flex items-center justify-between px-7 pt-7 pb-5 border-b border-gray-100 flex-shrink-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-500">
+                            <div
+                                class="w-10 h-10 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-500">
                                 <i class="fa-solid fa-location-dot"></i>
                             </div>
                             <h3 id="addressModalTitle" class="text-xl font-extrabold text-accent-navy tracking-tight">
@@ -500,17 +518,22 @@
                             <!-- Name + Phone -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Full
+                                        Name</label>
                                     <div class="relative">
-                                        <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
+                                        <i
+                                            class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
                                         <input id="addrFullName" placeholder="John Doe"
                                             class="w-full pl-9 pr-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Phone</label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Phone</label>
                                     <div class="relative">
-                                        <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
+                                        <i
+                                            class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
                                         <input id="addrPhone" placeholder="10-digit number"
                                             class="w-full pl-9 pr-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                     </div>
@@ -519,7 +542,9 @@
 
                             <!-- Street Address -->
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Street Address</label>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Street
+                                    Address</label>
                                 <textarea id="addrAddress" rows="2" placeholder="House no., Street, Area..."
                                     class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition resize-none placeholder-gray-300"></textarea>
                             </div>
@@ -527,12 +552,15 @@
                             <!-- Landmark + City -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Landmark <span class="normal-case font-medium">(optional)</span></label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Landmark
+                                        <span class="normal-case font-medium">(optional)</span></label>
                                     <input id="addrLandmark" placeholder="Near..."
                                         class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">City</label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">City</label>
                                     <input id="addrCity" placeholder="City"
                                         class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                 </div>
@@ -541,12 +569,14 @@
                             <!-- State + Pincode -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">State</label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">State</label>
                                     <input id="addrState" placeholder="State"
                                         class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Pincode</label>
+                                    <label
+                                        class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Pincode</label>
                                     <input id="addrZip" placeholder="6-digit pincode"
                                         class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm font-semibold text-accent-navy focus:border-brand-500 focus:bg-white outline-none transition placeholder-gray-300">
                                 </div>
@@ -554,7 +584,9 @@
 
                             <!-- Address Type -->
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Address Type</label>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Address
+                                    Type</label>
                                 <div class="flex gap-2">
                                     <button type="button"
                                         class="addr-type-btn flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm border-2 border-gray-100 text-gray-400 hover:border-brand-300 hover:text-brand-500 transition"
@@ -576,10 +608,13 @@
                             </div>
 
                             <!-- Default checkbox -->
-                            <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 hover:border-brand-200 hover:bg-brand-50 transition cursor-pointer group">
-                                <input type="checkbox" id="addrIsDefault" class="w-4 h-4 accent-brand-500 cursor-pointer">
+                            <label
+                                class="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 hover:border-brand-200 hover:bg-brand-50 transition cursor-pointer group">
+                                <input type="checkbox" id="addrIsDefault"
+                                    class="w-4 h-4 accent-brand-500 cursor-pointer">
                                 <div>
-                                    <p class="text-sm font-bold text-accent-navy group-hover:text-brand-600 transition">Set as default address</p>
+                                    <p class="text-sm font-bold text-accent-navy group-hover:text-brand-600 transition">
+                                        Set as default address</p>
                                     <p class="text-xs text-gray-400">Use this address by default at checkout</p>
                                 </div>
                             </label>
@@ -1246,6 +1281,15 @@
                     order_id: data.razorpayOrder.id,
 
                     handler: async function (paymentResponse) {
+
+                        Swal.fire({
+                            title: 'Verifying Payment...',
+                            text: 'Please wait, do not close or refresh this page.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
                         const verifyRes = await fetch("/verify-payment", {
                             method: "POST",

@@ -96,6 +96,14 @@
                             description: "Order Payment Retry",
                             order_id: data.razorpayOrder.id,
                             handler: async function (response) {
+                                Swal.fire({
+                                    title: 'Verifying Payment...',
+                                    text: 'Please wait, do not close or refresh this page.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
                                 const verifyRes = await fetch('/verify-payment', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
