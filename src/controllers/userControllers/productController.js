@@ -473,6 +473,14 @@ const getWishlist = async (req, res) => {
     // How many items were silently removed
     const removedCount = allItems.length - wishlistItems.length;
 
+    // show banner only once
+    let showRemovedBanner = false;
+
+    if (removedCount > 0 && req.session.lastWishlistRemovedCount !== removedCount) {
+      showRemovedBanner = true;
+      req.session.lastWishlistRemovedCount = removedCount;
+    }
+
     // Active offers
     const activeOffers = await Offer.find({
       status: "active",
@@ -495,7 +503,7 @@ const getWishlist = async (req, res) => {
 
     res.render("user/wishlist", {
       wishlist: wishlistItems,
-      removedCount
+      removedCount: showRemovedBanner ? removedCount : 0
     });
 
   } catch (error) {
