@@ -216,6 +216,11 @@ const updateOffer = async (req, res) => {
             }
         }
 
+        // Prevent Mongoose validation error if status is empty
+        if (data.status === "") {
+            delete data.status;
+        }
+
         const updatedOffer = await Offer.findByIdAndUpdate(
             id,
             { $set: data },
