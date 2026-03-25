@@ -296,7 +296,7 @@ TODO :
         ✔ order item card - refunded - COD - UI @done (3/25/2026, 10:09:19 AM)
         ✔ after order success checkout page is showing for a sec. @done (3/25/2026, 10:38:58 AM)
         ☐ cancelling order in last process
-        ☐ when an item is adding to cart from detailing page it's getting removed from wishlist
+        ✔ when an item is adding to cart from detailing page it's getting removed from wishlist @done (3/25/2026, 10:49:03 AM)
 
     Admin:
         ✔ view & edit variant images @done (1/28/2026, 8:31:00 PM)

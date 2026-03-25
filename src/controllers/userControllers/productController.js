@@ -148,7 +148,7 @@ const addToCart = async (req, res) => {
       });
     }
 
-    const { productId, variantId, quantity } = req.body;
+    const { productId, variantId, quantity, fromWishlist } = req.body;
     const qty = Number(quantity);
 
     if (!qty || qty < 1) {
@@ -239,10 +239,12 @@ const addToCart = async (req, res) => {
     await cart.save();
 
     // REMOVE FROM WISHLIST AFTER ADDING TO CART
-    await Wishlist.updateOne(
-      { user: userId },
-      { $pull: { items: { variant: variantId } } }
-    );
+    if (fromWishlist) {
+      await Wishlist.updateOne(
+        { user: userId },
+        { $pull: { items: { variant: variantId } } }
+      );
+    }
 
     const cartCount = cart.items.length
 
