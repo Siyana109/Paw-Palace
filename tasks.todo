@@ -293,7 +293,7 @@ TODO :
         ☐ brand active or inactive check
         ✔ wishlist error message is showing every time @done (3/25/2026, 9:57:36 AM)
         ✔ cart and wishlist count not showing in profile @done (3/25/2026, 1:12:10 AM)
-        ☐ order item card - refunded - COD - UI
+        ✔ order item card - refunded - COD - UI @done (3/25/2026, 10:09:19 AM)
         ☐ after order success checkout page is showing for a sec.
         ☐ cancelling order in last process
 

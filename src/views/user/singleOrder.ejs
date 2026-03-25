@@ -326,7 +326,7 @@
                                                                                                 </span>
                                                                             </div>
 
-                                                                            <% if (item.itemStatus==='Cancelled' ) { %>
+                                                                            <% if (item.itemStatus==='Cancelled' && item.refund && item.refund.amount) { %>
                                                                                 <p
                                                                                     class="text-xs font-bold text-rose-500 mt-1">
                                                                                     Refunded: ₹<%= (finalPrice *
