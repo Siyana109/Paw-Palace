@@ -82,6 +82,12 @@
 </nav>
 
 <script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
     window.updateCartCount = (count) => {
         const badge = document.getElementById('cartCountBadge');
         if (badge) {

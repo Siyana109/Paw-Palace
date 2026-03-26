@@ -1209,7 +1209,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = `/order-confirmation/${data.orderId}`;
+                        window.location.replace(`/order-confirmation/${data.orderId}`);
                     });
                 } else {
                     Swal.fire({
@@ -1305,17 +1305,16 @@
                         const verifyData = await verifyRes.json();
 
                         if (verifyData.success) {
-                            window.location.href =
-                                `/order-confirmation/${verifyData.orderId}`;
+                            window.location.replace(`/order-confirmation/${verifyData.orderId}`);
                         } else {
                             // Payment verification failed
-                            window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
+                            window.location.replace(`/checkout/payment-failed?orderId=${data.orderId}`);
                         }
                     },
                     modal: {
                         ondismiss: function () {
                             console.log('Payment cancelled by user');
-                            window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
+                            window.location.replace(`/checkout/payment-failed?orderId=${data.orderId}`);
                         }
                     },
 
@@ -1340,7 +1339,7 @@
                     // Razorpay modal stays open by default. The user can retry inside it, or close it.
                     // But since we just restocked, if they retry inside it we would have a loophole!
                     // Thus, we force redirect them to our Native failure retry page.
-                    window.location.href = `/checkout/payment-failed?orderId=${data.orderId}`;
+                    window.location.replace(`/checkout/payment-failed?orderId=${data.orderId}`);
                 });
 
                 rzp.open();

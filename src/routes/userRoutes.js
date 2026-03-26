@@ -11,28 +11,28 @@ import orderController from "../controllers/userControllers/orderController.js";
 import walletController from "../controllers/userControllers/walletController.js";
 import reviewController from "../controllers/userControllers/reviewController.js";
 
-router.get('/', authController.landingPage)
+router.get('/', userMiddleware.isLoggedIn, authController.landingPage)
 
-router.get('/signup', authController.getSignup)
-router.post('/signup', authController.postSignup)
+router.get('/signup', userMiddleware.isLoggedIn, authController.getSignup)
+router.post('/signup', userMiddleware.isLoggedIn, authController.postSignup)
 
 router.get('/verify-otp', userMiddleware.isLoggedIn, authController.getVerifyOtp);
 router.post('/verify-otp', userMiddleware.isLoggedIn, authController.verifyOtp)
 router.post("/resend-otp", userMiddleware.isLoggedIn, authController.resendOtp);
 
-router.get('/google', authController.googleSignup)
-router.get("/google/callback", authController.googleCallback)
+router.get('/google', userMiddleware.isLoggedIn, authController.googleSignup)
+router.get("/google/callback", userMiddleware.isLoggedIn, authController.googleCallback)
 
 router.get('/login', userMiddleware.isLoggedIn, authController.getLogin)
 router.post('/login', userMiddleware.isLoggedIn, authController.postLogin)
 
-router.get('/forgot-password', authController.forgotPassword)
-router.post('/forgot-password', authController.verifyEmailSendOtp)
-router.get("/reset-password/verify-otp", authController.getResetOtp)
-router.post('/reset-password/resend-otp', authController.resendResetOtp);
-router.post("/reset-password/verify-otp", authController.verifyResetOtp)
-router.get("/reset-password", authController.getResetPassword)
-router.post("/reset-password", authController.resetPassword)
+router.get('/forgot-password', userMiddleware.isLoggedIn, authController.forgotPassword)
+router.post('/forgot-password', userMiddleware.isLoggedIn, authController.verifyEmailSendOtp)
+router.get("/reset-password/verify-otp", userMiddleware.isLoggedIn, authController.getResetOtp)
+router.post('/reset-password/resend-otp', userMiddleware.isLoggedIn, authController.resendResetOtp);
+router.post("/reset-password/verify-otp", userMiddleware.isLoggedIn, authController.verifyResetOtp)
+router.get("/reset-password", userMiddleware.isLoggedIn, authController.getResetPassword)
+router.post("/reset-password", userMiddleware.isLoggedIn, authController.resetPassword)
 
 router.get('/profile', userMiddleware.checkSession, profileController.getProfile)
 router.post('/profile/update', userMiddleware.checkSession, profileController.updateProfile)
