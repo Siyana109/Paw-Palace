@@ -1,5 +1,6 @@
 import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
+import Brand from "../../model/brandModel.js";
 import Offer from "../../model/offerModel.js";
 import Wishlist from "../../model/wishlistModel.js";
 
@@ -26,10 +27,15 @@ const homePage = async (req, res) => {
     const activeCategories = await Category.find({ isActive: true }).select('_id');
     const activeCategoryIds = activeCategories.map(cat => cat._id);
 
+    // Get Active Brands
+    const activeBrands = await Brand.find({ isActive: true }).select('_id');
+    const activeBrandIds = activeBrands.map(b => b._id);
+
     // PRODUCT MATCH
     const productMatch = {
       isActive: true,
-      categoryId: { $in: activeCategoryIds }
+      categoryId: { $in: activeCategoryIds },
+      brandId: { $in: activeBrandIds }
     };
 
     if (search) {

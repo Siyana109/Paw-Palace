@@ -29,7 +29,7 @@ const getCheckoutPage = async (req, res) => {
       cart = await Cart.findOne({ user: userId })
         .populate({
           path: "items.product",
-          populate: { path: "categoryId" }
+          populate: [{ path: "categoryId" }, { path: "brandId" }]
         })
         .populate("items.variant");
     }
@@ -98,7 +98,8 @@ const getCheckoutPage = async (req, res) => {
     cart.items.forEach(item => {
       if (!item.variant || !item.variant.isActive || item.variant.stock === 0 ||
         !item.product || !item.product.isActive ||
-        !item.product.categoryId || !item.product.categoryId.isActive) {
+        !item.product.categoryId || !item.product.categoryId.isActive ||
+        !item.product.brandId || !item.product.brandId.isActive) {
         stockIssues.push({
           type: "OOS",
           productId: item.product._id,
@@ -230,14 +231,15 @@ const applyCoupon = async (req, res) => {
       cart = { items: [req.session.buyNowItem] };
     } else {
       cart = await Cart.findOne({ user: userId })
-        .populate({ path: "items.product", populate: { path: "categoryId" } })
+        .populate({ path: "items.product", populate: [{ path: "categoryId" }, { path: "brandId" }] })
         .populate("items.variant");
 
       if (cart) {
         cart.items = cart.items.filter(item =>
           item.variant && item.variant.isActive &&
           item.product && item.product.isActive &&
-          item.product.categoryId && item.product.categoryId.isActive
+          item.product.categoryId && item.product.categoryId.isActive &&
+          item.product.brandId && item.product.brandId.isActive
         );
       }
     }
@@ -384,7 +386,7 @@ const placeOrder = async (req, res) => {
       cart = await Cart.findOne({ user: userId })
         .populate({
           path: "items.product",
-          populate: { path: "categoryId" }
+          populate: [{ path: "categoryId" }, { path: "brandId" }]
         })
         .populate("items.variant");
 
@@ -402,7 +404,8 @@ const placeOrder = async (req, res) => {
       const variant = await Variant.findById(item.variant._id);
 
       if (!item.product || !item.product.isActive ||
-        !item.product.categoryId || !item.product.categoryId.isActive) {
+        !item.product.categoryId || !item.product.categoryId.isActive ||
+        !item.product.brandId || !item.product.brandId.isActive) {
         throw new Error("One or more items in your cart are currently unavailable.");
       }
 
@@ -889,11 +892,11 @@ const initBuyNow = async (req, res) => {
     const { productId, variantId, quantity } = req.body;
     const userId = req.session.user.id;
 
-    const product = await Product.findById(productId).populate('categoryId');
+    const product = await Product.findById(productId).populate('categoryId').populate('brandId');
     const variant = await Variant.findById(variantId);
 
-    if (!variant || !variant.isActive || !product || !product.isActive || (product.categoryId && !product.categoryId.isActive)) {
-      const isProductError = !product || !product.isActive || (product.categoryId && !product.categoryId.isActive);
+    if (!variant || !variant.isActive || !product || !product.isActive || (product.categoryId && !product.categoryId.isActive) || (product.brandId && !product.brandId.isActive)) {
+      const isProductError = !product || !product.isActive || (product.categoryId && !product.categoryId.isActive) || (product.brandId && !product.brandId.isActive);
       const reason = isProductError ? "product" : "variant";
       return res.json({
         success: false,

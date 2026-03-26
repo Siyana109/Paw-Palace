@@ -17,7 +17,7 @@ const getProductDetails = async (req, res) => {
       .populate("brandId")
       .populate("categoryId");
 
-    if (!product || !product.isActive || (product.categoryId && !product.categoryId.isActive)) {
+    if (!product || !product.isActive || (product.categoryId && !product.categoryId.isActive) || (product.brandId && !product.brandId.isActive)) {
       return res.redirect("/home?unavailable=product");
     }
 
@@ -173,7 +173,7 @@ const addToCart = async (req, res) => {
     const variant = await Variant.findById(variantId)
       .populate({
         path: "product",
-        populate: { path: "categoryId" }
+        populate: [{ path: "categoryId" }, { path: "brandId" }]
       });
 
     if (!productId || !variantId) {
@@ -183,8 +183,8 @@ const addToCart = async (req, res) => {
       });
     }
 
-    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive)) {
-      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive);
+    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive) || (variant.product.brandId && !variant.product.brandId.isActive)) {
+      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive) || (variant.product.brandId && !variant.product.brandId.isActive);
       const reason = isProductError ? "product" : "variant";
       return res.status(400).json({
         success: false,
@@ -277,7 +277,7 @@ const getCartPage = async (req, res) => {
     const cart = await Cart.findOne({ user: userId })
       .populate({
         path: 'items.product',
-        populate: { path: 'categoryId' }
+        populate: [{ path: 'categoryId' }, { path: 'brandId' }]
       })
       .populate('items.variant');
 
@@ -329,6 +329,7 @@ const getCartPage = async (req, res) => {
       !item.variant || !item.variant.isActive ||
       !item.product || !item.product.isActive ||
       !item.product.categoryId || !item.product.categoryId.isActive ||
+      !item.product.brandId || !item.product.brandId.isActive ||
       item.variant.stock === 0 || item.quantity > item.variant.stock
     );
 
@@ -391,10 +392,10 @@ const updateCartQuantity = async (req, res) => {
     const variant = await Variant.findById(variantId)
       .populate({
         path: "product",
-        populate: { path: "categoryId" }
+        populate: [{ path: "categoryId" }, { path: "brandId" }]
       });
 
-    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive)) {
+    if (!variant || !variant.isActive || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive) || (variant.product.brandId && !variant.product.brandId.isActive)) {
       return res.status(404).json({
         success: false,
         message: "Product unavailable"
@@ -460,7 +461,7 @@ const getWishlist = async (req, res) => {
     const wishlistDoc = await Wishlist.findOne({ user: userId })
       .populate({
         path: "items.product",
-        populate: { path: "categoryId" }
+        populate: [{ path: "categoryId" }, { path: "brandId" }]
       })
       .populate("items.variant");
 
@@ -469,7 +470,8 @@ const getWishlist = async (req, res) => {
     const wishlistItems = allItems.filter(item =>
       item.variant && item.variant.isActive &&
       item.product && item.product.isActive &&
-      item.product.categoryId && item.product.categoryId.isActive
+      item.product.categoryId && item.product.categoryId.isActive &&
+      item.product.brandId && item.product.brandId.isActive
     );
 
     // How many items were silently removed
@@ -532,7 +534,7 @@ const addToWishlist = async (req, res) => {
     const variant = await Variant.findById(variantId)
       .populate({
         path: "product",
-        populate: { path: "categoryId" }
+        populate: [{ path: "categoryId" }, { path: "brandId" }]
       });
 
     if (
@@ -540,9 +542,10 @@ const addToWishlist = async (req, res) => {
       !variant.isActive ||
       !variant.product ||
       !variant.product.isActive ||
-      (variant.product.categoryId && !variant.product.categoryId.isActive)
+      (variant.product.categoryId && !variant.product.categoryId.isActive) ||
+      (variant.product.brandId && !variant.product.brandId.isActive)
     ) {
-      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive);
+      const isProductError = !variant || !variant.product || !variant.product.isActive || (variant.product.categoryId && !variant.product.categoryId.isActive) || (variant.product.brandId && !variant.product.brandId.isActive);
       const reason = isProductError ? "product" : "variant";
       return res.status(400).json({
         success: false,
@@ -628,7 +631,7 @@ const validateCart = async (req, res) => {
     const cart = await Cart.findOne({ user: userId })
       .populate({
         path: "items.product",
-        populate: { path: "categoryId" }
+        populate: [{ path: "categoryId" }, { path: "brandId" }]
       })
       .populate("items.variant");
 
@@ -646,12 +649,21 @@ const validateCart = async (req, res) => {
 
       const product = item.product;
       const category = product?.categoryId;
+      const brand = product?.brandId;
       const variant = item.variant;
 
       if (!product || !product.isActive) {
         issues.push({
           type: "PRODUCT_INACTIVE",
           productName: product?.productName || "Product"
+        });
+        continue;
+      }
+
+      if (!brand || !brand.isActive) {
+        issues.push({
+          type: "BRAND_INACTIVE",
+          productName: product.productName
         });
         continue;
       }
