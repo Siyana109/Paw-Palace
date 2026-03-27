@@ -289,7 +289,7 @@ TODO :
         ✔ breadcrumbs in single order page is not correct @done (3/14/2026, 12:14:12 PM)
         ✔ profile photo not showing in order related pages @done (3/14/2026, 11:48:34 AM)
         ✔ buy now inactive items handling @done (3/19/2026, 11:49:53 AM)
-        ☐ brand active or inactive check
+        ✔ brand active or inactive check @done (3/27/2026, 9:40:55 AM)
         ✔ wishlist error message is showing every time @done (3/25/2026, 9:57:36 AM)
         ✔ cart and wishlist count not showing in profile @done (3/25/2026, 1:12:10 AM)
         ✔ order item card - refunded - COD - UI @done (3/25/2026, 10:09:19 AM)
